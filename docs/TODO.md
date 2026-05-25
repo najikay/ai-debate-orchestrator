@@ -107,45 +107,45 @@
 
 ### 1.1 ConfigLoader
 
-- [ ] Create `src/infrastructure/config_loader.py`.
-- [ ] Add imports: `import json`, `import os`, `from pathlib import Path`, `from typing import Any`.
-- [ ] Define `ConfigVersionError(Exception)` class in `config_loader.py`.
-- [ ] Create `tests/unit/test_config_loader.py`.
-- [ ] Add imports: `import pytest`, `from src.infrastructure.config_loader import ConfigLoader, ConfigVersionError`.
-- [ ] Define `tmp_config_dir` fixture: temp dir pre-populated with valid JSON config files.
-- [ ] Define `valid_setup_data` fixture: minimal valid setup dict.
-- [ ] Write failing test: `test_config_loader_init_sets_config_dir` — asserts `loader.config_dir` is set.
-- [ ] Implement `ConfigLoader.__init__(self, config_dir: str)` with Google-style docstring.
-- [ ] Run `uv run pytest tests/unit/test_config_loader.py::test_config_loader_init_sets_config_dir` — confirm pass.
-- [ ] Write failing test: `test_load_setup_returns_dict` — happy path, valid `setup.json`.
-- [ ] Implement `ConfigLoader.load_setup(self) -> dict`.
-- [ ] Write failing test: `test_load_setup_raises_file_not_found` — `setup.json` absent.
-- [ ] Implement `FileNotFoundError` handling in `load_setup`.
-- [ ] Write failing test: `test_load_setup_raises_on_invalid_json` — file contains malformed JSON.
-- [ ] Implement `json.JSONDecodeError` handling in `load_setup`.
-- [ ] Run `uv run pytest` on all `load_setup` tests — confirm all pass.
-- [ ] Write failing test: `test_load_rate_limits_returns_dict` — happy path.
-- [ ] Implement `ConfigLoader.load_rate_limits(self) -> dict`.
-- [ ] Write failing test: `test_load_rate_limits_raises_file_not_found`.
-- [ ] Implement `FileNotFoundError` handling in `load_rate_limits`.
-- [ ] Run `uv run pytest` on all `load_rate_limits` tests — confirm all pass.
-- [ ] Write failing test: `test_load_pricing_returns_dict` — happy path.
-- [ ] Implement `ConfigLoader.load_pricing(self) -> dict`.
-- [ ] Write failing test: `test_load_pricing_raises_file_not_found`.
-- [ ] Implement `FileNotFoundError` handling in `load_pricing`.
-- [ ] Run `uv run pytest` on all `load_pricing` tests — confirm all pass.
-- [ ] Write failing test: `test_validate_schema_version_passes_on_matching_version`.
-- [ ] Write failing test: `test_validate_schema_version_raises_config_version_error_on_mismatch`.
-- [ ] Implement `ConfigLoader._validate_schema_version(self, data: dict, expected: str) -> None`.
-- [ ] Run `uv run pytest` on all `_validate_schema_version` tests — confirm all pass.
-- [ ] Write failing test: `test_load_all_populates_setup_rate_limits_and_pricing`.
-- [ ] Implement `ConfigLoader.load_all(self) -> None` calling all three loaders.
-- [ ] Write failing test: `test_load_all_raises_config_version_error_on_bad_schema_version`.
-- [ ] Implement version validation inside `load_all`.
-- [ ] Run `uv run pytest` on all `load_all` tests — confirm all pass.
-- [ ] Run `uv run ruff check src/infrastructure/config_loader.py` — confirm 0 violations.
-- [ ] Run `wc -l src/infrastructure/config_loader.py` — confirm ≤ 150 lines.
-- [ ] Git commit: `feat: implement ConfigLoader with schema version validation`.
+- [x] Create `src/infrastructure/config_loader.py`.
+- [x] Add imports: `import json`, `import os`, `from pathlib import Path`, `from typing import Any`.
+- [x] Define `ConfigVersionError(Exception)` class in `config_loader.py`.
+- [x] Create `tests/unit/test_config_loader.py`.
+- [x] Add imports: `import pytest`, `from src.infrastructure.config_loader import ConfigLoader, ConfigVersionError`.
+- [x] Define `tmp_config_dir` fixture: temp dir pre-populated with valid JSON config files.
+- [x] Define `valid_setup_data` fixture: minimal valid setup dict.
+- [x] Write failing test: `test_config_loader_init_sets_config_dir` — asserts `loader.config_dir` is set.
+- [x] Implement `ConfigLoader.__init__(self, config_dir: str)` with Google-style docstring.
+- [x] Run `uv run pytest tests/unit/test_config_loader.py::test_config_loader_init_sets_config_dir` — confirm pass.
+- [x] Write failing test: `test_load_setup_returns_dict` — happy path, valid `setup.json`.
+- [x] Implement `ConfigLoader.load_setup(self) -> dict`.
+- [x] Write failing test: `test_load_setup_raises_file_not_found` — `setup.json` absent.
+- [x] Implement `FileNotFoundError` handling in `load_setup`.
+- [x] Write failing test: `test_load_setup_raises_on_invalid_json` — file contains malformed JSON.
+- [x] Implement `json.JSONDecodeError` handling in `load_setup`.
+- [x] Run `uv run pytest` on all `load_setup` tests — confirm all pass.
+- [x] Write failing test: `test_load_rate_limits_returns_dict` — happy path.
+- [x] Implement `ConfigLoader.load_rate_limits(self) -> dict`.
+- [x] Write failing test: `test_load_rate_limits_raises_file_not_found`.
+- [x] Implement `FileNotFoundError` handling in `load_rate_limits`.
+- [x] Run `uv run pytest` on all `load_rate_limits` tests — confirm all pass.
+- [x] Write failing test: `test_load_pricing_returns_dict` — happy path.
+- [x] Implement `ConfigLoader.load_pricing(self) -> dict`.
+- [x] Write failing test: `test_load_pricing_raises_file_not_found`.
+- [x] Implement `FileNotFoundError` handling in `load_pricing`.
+- [x] Run `uv run pytest` on all `load_pricing` tests — confirm all pass.
+- [x] Write failing test: `test_validate_schema_version_passes_on_matching_version`.
+- [x] Write failing test: `test_validate_schema_version_raises_config_version_error_on_mismatch`.
+- [x] Implement `ConfigLoader._validate_schema_version(self, data: dict, expected: str) -> None`.
+- [x] Run `uv run pytest` on all `_validate_schema_version` tests — confirm all pass.
+- [x] Write failing test: `test_load_all_populates_setup_rate_limits_and_pricing`.
+- [x] Implement `ConfigLoader.load_all(self) -> None` calling all three loaders.
+- [x] Write failing test: `test_load_all_raises_config_version_error_on_bad_schema_version`.
+- [x] Implement version validation inside `load_all`.
+- [x] Run `uv run pytest` on all `load_all` tests — confirm all pass.
+- [x] Run `uv run ruff check src/infrastructure/config_loader.py` — confirm 0 violations.
+- [x] Run `wc -l src/infrastructure/config_loader.py` — confirm ≤ 150 lines.
+- [x] Git commit: `feat: implement ConfigLoader with schema version validation`.
 
 ### 1.2 LoggerManager
 
