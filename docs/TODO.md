@@ -631,57 +631,57 @@
 
 ### 3.2 DebateEngine
 
-- [ ] Create `src/engine/debate_engine.py`.
-- [ ] Add `import logging` to `debate_engine.py`.
-- [ ] Add imports for `FatherAgent`, `ProSonAgent`, `ConSonAgent`, `StateManager`, `Watchdog`, `WatchdogError`, `CostReporter`, `Gatekeeper`, `ConfigLoader`.
-- [ ] Create `tests/unit/test_debate_engine.py`.
-- [ ] Add imports: `import pytest`, `from unittest.mock import MagicMock, patch, call`.
-- [ ] Add `from src.engine.debate_engine import DebateEngine`.
-- [ ] Define `mock_config` fixture with short turn limit for fast unit testing.
-- [ ] Define `mock_father`, `mock_pro_son`, `mock_con_son`, `mock_state_manager`, `mock_watchdog`, `mock_cost_reporter` fixtures.
-- [ ] Define `debate_engine` fixture wiring all mocks.
-- [ ] Write failing test: `test_debate_engine_init_creates_father_agent`.
-- [ ] Write failing test: `test_debate_engine_init_creates_pro_son_agent`.
-- [ ] Write failing test: `test_debate_engine_init_creates_con_son_agent`.
-- [ ] Write failing test: `test_debate_engine_init_creates_state_manager`.
-- [ ] Write failing test: `test_debate_engine_init_creates_watchdog_with_configured_timeout`.
-- [ ] Implement `DebateEngine.__init__(self, config: dict)` with Google-style docstring.
-- [ ] Run `uv run pytest` on all `__init__` tests — confirm all pass.
-- [ ] Write failing test: `test_run_turn_loop_executes_at_least_min_turns`.
-- [ ] Implement `DebateEngine._run_turn_loop(self) -> None`.
-- [ ] Write failing test: `test_run_turn_loop_alternates_pro_son_and_con_son_each_round`.
-- [ ] Implement alternation logic (pro → father → con → father) in `_run_turn_loop`.
-- [ ] Write failing test: `test_run_turn_loop_calls_record_message_after_every_turn`.
-- [ ] Implement `state_manager.record_message()` call in `_run_turn_loop`.
-- [ ] Write failing test: `test_run_turn_loop_routes_all_responses_through_father`.
-- [ ] Verify `father.route()` is called for each agent response.
-- [ ] Run `uv run pytest` on all `_run_turn_loop` tests — confirm all pass.
-- [ ] Write failing test: `test_check_budget_returns_false_when_cost_below_cap`.
-- [ ] Implement `DebateEngine._check_budget(self) -> bool`.
-- [ ] Write failing test: `test_check_budget_returns_true_when_cost_exceeds_cap`.
-- [ ] Implement cost-cap comparison using `CostReporter.compute()`.
-- [ ] Write failing test: `test_check_budget_logs_warning_at_90_percent_threshold`.
-- [ ] Implement 90%-threshold warning log in `_check_budget`.
-- [ ] Run `uv run pytest` on all `_check_budget` tests — confirm all pass.
-- [ ] Write failing test: `test_handle_watchdog_error_logs_error_to_logger`.
-- [ ] Implement `DebateEngine._handle_watchdog_error(self, error: WatchdogError) -> None`.
-- [ ] Write failing test: `test_handle_watchdog_error_appends_event_to_state`.
-- [ ] Implement state-event append in `_handle_watchdog_error`.
-- [ ] Write failing test: `test_handle_watchdog_error_saves_partial_state_json_to_logs`.
-- [ ] Implement partial-state JSON dump in `_handle_watchdog_error`.
-- [ ] Run `uv run pytest` on all `_handle_watchdog_error` tests — confirm all pass.
-- [ ] Write failing test: `test_start_returns_verdict_object`.
-- [ ] Implement `DebateEngine.start(self, topic: str) -> Verdict`.
-- [ ] Write failing test: `test_start_calls_father_open_debate_with_topic_string`.
-- [ ] Write failing test: `test_start_verdict_draw_field_is_always_false`.
-- [ ] Write failing test: `test_start_forces_early_evaluation_when_budget_cap_exceeded`.
-- [ ] Implement early-evaluation branch in `start`.
-- [ ] Write failing test: `test_start_propagates_watchdog_error_after_max_retries`.
-- [ ] Implement `WatchdogError` propagation in `start`.
-- [ ] Run `uv run pytest` on all `start` tests — confirm all pass.
-- [ ] Run `uv run ruff check src/engine/debate_engine.py` — confirm 0 violations.
-- [ ] Run `wc -l src/engine/debate_engine.py` — confirm ≤ 150 lines.
-- [ ] Git commit: `feat: implement DebateEngine orchestration loop with budget guard`.
+- [x] Create `src/engine/debate_engine.py`.
+- [x] Add `import logging` to `debate_engine.py`.
+- [x] Add imports for `FatherAgent`, `ProSonAgent`, `ConSonAgent`, `StateManager`, `Watchdog`, `WatchdogError`, `CostReporter`, `Gatekeeper`, `ConfigLoader`.
+- [x] Create `tests/unit/test_debate_engine.py`.
+- [x] Add imports: `import pytest`, `from unittest.mock import MagicMock, patch, call`.
+- [x] Add `from src.engine.debate_engine import DebateEngine`.
+- [x] Define `mock_config` fixture with short turn limit for fast unit testing.
+- [x] Define `mock_father`, `mock_pro_son`, `mock_con_son`, `mock_state_manager`, `mock_watchdog`, `mock_cost_reporter` fixtures.
+- [x] Define `debate_engine` fixture wiring all mocks.
+- [x] Write failing test: `test_debate_engine_init_creates_father_agent`.
+- [x] Write failing test: `test_debate_engine_init_creates_pro_son_agent`.
+- [x] Write failing test: `test_debate_engine_init_creates_con_son_agent`.
+- [x] Write failing test: `test_debate_engine_init_creates_state_manager`.
+- [x] Write failing test: `test_debate_engine_init_creates_watchdog_with_configured_timeout`.
+- [x] Implement `DebateEngine.__init__(self, config: dict)` with Google-style docstring.
+- [x] Run `uv run pytest` on all `__init__` tests — confirm all pass.
+- [x] Write failing test: `test_run_turn_loop_executes_at_least_min_turns`.
+- [x] Implement `DebateEngine._run_turn_loop(self) -> None`.
+- [x] Write failing test: `test_run_turn_loop_alternates_pro_son_and_con_son_each_round`.
+- [x] Implement alternation logic (pro → father → con → father) in `_run_turn_loop`.
+- [x] Write failing test: `test_run_turn_loop_calls_record_message_after_every_turn`.
+- [x] Implement `state_manager.record_message()` call in `_run_turn_loop`.
+- [x] Write failing test: `test_run_turn_loop_routes_all_responses_through_father`.
+- [x] Verify `father.route()` is called for each agent response.
+- [x] Run `uv run pytest` on all `_run_turn_loop` tests — confirm all pass.
+- [x] Write failing test: `test_check_budget_returns_false_when_cost_below_cap`.
+- [x] Implement `DebateEngine._check_budget(self) -> bool`.
+- [x] Write failing test: `test_check_budget_returns_true_when_cost_exceeds_cap`.
+- [x] Implement cost-cap comparison using `CostReporter.compute()`.
+- [x] Write failing test: `test_check_budget_logs_warning_at_90_percent_threshold`.
+- [x] Implement 90%-threshold warning log in `_check_budget`.
+- [x] Run `uv run pytest` on all `_check_budget` tests — confirm all pass.
+- [x] Write failing test: `test_handle_watchdog_error_logs_error_to_logger`.
+- [x] Implement `DebateEngine._handle_watchdog_error(self, error: WatchdogError) -> None`.
+- [x] Write failing test: `test_handle_watchdog_error_appends_event_to_state`.
+- [x] Implement state-event append in `_handle_watchdog_error`.
+- [x] Write failing test: `test_handle_watchdog_error_saves_partial_state_json_to_logs`.
+- [x] Implement partial-state JSON dump in `_handle_watchdog_error`.
+- [x] Run `uv run pytest` on all `_handle_watchdog_error` tests — confirm all pass.
+- [x] Write failing test: `test_start_returns_verdict_object`.
+- [x] Implement `DebateEngine.start(self, topic: str) -> Verdict`.
+- [x] Write failing test: `test_start_calls_father_open_debate_with_topic_string`.
+- [x] Write failing test: `test_start_verdict_draw_field_is_always_false`.
+- [x] Write failing test: `test_start_forces_early_evaluation_when_budget_cap_exceeded`.
+- [x] Implement early-evaluation branch in `start`.
+- [x] Write failing test: `test_start_propagates_watchdog_error_after_max_retries`.
+- [x] Implement `WatchdogError` propagation in `start`.
+- [x] Run `uv run pytest` on all `start` tests — confirm all pass.
+- [x] Run `uv run ruff check src/engine/debate_engine.py` — confirm 0 violations.
+- [x] Run `wc -l src/engine/debate_engine.py` — confirm ≤ 150 lines.
+- [x] Git commit: `feat: implement DebateEngine orchestration loop with budget guard`.
 
 ### 3.3 Integration Tests — Full Debate
 
