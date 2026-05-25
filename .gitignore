@@ -1,0 +1,26 @@
+# Environment & secrets
+.env
+
+# Runtime artifacts
+logs/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+
+# Build / packaging
+dist/
+*.egg-info/
+
+# Test / coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
