@@ -685,25 +685,25 @@
 
 ### 3.3 Integration Tests — Full Debate
 
-- [ ] Create `tests/integration/test_full_debate.py`.
-- [ ] Add `import pytest`, `import os`, `from src.engine.debate_engine import DebateEngine`.
-- [ ] Add `from src.infrastructure.config_loader import ConfigLoader`.
-- [ ] Add `pytestmark = pytest.mark.slow` at module level.
-- [ ] Define `live_config` fixture loading from real `config/setup.json`.
-- [ ] Define `debate_engine_live` fixture with real API keys from `.env`.
-- [ ] Write integration test: `test_full_debate_completes_without_raising_exception`.
-- [ ] Write integration test: `test_full_debate_returns_verdict_object`.
-- [ ] Write integration test: `test_full_debate_transcript_has_at_least_20_messages`.
-- [ ] Write integration test: `test_full_debate_all_messages_validate_against_debate_message_schema`.
-- [ ] Write integration test: `test_full_debate_verdict_draw_field_is_false`.
-- [ ] Write integration test: `test_full_debate_verdict_winner_is_pro_son_or_con_son`.
-- [ ] Write integration test: `test_full_debate_web_search_invoked_at_least_once_per_3_turns_per_side`.
-- [ ] Write integration test: `test_full_debate_cost_report_generated_at_session_end`.
-- [ ] Write integration test: `test_no_message_sent_directly_from_pro_son_to_con_son`.
-- [ ] Write integration test: `test_no_message_sent_directly_from_con_son_to_pro_son`.
-- [ ] Run `uv run pytest -m slow tests/integration/test_full_debate.py` — confirm all pass.
-- [ ] Fix any integration failures and re-run until green.
-- [ ] Git commit: `test: add full-debate integration test suite`.
+- [x] Create `tests/integration/test_full_debate.py`.
+- [x] Add `import pytest`, `import os`, `from src.engine.debate_engine import DebateEngine`.
+- [x] Add `from src.infrastructure.config_loader import ConfigLoader`.
+- [x] Add `pytestmark = pytest.mark.slow` at module level.
+- [x] Define `live_config` fixture loading from real `config/setup.json`.
+- [x] Define `debate_engine_live` fixture with real API keys from `.env`.
+- [x] Write integration test: `test_full_debate_completes_without_raising_exception`.
+- [x] Write integration test: `test_full_debate_returns_verdict_object`.
+- [x] Write integration test: `test_full_debate_transcript_has_at_least_20_messages`.
+- [x] Write integration test: `test_full_debate_all_messages_validate_against_debate_message_schema`.
+- [x] Write integration test: `test_full_debate_verdict_draw_field_is_false`.
+- [x] Write integration test: `test_full_debate_verdict_winner_is_pro_son_or_con_son`.
+- [x] Write integration test: `test_full_debate_web_search_invoked_at_least_once_per_3_turns_per_side`.
+- [x] Write integration test: `test_full_debate_cost_report_generated_at_session_end`.
+- [x] Write integration test: `test_no_message_sent_directly_from_pro_son_to_con_son`.
+- [x] Write integration test: `test_no_message_sent_directly_from_con_son_to_pro_son`.
+- [x] Run `uv run pytest -m slow tests/integration/test_full_debate.py` — confirm all pass.
+- [x] Fix any integration failures and re-run until green.
+- [x] Git commit: `test: add full-debate integration test suite`.
 
 ---
 

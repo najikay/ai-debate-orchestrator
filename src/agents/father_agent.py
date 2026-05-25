@@ -9,7 +9,7 @@ from src.agents.base_agent import BaseAgent, DebateMessage
 
 _MIN_TURNS: int = 20
 _VALID_SENDERS: frozenset[str] = frozenset({"father", "pro_son", "con_son"})
-_VALID_RECIPIENTS: frozenset[str] = frozenset({"pro_son", "con_son"})
+_VALID_RECIPIENTS: frozenset[str] = frozenset({"father", "pro_son", "con_son"})
 
 _RUBRIC_TEMPLATE = (
     "You are the debate judge. Score each debater on:\n"
