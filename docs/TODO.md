@@ -584,50 +584,50 @@
 
 ### 3.1 StateManager
 
-- [ ] Create `src/engine/state_manager.py`.
-- [ ] Add imports: `import json`, `import uuid`, `from dataclasses import dataclass, field`, `from datetime import datetime, timezone`.
-- [ ] Define `DebateState` dataclass with all fields from PRD §4.3.
-- [ ] Create `tests/unit/test_state_manager.py`.
-- [ ] Add imports: `import pytest`, `from src.engine.state_manager import StateManager, DebateState`.
-- [ ] Define `state_manager` fixture: fresh `StateManager()`.
-- [ ] Define `sample_message` fixture: valid `DebateMessage` dict.
-- [ ] Define `sample_verdict` fixture: valid `Verdict` dict.
-- [ ] Write failing test: `test_state_manager_init_status_is_initialization`.
-- [ ] Write failing test: `test_state_manager_init_turn_count_is_zero`.
-- [ ] Write failing test: `test_state_manager_init_transcript_is_empty_list`.
-- [ ] Implement `StateManager.__init__(self)` with Google-style docstring.
-- [ ] Run `uv run pytest` on all `__init__` tests — confirm all pass.
-- [ ] Write failing test: `test_record_message_appends_to_transcript`.
-- [ ] Implement `StateManager.record_message(self, msg) -> None`.
-- [ ] Write failing test: `test_record_message_increments_turn_count_by_one`.
-- [ ] Implement turn-count increment in `record_message`.
-- [ ] Write failing test: `test_record_message_refreshes_updated_at_timestamp`.
-- [ ] Implement `updated_at` refresh in `record_message`.
-- [ ] Run `uv run pytest` on all `record_message` tests — confirm all pass.
-- [ ] Write failing test: `test_record_verdict_stores_verdict_object`.
-- [ ] Implement `StateManager.record_verdict(self, v) -> None`.
-- [ ] Write failing test: `test_record_verdict_raises_if_verdict_already_exists`.
-- [ ] Implement duplicate-verdict guard in `record_verdict`.
-- [ ] Run `uv run pytest` on all `record_verdict` tests — confirm all pass.
-- [ ] Write failing test: `test_get_turn_count_returns_zero_on_fresh_state`.
-- [ ] Write failing test: `test_get_turn_count_returns_correct_value_after_n_messages`.
-- [ ] Implement `StateManager.get_turn_count(self) -> int`.
-- [ ] Run `uv run pytest` on `get_turn_count` tests — confirm all pass.
-- [ ] Write failing test: `test_to_json_output_is_a_string`.
-- [ ] Implement `StateManager.to_json(self) -> str`.
-- [ ] Write failing test: `test_to_json_output_is_parseable_json`.
-- [ ] Write failing test: `test_to_json_includes_topic_and_turn_count_and_transcript`.
-- [ ] Run `uv run pytest` on all `to_json` tests — confirm all pass.
-- [ ] Write failing test: `test_from_json_restores_topic_field`.
-- [ ] Implement `StateManager.from_json(self, data: str) -> DebateState`.
-- [ ] Write failing test: `test_from_json_restores_turn_count`.
-- [ ] Write failing test: `test_from_json_restores_full_transcript_array`.
-- [ ] Write failing test: `test_from_json_raises_value_error_on_malformed_json`.
-- [ ] Implement JSON parse error handling in `from_json`.
-- [ ] Run `uv run pytest` on all `from_json` tests — confirm all pass.
-- [ ] Run `uv run ruff check src/engine/state_manager.py` — confirm 0 violations.
-- [ ] Run `wc -l src/engine/state_manager.py` — confirm ≤ 150 lines.
-- [ ] Git commit: `feat: implement StateManager with JSON serialization round-trip`.
+- [x] Create `src/engine/state_manager.py`.
+- [x] Add imports: `import json`, `import uuid`, `from dataclasses import dataclass, field`, `from datetime import datetime, timezone`.
+- [x] Define `DebateState` dataclass with all fields from PRD §4.3.
+- [x] Create `tests/unit/test_state_manager.py`.
+- [x] Add imports: `import pytest`, `from src.engine.state_manager import StateManager, DebateState`.
+- [x] Define `state_manager` fixture: fresh `StateManager()`.
+- [x] Define `sample_message` fixture: valid `DebateMessage` dict.
+- [x] Define `sample_verdict` fixture: valid `Verdict` dict.
+- [x] Write failing test: `test_state_manager_init_status_is_initialization`.
+- [x] Write failing test: `test_state_manager_init_turn_count_is_zero`.
+- [x] Write failing test: `test_state_manager_init_transcript_is_empty_list`.
+- [x] Implement `StateManager.__init__(self)` with Google-style docstring.
+- [x] Run `uv run pytest` on all `__init__` tests — confirm all pass.
+- [x] Write failing test: `test_record_message_appends_to_transcript`.
+- [x] Implement `StateManager.record_message(self, msg) -> None`.
+- [x] Write failing test: `test_record_message_increments_turn_count_by_one`.
+- [x] Implement turn-count increment in `record_message`.
+- [x] Write failing test: `test_record_message_refreshes_updated_at_timestamp`.
+- [x] Implement `updated_at` refresh in `record_message`.
+- [x] Run `uv run pytest` on all `record_message` tests — confirm all pass.
+- [x] Write failing test: `test_record_verdict_stores_verdict_object`.
+- [x] Implement `StateManager.record_verdict(self, v) -> None`.
+- [x] Write failing test: `test_record_verdict_raises_if_verdict_already_exists`.
+- [x] Implement duplicate-verdict guard in `record_verdict`.
+- [x] Run `uv run pytest` on all `record_verdict` tests — confirm all pass.
+- [x] Write failing test: `test_get_turn_count_returns_zero_on_fresh_state`.
+- [x] Write failing test: `test_get_turn_count_returns_correct_value_after_n_messages`.
+- [x] Implement `StateManager.get_turn_count(self) -> int`.
+- [x] Run `uv run pytest` on `get_turn_count` tests — confirm all pass.
+- [x] Write failing test: `test_to_json_output_is_a_string`.
+- [x] Implement `StateManager.to_json(self) -> str`.
+- [x] Write failing test: `test_to_json_output_is_parseable_json`.
+- [x] Write failing test: `test_to_json_includes_topic_and_turn_count_and_transcript`.
+- [x] Run `uv run pytest` on all `to_json` tests — confirm all pass.
+- [x] Write failing test: `test_from_json_restores_topic_field`.
+- [x] Implement `StateManager.from_json(self, data: str) -> DebateState`.
+- [x] Write failing test: `test_from_json_restores_turn_count`.
+- [x] Write failing test: `test_from_json_restores_full_transcript_array`.
+- [x] Write failing test: `test_from_json_raises_value_error_on_malformed_json`.
+- [x] Implement JSON parse error handling in `from_json`.
+- [x] Run `uv run pytest` on all `from_json` tests — confirm all pass.
+- [x] Run `uv run ruff check src/engine/state_manager.py` — confirm 0 violations.
+- [x] Run `wc -l src/engine/state_manager.py` — confirm ≤ 150 lines.
+- [x] Git commit: `feat: implement StateManager with JSON serialization round-trip`.
 
 ### 3.2 DebateEngine
 
