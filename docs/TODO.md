@@ -231,31 +231,31 @@
 
 ### 1.4 Watchdog
 
-- [ ] Create `src/infrastructure/watchdog.py`.
-- [ ] Add imports: `import concurrent.futures`, `import logging`, `from typing import Any, Callable`.
-- [ ] Define `WatchdogError(Exception)` in `watchdog.py`.
-- [ ] Create `tests/unit/test_watchdog.py`.
-- [ ] Add imports: `import pytest`, `import time`, `from src.infrastructure.watchdog import Watchdog, WatchdogError`.
-- [ ] Define `fast_watchdog` fixture: `Watchdog(timeout_seconds=0.05, max_retries=1)`.
-- [ ] Write failing test: `test_watchdog_init_sets_timeout_seconds`.
-- [ ] Write failing test: `test_watchdog_init_sets_max_retries`.
-- [ ] Implement `Watchdog.__init__(self, timeout_seconds: int, max_retries: int)` with Google-style docstring.
-- [ ] Run `uv run pytest` on both `__init__` tests — confirm all pass.
-- [ ] Write failing test: `test_run_returns_result_when_function_completes_within_timeout`.
-- [ ] Implement `Watchdog.run(self, fn: Callable, args: dict) -> Any`.
-- [ ] Write failing test: `test_run_retries_once_on_first_timeout` — fn sleeps > timeout on first call, succeeds on retry.
-- [ ] Implement retry logic inside `run`.
-- [ ] Write failing test: `test_run_raises_watchdog_error_on_two_consecutive_timeouts`.
-- [ ] Implement `WatchdogError` raise after max retries exceeded.
-- [ ] Run `uv run pytest` on all `run` tests — confirm all pass.
-- [ ] Write failing test: `test_kill_and_retry_cancels_the_timed_out_future`.
-- [ ] Implement `Watchdog._kill_and_retry(self, fn: Callable, args: dict) -> Any`.
-- [ ] Write failing test: `test_kill_and_retry_emits_warning_log_on_each_timeout`.
-- [ ] Implement `logging.warning(...)` call in `_kill_and_retry`.
-- [ ] Run `uv run pytest` on all `_kill_and_retry` tests — confirm all pass.
-- [ ] Run `uv run ruff check src/infrastructure/watchdog.py` — confirm 0 violations.
-- [ ] Run `wc -l src/infrastructure/watchdog.py` — confirm ≤ 150 lines.
-- [ ] Git commit: `feat: implement Watchdog with thread-pool timeout and retry logic`.
+- [x] Create `src/infrastructure/watchdog.py`.
+- [x] Add imports: `import concurrent.futures`, `import logging`, `from typing import Any, Callable`.
+- [x] Define `WatchdogError(Exception)` in `watchdog.py`.
+- [x] Create `tests/unit/test_watchdog.py`.
+- [x] Add imports: `import pytest`, `import time`, `from src.infrastructure.watchdog import Watchdog, WatchdogError`.
+- [x] Define `fast_watchdog` fixture: `Watchdog(timeout_seconds=0.05, max_retries=1)`.
+- [x] Write failing test: `test_watchdog_init_sets_timeout_seconds`.
+- [x] Write failing test: `test_watchdog_init_sets_max_retries`.
+- [x] Implement `Watchdog.__init__(self, timeout_seconds: int, max_retries: int)` with Google-style docstring.
+- [x] Run `uv run pytest` on both `__init__` tests — confirm all pass.
+- [x] Write failing test: `test_run_returns_result_when_function_completes_within_timeout`.
+- [x] Implement `Watchdog.run(self, fn: Callable, args: dict) -> Any`.
+- [x] Write failing test: `test_run_retries_once_on_first_timeout` — fn sleeps > timeout on first call, succeeds on retry.
+- [x] Implement retry logic inside `run`.
+- [x] Write failing test: `test_run_raises_watchdog_error_on_two_consecutive_timeouts`.
+- [x] Implement `WatchdogError` raise after max retries exceeded.
+- [x] Run `uv run pytest` on all `run` tests — confirm all pass.
+- [x] Write failing test: `test_kill_and_retry_cancels_the_timed_out_future`.
+- [x] Implement `Watchdog._kill_and_retry(self, fn: Callable, args: dict) -> Any`.
+- [x] Write failing test: `test_kill_and_retry_emits_warning_log_on_each_timeout`.
+- [x] Implement `logging.warning(...)` call in `_kill_and_retry`.
+- [x] Run `uv run pytest` on all `_kill_and_retry` tests — confirm all pass.
+- [x] Run `uv run ruff check src/infrastructure/watchdog.py` — confirm 0 violations.
+- [x] Run `wc -l src/infrastructure/watchdog.py` — confirm ≤ 150 lines.
+- [x] Git commit: `feat: implement Watchdog with thread-pool timeout and retry logic`.
 
 ### 1.5 CostReporter
 
