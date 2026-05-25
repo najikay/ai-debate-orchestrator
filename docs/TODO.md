@@ -259,43 +259,43 @@
 
 ### 1.5 CostReporter
 
-- [ ] Create `src/infrastructure/cost_reporter.py`.
-- [ ] Add imports: `from dataclasses import dataclass, field`, `from typing import Dict`.
-- [ ] Define `AgentUsage` dataclass (prompt_tokens, completion_tokens, model) in `cost_reporter.py`.
-- [ ] Define `CostSummary` dataclass (per_agent, total_usd, budget_cap_usd, utilisation_pct) in `cost_reporter.py`.
-- [ ] Create `tests/unit/test_cost_reporter.py`.
-- [ ] Add imports: `import pytest`, `from src.infrastructure.cost_reporter import CostReporter, CostSummary`.
-- [ ] Define `mock_pricing` fixture with known per-token USD rates.
-- [ ] Define `cost_reporter` fixture: `CostReporter(mock_pricing, budget_cap_usd=2.00)`.
-- [ ] Write failing test: `test_cost_reporter_init_stores_pricing`.
-- [ ] Write failing test: `test_cost_reporter_init_stores_budget_cap`.
-- [ ] Implement `CostReporter.__init__(self, pricing: dict, budget_cap_usd: float)` with Google-style docstring.
-- [ ] Run `uv run pytest` on both `__init__` tests — confirm all pass.
-- [ ] Write failing test: `test_record_usage_accumulates_prompt_tokens_for_agent`.
-- [ ] Implement `CostReporter.record_usage(self, agent_id: str, model: str, prompt_tokens: int, completion_tokens: int) -> None`.
-- [ ] Write failing test: `test_record_usage_creates_new_entry_for_first_call_per_agent`.
-- [ ] Implement new-agent-entry creation in `record_usage`.
-- [ ] Write failing test: `test_record_usage_accumulates_tokens_across_multiple_calls`.
-- [ ] Verify token accumulation is additive in `record_usage`.
-- [ ] Run `uv run pytest` on all `record_usage` tests — confirm all pass.
-- [ ] Write failing test: `test_compute_returns_correct_total_usd_for_known_inputs`.
-- [ ] Implement `CostReporter.compute(self) -> CostSummary`.
-- [ ] Write failing test: `test_compute_per_agent_costs_sum_to_session_total`.
-- [ ] Implement per-agent cost breakdown in `compute`.
-- [ ] Write failing test: `test_compute_returns_zero_summary_when_no_usage_recorded`.
-- [ ] Implement zero-usage guard in `compute`.
-- [ ] Write failing test: `test_compute_calculates_utilisation_pct_correctly` — known cost / cap × 100.
-- [ ] Implement utilisation percentage in `compute`.
-- [ ] Run `uv run pytest` on all `compute` tests — confirm all pass.
-- [ ] Write failing test: `test_print_report_writes_non_empty_output_to_stdout`.
-- [ ] Implement `CostReporter.print_report(self, summary: CostSummary) -> None`.
-- [ ] Write failing test: `test_print_report_output_contains_each_agent_name`.
-- [ ] Write failing test: `test_print_report_output_contains_total_usd_line`.
-- [ ] Write failing test: `test_print_report_output_contains_budget_utilisation_percentage`.
-- [ ] Run `uv run pytest` on all `print_report` tests — confirm all pass.
-- [ ] Run `uv run ruff check src/infrastructure/cost_reporter.py` — confirm 0 violations.
-- [ ] Run `wc -l src/infrastructure/cost_reporter.py` — confirm ≤ 150 lines.
-- [ ] Git commit: `feat: implement CostReporter with per-agent USD breakdown`.
+- [x] Create `src/infrastructure/cost_reporter.py`.
+- [x] Add imports: `from dataclasses import dataclass, field`, `from typing import Dict`.
+- [x] Define `AgentUsage` dataclass (prompt_tokens, completion_tokens, model) in `cost_reporter.py`.
+- [x] Define `CostSummary` dataclass (per_agent, total_usd, budget_cap_usd, utilisation_pct) in `cost_reporter.py`.
+- [x] Create `tests/unit/test_cost_reporter.py`.
+- [x] Add imports: `import pytest`, `from src.infrastructure.cost_reporter import CostReporter, CostSummary`.
+- [x] Define `mock_pricing` fixture with known per-token USD rates.
+- [x] Define `cost_reporter` fixture: `CostReporter(mock_pricing, budget_cap_usd=2.00)`.
+- [x] Write failing test: `test_cost_reporter_init_stores_pricing`.
+- [x] Write failing test: `test_cost_reporter_init_stores_budget_cap`.
+- [x] Implement `CostReporter.__init__(self, pricing: dict, budget_cap_usd: float)` with Google-style docstring.
+- [x] Run `uv run pytest` on both `__init__` tests — confirm all pass.
+- [x] Write failing test: `test_record_usage_accumulates_prompt_tokens_for_agent`.
+- [x] Implement `CostReporter.record_usage(self, agent_id: str, model: str, prompt_tokens: int, completion_tokens: int) -> None`.
+- [x] Write failing test: `test_record_usage_creates_new_entry_for_first_call_per_agent`.
+- [x] Implement new-agent-entry creation in `record_usage`.
+- [x] Write failing test: `test_record_usage_accumulates_tokens_across_multiple_calls`.
+- [x] Verify token accumulation is additive in `record_usage`.
+- [x] Run `uv run pytest` on all `record_usage` tests — confirm all pass.
+- [x] Write failing test: `test_compute_returns_correct_total_usd_for_known_inputs`.
+- [x] Implement `CostReporter.compute(self) -> CostSummary`.
+- [x] Write failing test: `test_compute_per_agent_costs_sum_to_session_total`.
+- [x] Implement per-agent cost breakdown in `compute`.
+- [x] Write failing test: `test_compute_returns_zero_summary_when_no_usage_recorded`.
+- [x] Implement zero-usage guard in `compute`.
+- [x] Write failing test: `test_compute_calculates_utilisation_pct_correctly` — known cost / cap × 100.
+- [x] Implement utilisation percentage in `compute`.
+- [x] Run `uv run pytest` on all `compute` tests — confirm all pass.
+- [x] Write failing test: `test_print_report_writes_non_empty_output_to_stdout`.
+- [x] Implement `CostReporter.print_report(self, summary: CostSummary) -> None`.
+- [x] Write failing test: `test_print_report_output_contains_each_agent_name`.
+- [x] Write failing test: `test_print_report_output_contains_total_usd_line`.
+- [x] Write failing test: `test_print_report_output_contains_budget_utilisation_percentage`.
+- [x] Run `uv run pytest` on all `print_report` tests — confirm all pass.
+- [x] Run `uv run ruff check src/infrastructure/cost_reporter.py` — confirm 0 violations.
+- [x] Run `wc -l src/infrastructure/cost_reporter.py` — confirm ≤ 150 lines.
+- [x] Git commit: `feat: implement CostReporter with per-agent USD breakdown`.
 
 ---
 
