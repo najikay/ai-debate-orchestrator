@@ -1,0 +1,18 @@
+[INFO]  Loading config from 'config/' ...
+[INFO]  Config loaded. Schema version: 1.0
+
+[DEBATE STARTING] Topic: Remote work is better than office work
+
+
+============================================================
+[VERDICT]
+  Winner    : pro_son
+  Turns     : 21
+  Reasoning : pro_son scored 23/30, con_son scored 21/30. Winner: pro_son based on cumulative rubric evaluation.
+============================================================
+
+[COST REPORT]
+  Total : $0.0000 / $2.00 (0.0% of budget)
+
+[INFO] Transcript messages: 21
+[INFO] sample_debate.json written to examples/
