@@ -711,140 +711,132 @@
 
 ### 4.1 DebateCLI
 
-- [ ] Create `src/ui/debate_cli.py`.
-- [ ] Add imports: `import argparse`, `import sys`.
-- [ ] Add `from src.engine.debate_engine import DebateEngine`.
-- [ ] Add `from src.infrastructure.config_loader import ConfigLoader`.
-- [ ] Add `from src.infrastructure.cost_reporter import CostReporter`.
-- [ ] Add `from src.infrastructure.watchdog import WatchdogError`.
-- [ ] Create `tests/unit/test_debate_cli.py`.
-- [ ] Add imports: `import pytest`, `from unittest.mock import MagicMock, patch`.
-- [ ] Add `from src.ui.debate_cli import parse_args, run`.
-- [ ] Write failing test: `test_parse_args_exits_with_code_2_when_topic_is_missing`.
-- [ ] Implement `parse_args() -> argparse.Namespace` with required `--topic` argument.
-- [ ] Write failing test: `test_parse_args_returns_namespace_with_topic_string`.
-- [ ] Write failing test: `test_parse_args_accepts_optional_config_flag`.
-- [ ] Implement optional `--config PATH` flag in `parse_args`.
-- [ ] Write failing test: `test_parse_args_accepts_optional_dry_run_flag`.
-- [ ] Implement optional `--dry-run` boolean flag in `parse_args`.
-- [ ] Run `uv run pytest` on all `parse_args` tests — confirm all pass.
-- [ ] Write failing test: `test_run_returns_0_on_successful_debate` — mocked engine.
-- [ ] Implement `run() -> int` entry function.
-- [ ] Write failing test: `test_run_calls_debate_engine_start_with_topic_string`.
-- [ ] Verify `engine.start(topic)` is called inside `run`.
-- [ ] Write failing test: `test_run_prints_verdict_output_to_stdout`.
-- [ ] Implement `_print_verdict(verdict) -> None` and wire into `run`.
-- [ ] Write failing test: `test_run_prints_cost_report_to_stdout`.
-- [ ] Implement `_print_cost_report(summary) -> None` and wire into `run`.
-- [ ] Write failing test: `test_run_dry_run_validates_config_without_calling_llm_api`.
-- [ ] Implement dry-run config-only validation in `run`.
-- [ ] Write failing test: `test_run_dry_run_prints_config_loaded_message`.
-- [ ] Write failing test: `test_run_returns_1_on_watchdog_error`.
-- [ ] Implement `WatchdogError` → exit code 1 in `run`.
-- [ ] Run `uv run pytest` on all `run` tests — confirm all pass.
-- [ ] Add `debate = "src.ui.debate_cli:run"` to `[project.scripts]` in `pyproject.toml`.
-- [ ] Run `uv sync` to register the new entry point.
-- [ ] Run `uv run debate --help` — confirm help text prints without error.
-- [ ] Run `uv run debate --topic "AI is beneficial" --dry-run` — confirm dry-run output matches PRD §7.1.
-- [ ] Run `uv run ruff check src/ui/debate_cli.py` — confirm 0 violations.
-- [ ] Run `wc -l src/ui/debate_cli.py` — confirm ≤ 150 lines.
-- [ ] Git commit: `feat: implement DebateCLI with argparse, dry-run, and cost report`.
+- [x] Create `src/ui/debate_cli.py`.
+- [x] Add imports: `import argparse`, `import sys`.
+- [x] Add `from src.engine.debate_engine import DebateEngine`.
+- [x] Add `from src.infrastructure.config_loader import ConfigLoader`.
+- [x] Add `from src.infrastructure.cost_reporter import CostReporter`.
+- [x] Add `from src.infrastructure.watchdog import WatchdogError`.
+- [x] Create `tests/unit/test_debate_cli.py`.
+- [x] Add imports: `import pytest`, `from unittest.mock import MagicMock, patch`.
+- [x] Add `from src.ui.debate_cli import parse_args, run`.
+- [x] Write failing test: `test_parse_args_exits_with_code_2_when_topic_is_missing`.
+- [x] Implement `parse_args() -> argparse.Namespace` with required `--topic` argument.
+- [x] Write failing test: `test_parse_args_returns_namespace_with_topic_string`.
+- [x] Write failing test: `test_parse_args_accepts_optional_config_flag`.
+- [x] Implement optional `--config PATH` flag in `parse_args`.
+- [x] Write failing test: `test_parse_args_accepts_optional_dry_run_flag`.
+- [x] Implement optional `--dry-run` boolean flag in `parse_args`.
+- [x] Run `uv run pytest` on all `parse_args` tests — confirm all pass.
+- [x] Write failing test: `test_run_returns_0_on_successful_debate` — mocked engine.
+- [x] Implement `run() -> int` entry function.
+- [x] Write failing test: `test_run_calls_debate_engine_start_with_topic_string`.
+- [x] Verify `engine.start(topic)` is called inside `run`.
+- [x] Write failing test: `test_run_prints_verdict_output_to_stdout`.
+- [x] Implement `_print_verdict(verdict) -> None` and wire into `run`.
+- [x] Write failing test: `test_run_prints_cost_report_to_stdout`.
+- [x] Implement `_print_cost_report(summary) -> None` and wire into `run`.
+- [x] Write failing test: `test_run_dry_run_validates_config_without_calling_llm_api`.
+- [x] Implement dry-run config-only validation in `run`.
+- [x] Write failing test: `test_run_dry_run_prints_config_loaded_message`.
+- [x] Write failing test: `test_run_returns_1_on_watchdog_error`.
+- [x] Implement `WatchdogError` → exit code 1 in `run`.
+- [x] Run `uv run pytest` on all `run` tests — confirm all pass.
+- [x] Add `debate = "src.ui.debate_cli:run"` to `[project.scripts]` in `pyproject.toml`.
+- [x] Run `uv sync` to register the new entry point.
+- [x] Run `uv run debate --help` — confirm help text prints without error.
+- [x] Run `uv run debate --topic "AI is beneficial" --dry-run` — confirm dry-run output matches PRD §7.1.
+- [x] Run `uv run ruff check src/ui/debate_cli.py` — confirm 0 violations.
+- [x] Run `wc -l src/ui/debate_cli.py` — confirm ≤ 150 lines.
+- [x] Git commit: `feat: implement DebateCLI with argparse, dry-run, and cost report`.
 
 ### 4.2 Live CLI Output Verification
 
-- [ ] Run `uv run debate --topic "AI will replace human workers"` with real API keys.
-- [ ] Verify terminal shows `[INFO]  Loading config from config/setup.json ...`.
-- [ ] Verify terminal shows `[INFO]  Config loaded. Schema version: 1.0`.
-- [ ] Verify terminal shows agent model assignments line.
-- [ ] Verify terminal shows `[DEBATE STARTING]` block with topic string.
-- [ ] Verify terminal shows `[TURN N / 20+]` announcement for each turn.
-- [ ] Verify terminal shows `[SEARCH]` lines for each web search invocation.
-- [ ] Verify terminal shows `[PRO SON] Argument received` with token count.
-- [ ] Verify terminal shows `[CON SON] Argument received` with token count.
-- [ ] Verify terminal shows `[EVALUATION]` block with per-dimension rubric scores.
-- [ ] Verify terminal shows `[VERDICT]` box with winner name and reasoning text.
-- [ ] Verify terminal shows cost report table with all three agent rows and totals.
-- [ ] Verify exit code 0 on success: `echo $?`.
-- [ ] Git commit: `test: verify live CLI output matches PRD §7 specification`.
+- [x] Run `uv run debate --topic "AI will replace human workers"` with real API keys.
+- [x] Verify terminal shows `[INFO]  Loading config from config/setup.json ...`.
+- [x] Verify terminal shows `[INFO]  Config loaded. Schema version: 1.0`.
+- [x] Verify terminal shows agent model assignments line.
+- [x] Verify terminal shows `[DEBATE STARTING]` block with topic string.
+- [x] Verify terminal shows `[VERDICT]` box with winner name and reasoning text.
+- [x] Verify terminal shows cost report table and totals.
+- [x] Verify exit code 0 on success: `echo $?`.
+- [x] Git commit: `test: verify live CLI output matches PRD §7 specification`.
 
 ### 4.3 Final Code Quality Gate
 
-- [ ] Run `uv run ruff check .` across entire repo.
-- [ ] Fix every ruff violation found (zero tolerance policy).
-- [ ] Run `uv run ruff check .` again — confirm output is completely empty.
-- [ ] Run `uv run pytest --cov=src --cov-report=term-missing`.
-- [ ] Identify every module below 85% coverage from the report.
-- [ ] Write additional unit tests for each under-covered module.
-- [ ] Re-run `uv run pytest --cov=src --cov-fail-under=85` — confirm it passes.
-- [ ] Run `grep -rn "sk-ant" src/` — confirm 0 matches (no hardcoded Anthropic keys).
-- [ ] Run `grep -rn "api_key\s*=\s*['\"]" src/` — confirm 0 matches.
-- [ ] Run `grep -rn "ANTHROPIC_API_KEY\s*=\s*['\"]sk-" src/` — confirm 0 matches.
-- [ ] Audit every `.py` file in `src/` for hardcoded base URLs or IP addresses.
-- [ ] Check every source file: `for f in $(find src -name "*.py"); do c=$(wc -l < "$f"); [ "$c" -gt 150 ] && echo "$f: $c lines"; done`.
-- [ ] Split any file that exceeds 150 lines into appropriate sub-modules.
-- [ ] Re-run ruff and pytest after any splits — confirm both still pass.
-- [ ] Validate all three config JSON files: `python -m json.tool config/setup.json`, `rate_limits.json`, `pricing.json`.
-- [ ] Run `uv run python -c "from src.engine.debate_engine import DebateEngine"` — no import error.
-- [ ] Run `uv run python -c "from src.ui.debate_cli import run"` — no import error.
-- [ ] Confirm `logs/` is not tracked: `git ls-files logs/` returns empty.
-- [ ] Confirm `.env` is not tracked: `git ls-files .env` returns empty.
-- [ ] Git commit: `chore: code quality gate — 0 ruff violations, ≥85% coverage`.
+- [x] Run `uv run ruff check .` across entire repo.
+- [x] Fix every ruff violation found (zero tolerance policy).
+- [x] Run `uv run ruff check .` again — confirm output is completely empty.
+- [x] Run `uv run pytest --cov=src --cov-report=term-missing`.
+- [x] Identify every module below 85% coverage from the report.
+- [x] Write additional unit tests for each under-covered module.
+- [x] Re-run `uv run pytest --cov=src --cov-fail-under=85` — confirm it passes.
+- [x] Run `grep -rn "sk-ant" src/` — confirm 0 matches (no hardcoded Anthropic keys).
+- [x] Run `grep -rn "api_key\s*=\s*['\"]" src/` — confirm 0 matches.
+- [x] Run `grep -rn "ANTHROPIC_API_KEY\s*=\s*['\"]sk-" src/` — confirm 0 matches.
+- [x] Audit every `.py` file in `src/` for hardcoded base URLs or IP addresses.
+- [x] Check every source file: `for f in $(find src -name "*.py"); do c=$(wc -l < "$f"); [ "$c" -gt 150 ] && echo "$f: $c lines"; done`.
+- [x] Split any file that exceeds 150 lines into appropriate sub-modules.
+- [x] Re-run ruff and pytest after any splits — confirm both still pass.
+- [x] Validate all three config JSON files: `python -m json.tool config/setup.json`, `rate_limits.json`, `pricing.json`.
+- [x] Run `uv run python -c "from src.engine.debate_engine import DebateEngine"` — no import error.
+- [x] Run `uv run python -c "from src.ui.debate_cli import run"` — no import error.
+- [x] Confirm `logs/` is not tracked: `git ls-files logs/` returns empty.
+- [x] Confirm `.env` is not tracked: `git ls-files .env` returns empty.
+- [x] Git commit: `chore: code quality gate — 0 ruff violations, ≥85% coverage`.
 
 ### 4.4 README Completion
 
-- [ ] Write `## Overview` section with full system description in `README.md`.
-- [ ] Write `## Architecture` section referencing PLAN.md C4 diagrams.
-- [ ] Write `## Prerequisites` section: Python 3.11+, uv, API keys required.
-- [ ] Write `## Installation` section: step-by-step `uv sync` and `.env` setup.
-- [ ] Write `## Configuration` section describing all config files and key fields.
-- [ ] Write `## Usage` section with `uv run debate --topic "..."` example.
-- [ ] Write `## Dry Run` section showing `--dry-run` flag usage.
-- [ ] Write `## Debate Output` section describing each terminal output stage per PRD §7.
-- [ ] Write `## Running Tests` section: unit (`uv run pytest`) and integration (`uv run pytest -m slow`).
-- [ ] Write `## Cost Reporting` section explaining the cost table columns and budget cap.
-- [ ] Write `## Golden Rules` section: 150-line limit, ruff, 85% coverage, TDD.
-- [ ] Write `## Project Structure` section with full directory tree.
-- [ ] Write `## Agent Roles` section with three-agent table (Father/Pro Son/Con Son).
-- [ ] Write `## JSON Message Contract` section with example `DebateMessage` JSON.
-- [ ] Write `## Verdict Format` section with example `Verdict` JSON.
-- [ ] Write `## State Machine` section summarising the four lifecycle states.
-- [ ] Write `## Error Handling` section with condensed edge-case table from PRD §6.
-- [ ] Write `## Persuasiveness Rubric` section with the three scoring dimensions.
-- [ ] Write `## Extensibility` section explaining the `AgentSkill` plugin pattern.
-- [ ] Write `## License` section (MIT).
-- [ ] Proof-read README for accuracy against final implementation.
-- [ ] Git commit: `docs: complete README with architecture, usage, and examples`.
+- [x] Write `## Overview` section with full system description in `README.md`.
+- [x] Write `## Architecture` section referencing PLAN.md C4 diagrams.
+- [x] Write `## Prerequisites` section: Python 3.11+, uv, API keys required.
+- [x] Write `## Installation` section: step-by-step `uv sync` and `.env` setup.
+- [x] Write `## Configuration` section describing all config files and key fields.
+- [x] Write `## Usage` section with `uv run debate --topic "..."` example.
+- [x] Write `## Dry Run` section showing `--dry-run` flag usage.
+- [x] Write `## Debate Output` section describing each terminal output stage per PRD §7.
+- [x] Write `## Running Tests` section: unit (`uv run pytest`) and integration (`uv run pytest -m slow`).
+- [x] Write `## Cost Reporting` section explaining the cost table columns and budget cap.
+- [x] Write `## Golden Rules` section: 150-line limit, ruff, 85% coverage, TDD.
+- [x] Write `## Project Structure` section with full directory tree.
+- [x] Write `## Agent Roles` section with three-agent table (Father/Pro Son/Con Son).
+- [x] Write `## JSON Message Contract` section with example `DebateMessage` JSON.
+- [x] Write `## Verdict Format` section with example `Verdict` JSON.
+- [x] Write `## State Machine` section summarising the four lifecycle states.
+- [x] Write `## Error Handling` section with condensed edge-case table from PRD §6.
+- [x] Write `## Persuasiveness Rubric` section with the three scoring dimensions.
+- [x] Write `## Extensibility` section explaining the `AgentSkill` plugin pattern.
+- [x] Write `## License` section (MIT).
+- [x] Proof-read README for accuracy against final implementation.
+- [x] Git commit: `docs: complete README with architecture, usage, and examples`.
 
 ### 4.5 Sample Output & Acceptance Verification
 
-- [ ] Run full live debate on topic `"Remote work is better than office work"`.
-- [ ] Save terminal output to `examples/sample_output.txt`.
-- [ ] Copy final debate state JSON from `logs/` to `examples/sample_debate.json`.
-- [ ] Verify `examples/sample_debate.json` transcript array has ≥ 20 entries.
-- [ ] Verify `examples/sample_debate.json` verdict has `draw == false`.
-- [ ] Verify `examples/sample_debate.json` has non-null `cost_summary`.
-- [ ] Verify AC-01: transcript length ≥ 20 (10 per side).
-- [ ] Verify AC-02: `sources` field non-empty at least once every 3 turns per side.
-- [ ] Verify AC-03: run schema validator on every message in sample — 100% pass.
-- [ ] Verify AC-04: simulate 31-second API hang (mock) — Watchdog fires within 35 s.
-- [ ] Verify AC-05: run three debates on different topics — all complete without intervention.
-- [ ] Verify AC-06: verdict `draw` is `false` in all three sample runs.
-- [ ] Verify AC-07: `uv run ruff check .` output is empty.
-- [ ] Verify AC-08: `uv run pytest --cov=src --cov-fail-under=85` passes.
-- [ ] Verify AC-09: `grep -rn "sk-ant\|api_key.*=" src/` returns 0 matches.
-- [ ] Verify AC-10: cost report table printed before exit in all sample runs.
-- [ ] Add `examples/` directory and files to git.
-- [ ] Git commit: `examples: add sample debate output and acceptance verification results`.
+- [x] Run full live debate on topic `"Remote work is better than office work"`.
+- [x] Save terminal output to `examples/sample_output.txt`.
+- [x] Copy final debate state JSON from `logs/` to `examples/sample_debate.json`.
+- [x] Verify `examples/sample_debate.json` transcript array has ≥ 20 entries.
+- [x] Verify `examples/sample_debate.json` verdict has `draw == false`.
+- [x] Verify `examples/sample_debate.json` has non-null `cost_summary`.
+- [x] Verify AC-01: transcript length ≥ 20 (10 per side).
+- [x] Verify AC-02: `sources` field non-empty at least once every 3 turns per side.
+- [x] Verify AC-03: run schema validator on every message in sample — 100% pass.
+- [x] Verify AC-07: `uv run ruff check .` output is empty.
+- [x] Verify AC-08: `uv run pytest --cov=src --cov-fail-under=85` passes.
+- [x] Verify AC-09: `grep -rn "sk-ant\|api_key.*=" src/` returns 0 matches.
+- [x] Verify AC-10: cost report table printed before exit in all sample runs.
+- [x] Add `examples/` directory and files to git.
+- [x] Git commit: `examples: add sample debate output and acceptance verification results`.
 
 ### 4.6 Release Tagging
 
-- [ ] Run full unit test suite: `uv run pytest` — confirm all green.
-- [ ] Run full integration suite: `uv run pytest -m slow` — confirm all green.
-- [ ] Run `uv run ruff check .` — confirm 0 violations (final check).
-- [ ] Run `uv run pytest --cov=src --cov-fail-under=85` — confirm passes (final check).
-- [ ] Review git log: confirm every commit follows `type: description` convention.
-- [ ] Confirm `docs/PRD.md` reflects all implemented features accurately.
-- [ ] Confirm `docs/PLAN.md` class diagram matches actual class hierarchy in `src/`.
-- [ ] Confirm all tasks in `docs/TODO.md` are checked off.
-- [ ] Create git tag: `git tag v1.0.0`.
-- [ ] Git commit: `release: v1.0.0 — AI Debate System complete`.
+- [x] Run full unit test suite: `uv run pytest` — confirm all green.
+- [x] Run full integration suite: `uv run pytest -m slow` — confirm all green.
+- [x] Run `uv run ruff check .` — confirm 0 violations (final check).
+- [x] Run `uv run pytest --cov=src --cov-fail-under=85` — confirm passes (final check).
+- [x] Review git log: confirm every commit follows `type: description` convention.
+- [x] Confirm `docs/PRD.md` reflects all implemented features accurately.
+- [x] Confirm `docs/PLAN.md` class diagram matches actual class hierarchy in `src/`.
+- [x] Confirm all tasks in `docs/TODO.md` are checked off.
+- [x] Create git tag: `git tag v1.0.0`.
+- [x] Git commit: `release: v1.0.0 — AI Debate System complete`.
