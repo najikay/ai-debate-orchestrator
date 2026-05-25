@@ -323,47 +323,47 @@
 ### 2.2 WebSearchTool
 
 
-- [ ] Create `src/skills/web_search_tool.py`.
-- [ ] Add imports: `import os`, `import requests`, `from src.skills.base_skill import AgentSkill, SkillResult, SkillError`.
-- [ ] Create `tests/unit/test_web_search_tool.py`.
-- [ ] Add imports: `import pytest`, `from unittest.mock import patch, MagicMock`.
-- [ ] Add `from src.skills.web_search_tool import WebSearchTool`.
-- [ ] Define `mock_search_response` fixture: valid search API JSON dict.
-- [ ] Define `web_search_tool` fixture with env vars patched via `monkeypatch`.
-- [ ] Write failing test: `test_web_search_tool_init_reads_api_key_from_env`.
-- [ ] Write failing test: `test_web_search_tool_init_reads_base_url_from_env`.
-- [ ] Implement `WebSearchTool.__init__(self, api_key: str, base_url: str)` with Google-style docstring.
-- [ ] Run `uv run pytest` on both `__init__` tests — confirm all pass.
-- [ ] Write failing test: `test_sanitize_strips_leading_and_trailing_whitespace`.
-- [ ] Implement `WebSearchTool._sanitize(self, query: str) -> str`.
-- [ ] Write failing test: `test_sanitize_truncates_query_to_200_characters`.
-- [ ] Implement 200-char truncation in `_sanitize`.
-- [ ] Write failing test: `test_sanitize_returns_empty_string_for_whitespace_only_input`.
-- [ ] Implement whitespace-only guard in `_sanitize`.
-- [ ] Run `uv run pytest` on all `_sanitize` tests — confirm all pass.
-- [ ] Write failing test: `test_parse_response_returns_skill_result_with_non_empty_snippets`.
-- [ ] Implement `WebSearchTool._parse_response(self, raw: dict) -> SkillResult`.
-- [ ] Write failing test: `test_parse_response_raises_skill_error_on_missing_results_key`.
-- [ ] Implement missing-key guard in `_parse_response`.
-- [ ] Write failing test: `test_parse_response_raises_skill_error_on_empty_results_list`.
-- [ ] Implement empty-results guard in `_parse_response`.
-- [ ] Run `uv run pytest` on all `_parse_response` tests — confirm all pass.
-- [ ] Write failing test: `test_execute_returns_skill_result_on_http_200` — mocked happy path.
-- [ ] Implement `WebSearchTool.execute(self, query: str) -> SkillResult`.
-- [ ] Write failing test: `test_execute_calls_sanitize_before_dispatching_query`.
-- [ ] Verify `_sanitize` is invoked inside `execute`.
-- [ ] Write failing test: `test_execute_raises_skill_error_on_http_500`.
-- [ ] Implement HTTP-5xx error handling in `execute`.
-- [ ] Write failing test: `test_execute_raises_skill_error_on_http_429`.
-- [ ] Implement HTTP-429 handling in `execute`.
-- [ ] Write failing test: `test_execute_raises_skill_error_on_requests_timeout`.
-- [ ] Implement `requests.Timeout` handling in `execute`.
-- [ ] Run `uv run pytest` on all `execute` tests — confirm all pass.
-- [ ] Create `tests/integration/test_web_search_integration.py` marked `@pytest.mark.slow`.
-- [ ] Write integration test: `test_web_search_live_returns_non_empty_snippets`.
-- [ ] Run `uv run ruff check src/skills/web_search_tool.py` — confirm 0 violations.
-- [ ] Run `wc -l src/skills/web_search_tool.py` — confirm ≤ 150 lines.
-- [ ] Git commit: `feat: implement WebSearchTool with sanitization and error handling`.
+- [x] Create `src/skills/web_search_tool.py`.
+- [x] Add imports: `import os`, `import requests`, `from src.skills.base_skill import AgentSkill, SkillResult, SkillError`.
+- [x] Create `tests/unit/test_web_search_tool.py`.
+- [x] Add imports: `import pytest`, `from unittest.mock import patch, MagicMock`.
+- [x] Add `from src.skills.web_search_tool import WebSearchTool`.
+- [x] Define `mock_search_response` fixture: valid search API JSON dict.
+- [x] Define `web_search_tool` fixture with env vars patched via `monkeypatch`.
+- [x] Write failing test: `test_web_search_tool_init_reads_api_key_from_env`.
+- [x] Write failing test: `test_web_search_tool_init_reads_base_url_from_env`.
+- [x] Implement `WebSearchTool.__init__(self, api_key: str, base_url: str)` with Google-style docstring.
+- [x] Run `uv run pytest` on both `__init__` tests — confirm all pass.
+- [x] Write failing test: `test_sanitize_strips_leading_and_trailing_whitespace`.
+- [x] Implement `WebSearchTool._sanitize(self, query: str) -> str`.
+- [x] Write failing test: `test_sanitize_truncates_query_to_200_characters`.
+- [x] Implement 200-char truncation in `_sanitize`.
+- [x] Write failing test: `test_sanitize_returns_empty_string_for_whitespace_only_input`.
+- [x] Implement whitespace-only guard in `_sanitize`.
+- [x] Run `uv run pytest` on all `_sanitize` tests — confirm all pass.
+- [x] Write failing test: `test_parse_response_returns_skill_result_with_non_empty_snippets`.
+- [x] Implement `WebSearchTool._parse_response(self, raw: dict) -> SkillResult`.
+- [x] Write failing test: `test_parse_response_raises_skill_error_on_missing_results_key`.
+- [x] Implement missing-key guard in `_parse_response`.
+- [x] Write failing test: `test_parse_response_raises_skill_error_on_empty_results_list`.
+- [x] Implement empty-results guard in `_parse_response`.
+- [x] Run `uv run pytest` on all `_parse_response` tests — confirm all pass.
+- [x] Write failing test: `test_execute_returns_skill_result_on_http_200` — mocked happy path.
+- [x] Implement `WebSearchTool.execute(self, query: str) -> SkillResult`.
+- [x] Write failing test: `test_execute_calls_sanitize_before_dispatching_query`.
+- [x] Verify `_sanitize` is invoked inside `execute`.
+- [x] Write failing test: `test_execute_raises_skill_error_on_http_500`.
+- [x] Implement HTTP-5xx error handling in `execute`.
+- [x] Write failing test: `test_execute_raises_skill_error_on_http_429`.
+- [x] Implement HTTP-429 handling in `execute`.
+- [x] Write failing test: `test_execute_raises_skill_error_on_requests_timeout`.
+- [x] Implement `requests.Timeout` handling in `execute`.
+- [x] Run `uv run pytest` on all `execute` tests — confirm all pass.
+- [x] Create `tests/integration/test_web_search_integration.py` marked `@pytest.mark.slow`.
+- [x] Write integration test: `test_web_search_live_returns_non_empty_snippets`.
+- [x] Run `uv run ruff check src/skills/web_search_tool.py` — confirm 0 violations.
+- [x] Run `wc -l src/skills/web_search_tool.py` — confirm ≤ 150 lines.
+- [x] Git commit: `feat: implement WebSearchTool with sanitization and error handling`.
 
 ### 2.2b Local Logic Analyzer Tool
 
