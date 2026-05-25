@@ -512,71 +512,71 @@
 
 ### 2.6 FatherAgent
 
-- [ ] Create `src/agents/father_agent.py`.
-- [ ] Add imports: `import json`, `import uuid`, `from datetime import datetime, timezone`.
-- [ ] Add `from src.agents.base_agent import BaseAgent, DebateMessage, MessageParseError`.
-- [ ] Define `NotEnoughTurnsError(Exception)` in `father_agent.py`.
-- [ ] Define `Verdict` dataclass with fields: `verdict_id`, `winner`, `draw`, `reasoning`, `turn_count`, `timestamp`.
-- [ ] Create `tests/unit/test_father_agent.py`.
-- [ ] Add imports: `import pytest`, `from unittest.mock import MagicMock, patch`.
-- [ ] Add `from src.agents.father_agent import FatherAgent, NotEnoughTurnsError, Verdict`.
-- [ ] Define `mock_gatekeeper` fixture for father tests.
-- [ ] Define `father_config` fixture with model and agent_id fields.
-- [ ] Define `father_agent` fixture instantiating `FatherAgent`.
-- [ ] Define `sample_debate_state` fixture with 20+ transcript messages.
-- [ ] Define `short_debate_state` fixture with only 10 messages.
-- [ ] Write failing test: `test_father_agent_init_sets_role_to_father`.
-- [ ] Implement `FatherAgent.__init__(self, config: dict, gatekeeper)` with Google-style docstring.
-- [ ] Run `uv run pytest` on `__init__` test — confirm pass.
-- [ ] Write failing test: `test_open_debate_returns_debate_message`.
-- [ ] Implement `FatherAgent.open_debate(self, topic: str) -> DebateMessage`.
-- [ ] Write failing test: `test_open_debate_sender_field_is_father`.
-- [ ] Write failing test: `test_open_debate_recipient_field_is_pro_son`.
-- [ ] Write failing test: `test_open_debate_message_id_is_valid_uuid`.
-- [ ] Implement all field constraints in `open_debate`.
-- [ ] Run `uv run pytest` on all `open_debate` tests — confirm all pass.
-- [ ] Write failing test: `test_validate_message_returns_true_on_complete_valid_message`.
-- [ ] Implement `FatherAgent._validate_message(self, msg: DebateMessage) -> bool`.
-- [ ] Write failing test: `test_validate_message_returns_false_on_missing_content`.
-- [ ] Implement missing-content detection in `_validate_message`.
-- [ ] Write failing test: `test_validate_message_returns_false_on_invalid_sender_value`.
-- [ ] Implement sender-enum validation in `_validate_message`.
-- [ ] Write failing test: `test_validate_message_returns_false_on_empty_sources_on_turn_divisible_by_3`.
-- [ ] Implement per-3-turn sources check in `_validate_message`.
-- [ ] Run `uv run pytest` on all `_validate_message` tests — confirm all pass.
-- [ ] Write failing test: `test_route_returns_pro_son_identifier_for_pro_son_recipient`.
-- [ ] Implement `FatherAgent.route(self, msg: DebateMessage) -> str`.
-- [ ] Write failing test: `test_route_returns_con_son_identifier_for_con_son_recipient`.
-- [ ] Implement con son routing branch.
-- [ ] Write failing test: `test_route_raises_value_error_on_invalid_recipient_value`.
-- [ ] Implement invalid-recipient guard in `route`.
-- [ ] Run `uv run pytest` on all `route` tests — confirm all pass.
-- [ ] Write failing test: `test_check_min_turns_returns_false_when_turn_count_is_19`.
-- [ ] Implement `FatherAgent._check_min_turns(self, state) -> bool`.
-- [ ] Write failing test: `test_check_min_turns_returns_true_when_turn_count_is_20`.
-- [ ] Write failing test: `test_check_min_turns_returns_true_when_turn_count_exceeds_20`.
-- [ ] Run `uv run pytest` on all `_check_min_turns` tests — confirm all pass.
-- [ ] Write failing test: `test_score_persuasiveness_returns_dict_with_pro_and_con_keys`.
-- [ ] Implement `FatherAgent._score_persuasiveness(self, transcript: list) -> dict`.
-- [ ] Write failing test: `test_score_persuasiveness_each_entry_has_clarity_evidence_logic_total`.
-- [ ] Implement rubric-dimension extraction (clarity, evidence, logic) in `_score_persuasiveness`.
-- [ ] Write failing test: `test_score_persuasiveness_uses_rubric_prompt_template_verbatim`.
-- [ ] Verify rubric prompt from PRD §9.3 is embedded unchanged in `_score_persuasiveness`.
-- [ ] Run `uv run pytest` on all `_score_persuasiveness` tests — confirm all pass.
-- [ ] Write failing test: `test_evaluate_raises_not_enough_turns_error_when_turn_count_below_20`.
-- [ ] Implement `FatherAgent.evaluate(self, state) -> Verdict`.
-- [ ] Write failing test: `test_evaluate_returns_verdict_with_draw_false`.
-- [ ] Implement `draw=False` enforcement in `evaluate`.
-- [ ] Write failing test: `test_evaluate_winner_is_exactly_pro_son_or_con_son`.
-- [ ] Implement winner-selection from rubric totals in `evaluate`.
-- [ ] Write failing test: `test_evaluate_reasoning_field_is_at_least_50_characters`.
-- [ ] Implement reasoning-length enforcement in `evaluate`.
-- [ ] Write failing test: `test_evaluate_applies_tiebreaker_when_total_scores_are_equal`.
-- [ ] Implement momentum tiebreaker (last 4 turns) in `evaluate`.
-- [ ] Run `uv run pytest` on all `evaluate` tests — confirm all pass.
-- [ ] Run `uv run ruff check src/agents/father_agent.py` — confirm 0 violations.
-- [ ] Run `wc -l src/agents/father_agent.py` — confirm ≤ 150 lines.
-- [ ] Git commit: `feat: implement FatherAgent with routing and persuasiveness evaluation`.
+- [x] Create `src/agents/father_agent.py`.
+- [x] Add imports: `import json`, `import uuid`, `from datetime import datetime, timezone`.
+- [x] Add `from src.agents.base_agent import BaseAgent, DebateMessage, MessageParseError`.
+- [x] Define `NotEnoughTurnsError(Exception)` in `father_agent.py`.
+- [x] Define `Verdict` dataclass with fields: `verdict_id`, `winner`, `draw`, `reasoning`, `turn_count`, `timestamp`.
+- [x] Create `tests/unit/test_father_agent.py`.
+- [x] Add imports: `import pytest`, `from unittest.mock import MagicMock, patch`.
+- [x] Add `from src.agents.father_agent import FatherAgent, NotEnoughTurnsError, Verdict`.
+- [x] Define `mock_gatekeeper` fixture for father tests.
+- [x] Define `father_config` fixture with model and agent_id fields.
+- [x] Define `father_agent` fixture instantiating `FatherAgent`.
+- [x] Define `sample_debate_state` fixture with 20+ transcript messages.
+- [x] Define `short_debate_state` fixture with only 10 messages.
+- [x] Write failing test: `test_father_agent_init_sets_role_to_father`.
+- [x] Implement `FatherAgent.__init__(self, config: dict, gatekeeper)` with Google-style docstring.
+- [x] Run `uv run pytest` on `__init__` test — confirm pass.
+- [x] Write failing test: `test_open_debate_returns_debate_message`.
+- [x] Implement `FatherAgent.open_debate(self, topic: str) -> DebateMessage`.
+- [x] Write failing test: `test_open_debate_sender_field_is_father`.
+- [x] Write failing test: `test_open_debate_recipient_field_is_pro_son`.
+- [x] Write failing test: `test_open_debate_message_id_is_valid_uuid`.
+- [x] Implement all field constraints in `open_debate`.
+- [x] Run `uv run pytest` on all `open_debate` tests — confirm all pass.
+- [x] Write failing test: `test_validate_message_returns_true_on_complete_valid_message`.
+- [x] Implement `FatherAgent._validate_message(self, msg: DebateMessage) -> bool`.
+- [x] Write failing test: `test_validate_message_returns_false_on_missing_content`.
+- [x] Implement missing-content detection in `_validate_message`.
+- [x] Write failing test: `test_validate_message_returns_false_on_invalid_sender_value`.
+- [x] Implement sender-enum validation in `_validate_message`.
+- [x] Write failing test: `test_validate_message_returns_false_on_empty_sources_on_turn_divisible_by_3`.
+- [x] Implement per-3-turn sources check in `_validate_message`.
+- [x] Run `uv run pytest` on all `_validate_message` tests — confirm all pass.
+- [x] Write failing test: `test_route_returns_pro_son_identifier_for_pro_son_recipient`.
+- [x] Implement `FatherAgent.route(self, msg: DebateMessage) -> str`.
+- [x] Write failing test: `test_route_returns_con_son_identifier_for_con_son_recipient`.
+- [x] Implement con son routing branch.
+- [x] Write failing test: `test_route_raises_value_error_on_invalid_recipient_value`.
+- [x] Implement invalid-recipient guard in `route`.
+- [x] Run `uv run pytest` on all `route` tests — confirm all pass.
+- [x] Write failing test: `test_check_min_turns_returns_false_when_turn_count_is_19`.
+- [x] Implement `FatherAgent._check_min_turns(self, state) -> bool`.
+- [x] Write failing test: `test_check_min_turns_returns_true_when_turn_count_is_20`.
+- [x] Write failing test: `test_check_min_turns_returns_true_when_turn_count_exceeds_20`.
+- [x] Run `uv run pytest` on all `_check_min_turns` tests — confirm all pass.
+- [x] Write failing test: `test_score_persuasiveness_returns_dict_with_pro_and_con_keys`.
+- [x] Implement `FatherAgent._score_persuasiveness(self, transcript: list) -> dict`.
+- [x] Write failing test: `test_score_persuasiveness_each_entry_has_clarity_evidence_logic_total`.
+- [x] Implement rubric-dimension extraction (clarity, evidence, logic) in `_score_persuasiveness`.
+- [x] Write failing test: `test_score_persuasiveness_uses_rubric_prompt_template_verbatim`.
+- [x] Verify rubric prompt from PRD §9.3 is embedded unchanged in `_score_persuasiveness`.
+- [x] Run `uv run pytest` on all `_score_persuasiveness` tests — confirm all pass.
+- [x] Write failing test: `test_evaluate_raises_not_enough_turns_error_when_turn_count_below_20`.
+- [x] Implement `FatherAgent.evaluate(self, state) -> Verdict`.
+- [x] Write failing test: `test_evaluate_returns_verdict_with_draw_false`.
+- [x] Implement `draw=False` enforcement in `evaluate`.
+- [x] Write failing test: `test_evaluate_winner_is_exactly_pro_son_or_con_son`.
+- [x] Implement winner-selection from rubric totals in `evaluate`.
+- [x] Write failing test: `test_evaluate_reasoning_field_is_at_least_50_characters`.
+- [x] Implement reasoning-length enforcement in `evaluate`.
+- [x] Write failing test: `test_evaluate_applies_tiebreaker_when_total_scores_are_equal`.
+- [x] Implement momentum tiebreaker (last 4 turns) in `evaluate`.
+- [x] Run `uv run pytest` on all `evaluate` tests — confirm all pass.
+- [x] Run `uv run ruff check src/agents/father_agent.py` — confirm 0 violations.
+- [x] Run `wc -l src/agents/father_agent.py` — confirm ≤ 150 lines.
+- [x] Git commit: `feat: implement FatherAgent with routing and persuasiveness evaluation`.
 
 ---
 
