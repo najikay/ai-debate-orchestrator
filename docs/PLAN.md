@@ -105,7 +105,8 @@ User ──topic──► DebateEngine.start()
 │  (Agent logic, JSON parsing, retry)             │
 ├─────────────────────────────────────────────────┤
 │               Tools Layer                       │
-│  web_search_tool.py  |  base_skill.py           │
+│  web_search_tool.py  |  logic_analyzer_tool.py  │
+│  base_skill.py                                  │
 │  (Skill interface implementations)              │
 ├─────────────────────────────────────────────────┤
 │             Infrastructure Layer               │
@@ -164,6 +165,13 @@ classDiagram
         +str api_key
         +execute(query: str) SkillResult
         -_sanitize(query: str) str
+    }
+
+    class LogicAnalyzerTool {
+        +str skill_name = "logic_analyzer"
+        +execute(query: str) SkillResult
+        -_count_keywords(text: str, keywords: list) int
+        -_sentence_count(text: str) int
     }
 
     class DebateEngine {
@@ -225,6 +233,7 @@ classDiagram
     BaseAgent <|-- ProSonAgent
     BaseAgent <|-- ConSonAgent
     AgentSkill <|-- WebSearchTool
+    AgentSkill <|-- LogicAnalyzerTool
     ProSonAgent "1" *-- "1..*" AgentSkill
     ConSonAgent "1" *-- "1..*" AgentSkill
     DebateEngine "1" *-- "1" FatherAgent
@@ -403,6 +412,7 @@ A2/
 │   ├── skills/
 │   │   ├── __init__.py
 │   │   ├── base_skill.py
+│   │   ├── logic_analyzer_tool.py
 │   │   └── web_search_tool.py
 │   └── ui/
 │       ├── __init__.py

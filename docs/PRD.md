@@ -68,6 +68,20 @@ extend outcomes.
 - Tool invocations are logged with query string, timestamp, and result snippet.
 - The Gatekeeper enforces rate limits on search calls to prevent runaway API usage.
 
+### 2.5 Offline Logic Analyzer Tool (Fallback & Analytical Aid)
+
+- Both Son agents also possess a `logic_analyze(query: str) -> SkillResult` tool
+  implemented by `LogicAnalyzerTool`.
+- This skill is **purely local** — it performs string analysis with zero network calls,
+  making it available regardless of API key availability or network connectivity.
+- **Primary use:** fallback when `SEARCH_API_KEY` is absent or rate-limit exhausted;
+  also used by agents to self-audit the logical structure of their own arguments before
+  submission.
+- **Analysis provided:** premise-keyword count, conclusion-keyword count, word count,
+  sentence count, and average sentence length — distilled into a rubric snippet list.
+- The `setup.json` key `enabled_skills` controls which tools are injected at runtime
+  (e.g. `["web_search", "logic_analyzer"]`); the engine reads this at startup.
+
 ---
 
 ## 3. Functional Requirements

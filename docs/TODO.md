@@ -322,6 +322,7 @@
 
 ### 2.2 WebSearchTool
 
+
 - [ ] Create `src/skills/web_search_tool.py`.
 - [ ] Add imports: `import os`, `import requests`, `from src.skills.base_skill import AgentSkill, SkillResult, SkillError`.
 - [ ] Create `tests/unit/test_web_search_tool.py`.
@@ -363,6 +364,27 @@
 - [ ] Run `uv run ruff check src/skills/web_search_tool.py` — confirm 0 violations.
 - [ ] Run `wc -l src/skills/web_search_tool.py` — confirm ≤ 150 lines.
 - [ ] Git commit: `feat: implement WebSearchTool with sanitization and error handling`.
+
+### 2.2b Local Logic Analyzer Tool
+
+- [ ] Create `src/skills/logic_analyzer_tool.py`.
+- [ ] Inherit from `AgentSkill`; `skill_name = "logic_analyzer"`.
+- [ ] Implement `execute(query: str) -> SkillResult` — purely local string analysis (no network calls).
+- [ ] Count premise keywords (because, since, given that, as, if) and conclusion keywords (therefore, thus, hence, so, consequently).
+- [ ] Return `SkillResult` with `snippets` containing a rubric summary (keyword counts, word count, sentence count, avg sentence length).
+- [ ] Create `tests/unit/test_logic_analyzer_tool.py`.
+- [ ] Write failing test: `test_logic_analyzer_skill_name_is_logic_analyzer`.
+- [ ] Write failing test: `test_execute_returns_skill_result`.
+- [ ] Write failing test: `test_execute_snippets_are_non_empty`.
+- [ ] Write failing test: `test_execute_detects_premise_keywords`.
+- [ ] Write failing test: `test_execute_detects_conclusion_keywords`.
+- [ ] Write failing test: `test_execute_counts_words`.
+- [ ] Write failing test: `test_execute_empty_query_returns_result_without_raising`.
+- [ ] Write failing test: `test_execute_makes_no_network_calls` — patch `socket.getaddrinfo` to confirm it is never called.
+- [ ] Run `uv run pytest tests/unit/test_logic_analyzer_tool.py` — confirm all pass.
+- [ ] Run `uv run ruff check src/skills/logic_analyzer_tool.py` — confirm 0 violations.
+- [ ] Run `wc -l src/skills/logic_analyzer_tool.py` — confirm ≤ 150 lines.
+- [ ] Git commit: `feat: implement offline LogicAnalyzerTool`.
 
 ### 2.3 BaseAgent ABC
 
