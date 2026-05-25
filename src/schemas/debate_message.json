@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DebateMessage",
+  "description": "A single message exchanged between agents, routed through the Father agent.",
+  "type": "object",
+  "required": [
+    "message_id",
+    "sender",
+    "recipient",
+    "turn",
+    "content",
+    "sources",
+    "token_count",
+    "timestamp"
+  ],
+  "properties": {
+    "message_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for this message."
+    },
+    "sender": {
+      "type": "string",
+      "enum": ["father", "pro_son", "con_son"],
+      "description": "The agent that produced this message."
+    },
+    "recipient": {
+      "type": "string",
+      "enum": ["father", "pro_son", "con_son"],
+      "description": "The intended next recipient. All routing goes through the Father."
+    },
+    "turn": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "1-based turn index within the debate transcript."
+    },
+    "content": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The argument text or routing instruction."
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "URLs or citation strings sourced from the Web Search tool."
+    },
+    "token_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total tokens consumed producing this message (prompt + completion)."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC timestamp when the message was produced."
+    }
+  },
+  "additionalProperties": false
+}

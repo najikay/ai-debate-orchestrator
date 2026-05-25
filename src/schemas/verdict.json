@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Verdict",
+  "description": "The Father agent's final ruling after evaluating the full debate transcript.",
+  "type": "object",
+  "required": [
+    "verdict_id",
+    "winner",
+    "draw",
+    "reasoning",
+    "turn_count",
+    "timestamp"
+  ],
+  "properties": {
+    "verdict_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for this verdict."
+    },
+    "winner": {
+      "type": "string",
+      "enum": ["pro_son", "con_son"],
+      "description": "The agent declared the more persuasive debater. Never null."
+    },
+    "draw": {
+      "type": "boolean",
+      "const": false,
+      "description": "Draws are prohibited. This field must always be false."
+    },
+    "reasoning": {
+      "type": "string",
+      "minLength": 50,
+      "description": "Father's explanation of the verdict citing rubric scores."
+    },
+    "turn_count": {
+      "type": "integer",
+      "minimum": 20,
+      "description": "Total number of turns at the time of evaluation."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC timestamp when the verdict was produced."
+    }
+  },
+  "additionalProperties": false
+}

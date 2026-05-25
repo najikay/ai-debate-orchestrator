@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "_comment": "Prices are USD per 1,000 tokens. Update these values if Anthropic changes pricing.",
+  "models": {
+    "claude-sonnet-4-6": {
+      "input_per_1k": 0.003,
+      "output_per_1k": 0.015
+    },
+    "claude-haiku-4-5": {
+      "input_per_1k": 0.0008,
+      "output_per_1k": 0.004
+    }
+  }
+}

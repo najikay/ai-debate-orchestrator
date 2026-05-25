@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "debate": {
+    "min_turns_per_side": 10,
+    "max_session_cost_usd": 2.00
+  },
+  "agents": {
+    "father": {
+      "model": "claude-sonnet-4-6"
+    },
+    "pro_son": {
+      "model": "claude-haiku-4-5"
+    },
+    "con_son": {
+      "model": "claude-haiku-4-5"
+    }
+  },
+  "watchdog": {
+    "timeout_seconds": 30,
+    "max_retries": 1
+  },
+  "logging": {
+    "log_dir": "logs/",
+    "max_files": 20,
+    "max_lines_per_file": 500
+  },
+  "enabled_skills": ["web_search"]
+}

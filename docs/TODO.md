@@ -14,92 +14,92 @@
 
 ### 0.1 uv & Python Environment
 
-- [ ] Install `uv` globally via the official installer script.
-- [ ] Verify `uv --version` outputs 0.4.0 or higher.
-- [ ] Run `uv init` in the project root to generate `pyproject.toml`.
-- [ ] Confirm `pyproject.toml` was created and is syntactically valid TOML.
-- [ ] Set `name = "ai-debate-system"` in `pyproject.toml`.
-- [ ] Set `version = "0.1.0"` and `requires-python = ">=3.11"` in `pyproject.toml`.
-- [ ] Set `description` and `authors = [{name = "NajAmjad"}]` in `pyproject.toml`.
-- [ ] Add `anthropic`, `jsonschema`, `python-dotenv`, `requests` to `[project.dependencies]`.
-- [ ] Add `[project.optional-dependencies]` dev section with `ruff`, `pytest`, `pytest-cov`.
-- [ ] Add `[tool.ruff]` with `line-length = 88` and `[tool.ruff.lint]` with `select = ["E","W","F","I"]`.
-- [ ] Add `[tool.pytest.ini_options]` with `testpaths`, `addopts = "--cov=src --cov-fail-under=85"`.
-- [ ] Run `uv sync` and confirm `.venv/` is created.
-- [ ] Run `uv run python --version` — confirm Python 3.11+.
-- [ ] Run `uv run ruff --version` — confirm ruff is available.
-- [ ] Run `uv run pytest --version` — confirm pytest is available.
-- [ ] Run `uv run python -c "import anthropic; import jsonschema"` — confirm imports work.
+- [x] Install `uv` globally via the official installer script.
+- [x] Verify `uv --version` outputs 0.4.0 or higher.
+- [x] Run `uv init` in the project root to generate `pyproject.toml`.
+- [x] Confirm `pyproject.toml` was created and is syntactically valid TOML.
+- [x] Set `name = "ai-debate-system"` in `pyproject.toml`.
+- [x] Set `version = "0.1.0"` and `requires-python = ">=3.11"` in `pyproject.toml`.
+- [x] Set `description` and `authors = [{name = "NajAmjad"}]` in `pyproject.toml`.
+- [x] Add `anthropic`, `jsonschema`, `python-dotenv`, `requests` to `[project.dependencies]`.
+- [x] Add `[project.optional-dependencies]` dev section with `ruff`, `pytest`, `pytest-cov`.
+- [x] Add `[tool.ruff]` with `line-length = 88` and `[tool.ruff.lint]` with `select = ["E","W","F","I"]`.
+- [x] Add `[tool.pytest.ini_options]` with `testpaths`, `addopts = "--cov=src --cov-fail-under=85"`.
+- [x] Run `uv sync` and confirm `.venv/` is created.
+- [x] Run `uv run python --version` — confirm Python 3.11+.
+- [x] Run `uv run ruff --version` — confirm ruff is available.
+- [x] Run `uv run pytest --version` — confirm pytest is available.
+- [x] Run `uv run python -c "import anthropic; import jsonschema"` — confirm imports work.
 
 ### 0.2 Directory Structure & __init__ Files
 
-- [ ] Create directories: `src/`, `src/agents/`, `src/engine/`, `src/infrastructure/`, `src/schemas/`, `src/skills/`, `src/ui/`.
-- [ ] Create directories: `tests/`, `tests/unit/`, `tests/integration/`, `config/`, `examples/`.
-- [ ] Create `src/__init__.py`, `src/agents/__init__.py`, `src/engine/__init__.py` as empty files.
-- [ ] Create `src/infrastructure/__init__.py`, `src/skills/__init__.py`, `src/ui/__init__.py` as empty files.
-- [ ] Create `tests/__init__.py`, `tests/unit/__init__.py`, `tests/integration/__init__.py` as empty files.
-- [ ] Verify all `__init__.py` files are empty (0 bytes).
+- [x] Create directories: `src/`, `src/agents/`, `src/engine/`, `src/infrastructure/`, `src/schemas/`, `src/skills/`, `src/ui/`.
+- [x] Create directories: `tests/`, `tests/unit/`, `tests/integration/`, `config/`, `examples/`.
+- [x] Create `src/__init__.py`, `src/agents/__init__.py`, `src/engine/__init__.py` as empty files.
+- [x] Create `src/infrastructure/__init__.py`, `src/skills/__init__.py`, `src/ui/__init__.py` as empty files.
+- [x] Create `tests/__init__.py`, `tests/unit/__init__.py`, `tests/integration/__init__.py` as empty files.
+- [x] Verify all `__init__.py` files are empty (0 bytes).
 
 ### 0.3 .gitignore
 
-- [ ] Create `.gitignore` in project root.
-- [ ] Add `.env`, `logs/`, `__pycache__/`, `.venv/`, `*.pyc`, `*.pyo` to `.gitignore`.
-- [ ] Add `.coverage`, `htmlcov/`, `.pytest_cache/`, `dist/`, `*.egg-info/` to `.gitignore`.
-- [ ] Add `.idea/`, `.vscode/` to `.gitignore`.
-- [ ] Verify `git status` does not show `.venv/` or `logs/` as untracked.
+- [x] Create `.gitignore` in project root.
+- [x] Add `.env`, `logs/`, `__pycache__/`, `.venv/`, `*.pyc`, `*.pyo` to `.gitignore`.
+- [x] Add `.coverage`, `htmlcov/`, `.pytest_cache/`, `dist/`, `*.egg-info/` to `.gitignore`.
+- [x] Add `.idea/`, `.vscode/` to `.gitignore`.
+- [x] Verify `git status` does not show `.venv/` or `logs/` as untracked.
 
 ### 0.4 .env-example
 
-- [ ] Create `.env-example` with comment block `# Anthropic Claude API`.
-- [ ] Add `ANTHROPIC_API_KEY=your_anthropic_key_here` to `.env-example`.
-- [ ] Add `SEARCH_API_KEY=your_search_key_here` to `.env-example`.
-- [ ] Add `SEARCH_BASE_URL=https://api.example.com/search` to `.env-example`.
-- [ ] Copy `.env-example` to local `.env` and fill real API keys (do NOT commit `.env`).
-- [ ] Confirm `.env` is listed in `.gitignore` and will not be staged.
+- [x] Create `.env-example` with comment block `# Anthropic Claude API`.
+- [x] Add `ANTHROPIC_API_KEY=your_anthropic_key_here` to `.env-example`.
+- [x] Add `SEARCH_API_KEY=your_search_key_here` to `.env-example`.
+- [x] Add `SEARCH_BASE_URL=https://api.example.com/search` to `.env-example`.
+- [x] Copy `.env-example` to local `.env` and fill real API keys (do NOT commit `.env`).
+- [x] Confirm `.env` is listed in `.gitignore` and will not be staged.
 
 ### 0.5 config/setup.json
 
-- [ ] Create `config/setup.json` with `schema_version`, `debate`, `agents`, `watchdog`, `logging`, `enabled_skills` top-level keys.
-- [ ] Set `debate.min_turns_per_side = 10` and `debate.max_session_cost_usd = 2.00`.
-- [ ] Set agent models: `father = "claude-sonnet-4-6"`, `pro_son = con_son = "claude-haiku-4-5"`.
-- [ ] Set `watchdog.timeout_seconds = 30` and `watchdog.max_retries = 1`.
-- [ ] Set `logging.log_dir = "logs/"`, `logging.max_files = 20`, `logging.max_lines_per_file = 500`.
-- [ ] Set `enabled_skills = ["web_search"]`.
-- [ ] Validate `setup.json` is valid JSON: `python -m json.tool config/setup.json`.
+- [x] Create `config/setup.json` with `schema_version`, `debate`, `agents`, `watchdog`, `logging`, `enabled_skills` top-level keys.
+- [x] Set `debate.min_turns_per_side = 10` and `debate.max_session_cost_usd = 2.00`.
+- [x] Set agent models: `father = "claude-sonnet-4-6"`, `pro_son = con_son = "claude-haiku-4-5"`.
+- [x] Set `watchdog.timeout_seconds = 30` and `watchdog.max_retries = 1`.
+- [x] Set `logging.log_dir = "logs/"`, `logging.max_files = 20`, `logging.max_lines_per_file = 500`.
+- [x] Set `enabled_skills = ["web_search"]`.
+- [x] Validate `setup.json` is valid JSON: `python -m json.tool config/setup.json`.
 
 ### 0.6 config/rate_limits.json
 
-- [ ] Create `config/rate_limits.json` with `schema_version` field.
-- [ ] Add `models.claude-sonnet-4-6: {rpm: 50, tpm: 40000}` and `models.claude-haiku-4-5: {rpm: 100, tpm: 100000}`.
-- [ ] Add `web_search: {rpm: 30}`.
-- [ ] Validate `rate_limits.json` is valid JSON.
+- [x] Create `config/rate_limits.json` with `schema_version` field.
+- [x] Add `models.claude-sonnet-4-6: {rpm: 50, tpm: 40000}` and `models.claude-haiku-4-5: {rpm: 100, tpm: 100000}`.
+- [x] Add `web_search: {rpm: 30}`.
+- [x] Validate `rate_limits.json` is valid JSON.
 
 ### 0.7 config/pricing.json
 
-- [ ] Create `config/pricing.json` with `schema_version` field.
-- [ ] Add `models.claude-sonnet-4-6` and `models.claude-haiku-4-5` entries with `input_per_1k` and `output_per_1k` USD values.
-- [ ] Validate `pricing.json` is valid JSON.
+- [x] Create `config/pricing.json` with `schema_version` field.
+- [x] Add `models.claude-sonnet-4-6` and `models.claude-haiku-4-5` entries with `input_per_1k` and `output_per_1k` USD values.
+- [x] Validate `pricing.json` is valid JSON.
 
 ### 0.8 JSON Schema Files
 
-- [ ] Create `src/schemas/debate_message.json` with `$schema`, `type: object`, and `required` array.
-- [ ] Add all 8 properties: `message_id` (uuid), `sender` (enum), `recipient` (enum), `turn` (int ≥1), `content` (string), `sources` (array), `token_count` (int ≥0), `timestamp` (date-time).
-- [ ] Validate `debate_message.json` with `python -c "import jsonschema, json; jsonschema.Draft7Validator(json.load(open('src/schemas/debate_message.json')))"`.
-- [ ] Create `src/schemas/verdict.json` with `required` array.
-- [ ] Add all 6 properties: `verdict_id` (uuid), `winner` (enum: pro_son|con_son), `draw` (const: false), `reasoning` (string ≥50), `turn_count` (int ≥20), `timestamp` (date-time).
-- [ ] Validate `verdict.json` with `python -c "import jsonschema, json; jsonschema.Draft7Validator(json.load(open('src/schemas/verdict.json')))"`.
+- [x] Create `src/schemas/debate_message.json` with `$schema`, `type: object`, and `required` array.
+- [x] Add all 8 properties: `message_id` (uuid), `sender` (enum), `recipient` (enum), `turn` (int ≥1), `content` (string), `sources` (array), `token_count` (int ≥0), `timestamp` (date-time).
+- [x] Validate `debate_message.json` with `python -c "import jsonschema, json; jsonschema.Draft7Validator(json.load(open('src/schemas/debate_message.json')))"`.
+- [x] Create `src/schemas/verdict.json` with `required` array.
+- [x] Add all 6 properties: `verdict_id` (uuid), `winner` (enum: pro_son|con_son), `draw` (const: false), `reasoning` (string ≥50), `turn_count` (int ≥20), `timestamp` (date-time).
+- [x] Validate `verdict.json` with `python -c "import jsonschema, json; jsonschema.Draft7Validator(json.load(open('src/schemas/verdict.json')))"`.
 
 ### 0.9 Test Configuration
 
-- [ ] Create `tests/conftest.py` with `slow` custom mark definition.
-- [ ] Register `slow` marker in `pyproject.toml` under `[tool.pytest.ini_options]`.
-- [ ] Create `tests/integration/conftest.py` with `pytestmark = pytest.mark.slow`.
+- [x] Create `tests/conftest.py` with `slow` custom mark definition.
+- [x] Register `slow` marker in `pyproject.toml` under `[tool.pytest.ini_options]`.
+- [x] Create `tests/integration/conftest.py` with `pytestmark = pytest.mark.slow`.
 
 ### 0.10 Initial README & First Commit
 
-- [ ] Create `README.md` with title, group name, one-paragraph overview, and placeholder sections.
-- [ ] Stage all Phase 0 files: `git add .`.
-- [ ] Git commit: `chore: scaffold project structure and configuration files`.
+- [x] Create `README.md` with title, group name, one-paragraph overview, and placeholder sections.
+- [x] Stage all Phase 0 files: `git add .`.
+- [x] Git commit: `chore: scaffold project structure and configuration files`.
 
 ---
 

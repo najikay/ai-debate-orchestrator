@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "models": {
+    "claude-sonnet-4-6": {
+      "rpm": 50,
+      "tpm": 40000
+    },
+    "claude-haiku-4-5": {
+      "rpm": 100,
+      "tpm": 100000
+    }
+  },
+  "web_search": {
+    "rpm": 30
+  }
+}
