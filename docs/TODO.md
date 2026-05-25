@@ -181,53 +181,53 @@
 
 ### 1.3 Gatekeeper
 
-- [ ] Create `src/infrastructure/gatekeeper.py`.
-- [ ] Add imports: `import threading`, `from collections import deque`, `import time`, `from dataclasses import dataclass, field`, `from typing import Any`.
-- [ ] Define `QueueFullError(Exception)` in `gatekeeper.py`.
-- [ ] Define `APIRequest` dataclass (agent_id, model, payload) in `gatekeeper.py`.
-- [ ] Define `APIResponse` dataclass (content, prompt_tokens, completion_tokens) in `gatekeeper.py`.
-- [ ] Define `UsageStats` dataclass (prompt_tokens, completion_tokens, total_tokens) in `gatekeeper.py`.
-- [ ] Create `tests/unit/test_gatekeeper.py`.
-- [ ] Add imports: `import pytest`, `from unittest.mock import patch, MagicMock`.
-- [ ] Add `from src.infrastructure.gatekeeper import Gatekeeper, QueueFullError, APIRequest, APIResponse, UsageStats`.
-- [ ] Define `mock_rate_limits` fixture with low rpm/tpm for fast testing.
-- [ ] Define `gatekeeper` fixture initialised with `mock_rate_limits`.
-- [ ] Define `sample_request` fixture as a valid `APIRequest` object.
-- [ ] Write failing test: `test_gatekeeper_init_creates_empty_queue`.
-- [ ] Write failing test: `test_gatekeeper_init_stores_rate_limits`.
-- [ ] Implement `Gatekeeper.__init__(self, rate_limits: dict)` with Google-style docstring.
-- [ ] Run `uv run pytest` on both `__init__` tests — confirm all pass.
-- [ ] Write failing test: `test_dispatch_returns_api_response` — mocked HTTP, happy path.
-- [ ] Implement `Gatekeeper.dispatch(self, request: APIRequest) -> APIResponse`.
-- [ ] Write failing test: `test_dispatch_records_token_usage_for_agent`.
-- [ ] Implement token-usage recording in `dispatch`.
-- [ ] Write failing test: `test_dispatch_queues_request_when_rate_limit_enforced`.
-- [ ] Implement queue insertion path in `dispatch`.
-- [ ] Run `uv run pytest` on all `dispatch` tests — confirm all pass.
-- [ ] Write failing test: `test_enforce_limits_blocks_when_rpm_bucket_depleted`.
-- [ ] Implement `Gatekeeper._enforce_limits(self, model: str) -> None` with token-bucket logic.
-- [ ] Write failing test: `test_enforce_limits_allows_call_within_rpm`.
-- [ ] Run `uv run pytest` on all `_enforce_limits` tests — confirm all pass.
-- [ ] Write failing test: `test_enqueue_adds_request_to_deque`.
-- [ ] Implement `Gatekeeper._enqueue(self, request: APIRequest) -> None`.
-- [ ] Write failing test: `test_enqueue_raises_queue_full_error_when_depth_exceeds_50`.
-- [ ] Implement depth-50 guard and `QueueFullError` raise in `_enqueue`.
-- [ ] Run `uv run pytest` on all `_enqueue` tests — confirm all pass.
-- [ ] Write failing test: `test_dequeue_returns_oldest_request_fifo`.
-- [ ] Implement `Gatekeeper._dequeue(self) -> APIRequest`.
-- [ ] Write failing test: `test_dequeue_raises_when_queue_is_empty`.
-- [ ] Implement empty-queue guard in `_dequeue`.
-- [ ] Run `uv run pytest` on all `_dequeue` tests — confirm all pass.
-- [ ] Write failing test: `test_get_usage_returns_correct_stats_for_known_agent`.
-- [ ] Implement `Gatekeeper.get_usage(self, agent_id: str) -> UsageStats`.
-- [ ] Write failing test: `test_get_usage_returns_zero_stats_for_unknown_agent`.
-- [ ] Implement zero-default for unknown agents in `get_usage`.
-- [ ] Write failing test: `test_gatekeeper_is_thread_safe` — concurrent dispatches do not corrupt usage totals.
-- [ ] Verify `threading.Lock` guards `dispatch` and `get_usage`.
-- [ ] Run `uv run pytest` on all `get_usage` and thread-safety tests — confirm all pass.
-- [ ] Run `uv run ruff check src/infrastructure/gatekeeper.py` — confirm 0 violations.
-- [ ] Run `wc -l src/infrastructure/gatekeeper.py` — confirm ≤ 150 lines.
-- [ ] Git commit: `feat: implement Gatekeeper with token-bucket rate limiting and FIFO queue`.
+- [x] Create `src/infrastructure/gatekeeper.py`.
+- [x] Add imports: `import threading`, `from collections import deque`, `import time`, `from dataclasses import dataclass, field`, `from typing import Any`.
+- [x] Define `QueueFullError(Exception)` in `gatekeeper.py`.
+- [x] Define `APIRequest` dataclass (agent_id, model, payload) in `gatekeeper.py`.
+- [x] Define `APIResponse` dataclass (content, prompt_tokens, completion_tokens) in `gatekeeper.py`.
+- [x] Define `UsageStats` dataclass (prompt_tokens, completion_tokens, total_tokens) in `gatekeeper.py`.
+- [x] Create `tests/unit/test_gatekeeper.py`.
+- [x] Add imports: `import pytest`, `from unittest.mock import patch, MagicMock`.
+- [x] Add `from src.infrastructure.gatekeeper import Gatekeeper, QueueFullError, APIRequest, APIResponse, UsageStats`.
+- [x] Define `mock_rate_limits` fixture with low rpm/tpm for fast testing.
+- [x] Define `gatekeeper` fixture initialised with `mock_rate_limits`.
+- [x] Define `sample_request` fixture as a valid `APIRequest` object.
+- [x] Write failing test: `test_gatekeeper_init_creates_empty_queue`.
+- [x] Write failing test: `test_gatekeeper_init_stores_rate_limits`.
+- [x] Implement `Gatekeeper.__init__(self, rate_limits: dict)` with Google-style docstring.
+- [x] Run `uv run pytest` on both `__init__` tests — confirm all pass.
+- [x] Write failing test: `test_dispatch_returns_api_response` — mocked HTTP, happy path.
+- [x] Implement `Gatekeeper.dispatch(self, request: APIRequest) -> APIResponse`.
+- [x] Write failing test: `test_dispatch_records_token_usage_for_agent`.
+- [x] Implement token-usage recording in `dispatch`.
+- [x] Write failing test: `test_dispatch_queues_request_when_rate_limit_enforced`.
+- [x] Implement queue insertion path in `dispatch`.
+- [x] Run `uv run pytest` on all `dispatch` tests — confirm all pass.
+- [x] Write failing test: `test_enforce_limits_blocks_when_rpm_bucket_depleted`.
+- [x] Implement `Gatekeeper._enforce_limits(self, model: str) -> None` with token-bucket logic.
+- [x] Write failing test: `test_enforce_limits_allows_call_within_rpm`.
+- [x] Run `uv run pytest` on all `_enforce_limits` tests — confirm all pass.
+- [x] Write failing test: `test_enqueue_adds_request_to_deque`.
+- [x] Implement `Gatekeeper._enqueue(self, request: APIRequest) -> None`.
+- [x] Write failing test: `test_enqueue_raises_queue_full_error_when_depth_exceeds_50`.
+- [x] Implement depth-50 guard and `QueueFullError` raise in `_enqueue`.
+- [x] Run `uv run pytest` on all `_enqueue` tests — confirm all pass.
+- [x] Write failing test: `test_dequeue_returns_oldest_request_fifo`.
+- [x] Implement `Gatekeeper._dequeue(self) -> APIRequest`.
+- [x] Write failing test: `test_dequeue_raises_when_queue_is_empty`.
+- [x] Implement empty-queue guard in `_dequeue`.
+- [x] Run `uv run pytest` on all `_dequeue` tests — confirm all pass.
+- [x] Write failing test: `test_get_usage_returns_correct_stats_for_known_agent`.
+- [x] Implement `Gatekeeper.get_usage(self, agent_id: str) -> UsageStats`.
+- [x] Write failing test: `test_get_usage_returns_zero_stats_for_unknown_agent`.
+- [x] Implement zero-default for unknown agents in `get_usage`.
+- [x] Write failing test: `test_gatekeeper_is_thread_safe` — concurrent dispatches do not corrupt usage totals.
+- [x] Verify `threading.Lock` guards `dispatch` and `get_usage`.
+- [x] Run `uv run pytest` on all `get_usage` and thread-safety tests — confirm all pass.
+- [x] Run `uv run ruff check src/infrastructure/gatekeeper.py` — confirm 0 violations.
+- [x] Run `wc -l src/infrastructure/gatekeeper.py` — confirm ≤ 150 lines.
+- [x] Git commit: `feat: implement Gatekeeper with token-bucket rate limiting and FIFO queue`.
 
 ### 1.4 Watchdog
 
