@@ -303,22 +303,22 @@
 
 ### 2.1 AgentSkill ABC
 
-- [ ] Create `src/skills/base_skill.py`.
-- [ ] Add imports: `from abc import ABC, abstractmethod`, `from dataclasses import dataclass`.
-- [ ] Define `SkillError(Exception)` class in `base_skill.py`.
-- [ ] Define `SkillResult` dataclass: fields `query: str`, `snippets: list[str]`, `raw_response: dict`.
-- [ ] Define `AgentSkill(ABC)` with `skill_name: str` attribute and `@abstractmethod execute(query: str) -> SkillResult`.
-- [ ] Create `tests/unit/test_base_skill.py`.
-- [ ] Add imports: `import pytest`, `from src.skills.base_skill import AgentSkill, SkillResult, SkillError`.
-- [ ] Write failing test: `test_agent_skill_cannot_be_instantiated_directly` — raises `TypeError`.
-- [ ] Write failing test: `test_concrete_subclass_missing_execute_is_still_abstract`.
-- [ ] Write failing test: `test_concrete_subclass_with_execute_is_instantiable`.
-- [ ] Write failing test: `test_skill_result_dataclass_has_query_snippets_raw_response_fields`.
-- [ ] Write failing test: `test_skill_error_is_subclass_of_exception`.
-- [ ] Run `uv run pytest tests/unit/test_base_skill.py` — confirm all pass.
-- [ ] Run `uv run ruff check src/skills/base_skill.py` — confirm 0 violations.
-- [ ] Run `wc -l src/skills/base_skill.py` — confirm ≤ 150 lines.
-- [ ] Git commit: `feat: implement AgentSkill ABC and SkillResult dataclass`.
+- [x] Create `src/skills/base_skill.py`.
+- [x] Add imports: `from abc import ABC, abstractmethod`, `from dataclasses import dataclass`.
+- [x] Define `SkillError(Exception)` class in `base_skill.py`.
+- [x] Define `SkillResult` dataclass: fields `query: str`, `snippets: list[str]`, `raw_response: dict`.
+- [x] Define `AgentSkill(ABC)` with `skill_name: str` attribute and `@abstractmethod execute(query: str) -> SkillResult`.
+- [x] Create `tests/unit/test_base_skill.py`.
+- [x] Add imports: `import pytest`, `from src.skills.base_skill import AgentSkill, SkillResult, SkillError`.
+- [x] Write failing test: `test_agent_skill_cannot_be_instantiated_directly` — raises `TypeError`.
+- [x] Write failing test: `test_concrete_subclass_missing_execute_is_still_abstract`.
+- [x] Write failing test: `test_concrete_subclass_with_execute_is_instantiable`.
+- [x] Write failing test: `test_skill_result_dataclass_has_query_snippets_raw_response_fields`.
+- [x] Write failing test: `test_skill_error_is_subclass_of_exception`.
+- [x] Run `uv run pytest tests/unit/test_base_skill.py` — confirm all pass.
+- [x] Run `uv run ruff check src/skills/base_skill.py` — confirm 0 violations.
+- [x] Run `wc -l src/skills/base_skill.py` — confirm ≤ 150 lines.
+- [x] Git commit: `feat: implement AgentSkill ABC and SkillResult dataclass`.
 
 ### 2.2 WebSearchTool
 
