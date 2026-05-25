@@ -472,43 +472,43 @@
 
 ### 2.5 ConSonAgent
 
-- [ ] Create `src/agents/con_son_agent.py`.
-- [ ] Add imports: `from src.agents.base_agent import BaseAgent, DebateMessage, MessageParseError, AgentFailureError`.
-- [ ] Add `from src.skills.base_skill import AgentSkill`.
-- [ ] Create `tests/unit/test_con_son_agent.py`.
-- [ ] Add imports: `import pytest`, `from unittest.mock import MagicMock, patch`.
-- [ ] Add `from src.agents.con_son_agent import ConSonAgent`.
-- [ ] Define `mock_gatekeeper` fixture for con son tests.
-- [ ] Define `mock_skill` fixture as `MagicMock(spec=AgentSkill)`.
-- [ ] Define `con_son_config` fixture with model and agent_id fields.
-- [ ] Define `con_son_agent` fixture instantiating `ConSonAgent`.
-- [ ] Write failing test: `test_con_son_init_sets_position_attribute_to_con`.
-- [ ] Write failing test: `test_con_son_init_stores_skills_list`.
-- [ ] Implement `ConSonAgent.__init__(self, config: dict, gatekeeper, skills: list)` with Google-style docstring.
-- [ ] Run `uv run pytest` on both `__init__` tests — confirm all pass.
-- [ ] Write failing test: `test_build_prompt_returns_non_empty_string`.
-- [ ] Implement `ConSonAgent.build_prompt(self, context) -> str`.
-- [ ] Write failing test: `test_build_prompt_contains_con_position_instruction`.
-- [ ] Implement con-position instruction injection in `build_prompt`.
-- [ ] Write failing test: `test_build_prompt_embeds_topic_from_debate_state`.
-- [ ] Run `uv run pytest` on all `build_prompt` tests — confirm all pass.
-- [ ] Write failing test: `test_enforce_position_returns_content_unchanged_for_con_argument`.
-- [ ] Implement `ConSonAgent._enforce_position(self, content: str) -> str`.
-- [ ] Write failing test: `test_enforce_position_raises_retry_signal_when_pro_stance_detected`.
-- [ ] Implement pro-content detection and retry signal in `_enforce_position`.
-- [ ] Run `uv run pytest` on all `_enforce_position` tests — confirm all pass.
-- [ ] Write failing test: `test_generate_argument_returns_valid_debate_message` — mocked API, happy path.
-- [ ] Implement `ConSonAgent.generate_argument(self, prompt: DebateMessage) -> DebateMessage`.
-- [ ] Write failing test: `test_generate_argument_sources_field_is_non_empty`.
-- [ ] Implement sources enforcement in `generate_argument`.
-- [ ] Write failing test: `test_generate_argument_retries_up_to_2_times_on_position_violation`.
-- [ ] Implement max-2-retries logic in `generate_argument`.
-- [ ] Write failing test: `test_generate_argument_raises_agent_failure_error_after_2_retries`.
-- [ ] Implement `AgentFailureError` raise after retries exhausted.
-- [ ] Run `uv run pytest` on all `generate_argument` tests — confirm all pass.
-- [ ] Run `uv run ruff check src/agents/con_son_agent.py` — confirm 0 violations.
-- [ ] Run `wc -l src/agents/con_son_agent.py` — confirm ≤ 150 lines.
-- [ ] Git commit: `feat: implement ConSonAgent with position enforcement and retry`.
+- [x] Create `src/agents/con_son_agent.py`.
+- [x] Add imports: `from src.agents.base_agent import BaseAgent, DebateMessage, MessageParseError, AgentFailureError`.
+- [x] Add `from src.skills.base_skill import AgentSkill`.
+- [x] Create `tests/unit/test_con_son_agent.py`.
+- [x] Add imports: `import pytest`, `from unittest.mock import MagicMock, patch`.
+- [x] Add `from src.agents.con_son_agent import ConSonAgent`.
+- [x] Define `mock_gatekeeper` fixture for con son tests.
+- [x] Define `mock_skill` fixture as `MagicMock(spec=AgentSkill)`.
+- [x] Define `con_son_config` fixture with model and agent_id fields.
+- [x] Define `con_son_agent` fixture instantiating `ConSonAgent`.
+- [x] Write failing test: `test_con_son_init_sets_position_attribute_to_con`.
+- [x] Write failing test: `test_con_son_init_stores_skills_list`.
+- [x] Implement `ConSonAgent.__init__(self, config: dict, gatekeeper, skills: list)` with Google-style docstring.
+- [x] Run `uv run pytest` on both `__init__` tests — confirm all pass.
+- [x] Write failing test: `test_build_prompt_returns_non_empty_string`.
+- [x] Implement `ConSonAgent.build_prompt(self, context) -> str`.
+- [x] Write failing test: `test_build_prompt_contains_con_position_instruction`.
+- [x] Implement con-position instruction injection in `build_prompt`.
+- [x] Write failing test: `test_build_prompt_embeds_topic_from_debate_state`.
+- [x] Run `uv run pytest` on all `build_prompt` tests — confirm all pass.
+- [x] Write failing test: `test_enforce_position_returns_content_unchanged_for_con_argument`.
+- [x] Implement `ConSonAgent._enforce_position(self, content: str) -> str`.
+- [x] Write failing test: `test_enforce_position_raises_retry_signal_when_pro_stance_detected`.
+- [x] Implement pro-content detection and retry signal in `_enforce_position`.
+- [x] Run `uv run pytest` on all `_enforce_position` tests — confirm all pass.
+- [x] Write failing test: `test_generate_argument_returns_valid_debate_message` — mocked API, happy path.
+- [x] Implement `ConSonAgent.generate_argument(self, prompt: DebateMessage) -> DebateMessage`.
+- [x] Write failing test: `test_generate_argument_sources_field_is_non_empty`.
+- [x] Implement sources enforcement in `generate_argument`.
+- [x] Write failing test: `test_generate_argument_retries_up_to_2_times_on_position_violation`.
+- [x] Implement max-2-retries logic in `generate_argument`.
+- [x] Write failing test: `test_generate_argument_raises_agent_failure_error_after_2_retries`.
+- [x] Implement `AgentFailureError` raise after retries exhausted.
+- [x] Run `uv run pytest` on all `generate_argument` tests — confirm all pass.
+- [x] Run `uv run ruff check src/agents/con_son_agent.py` — confirm 0 violations.
+- [x] Run `wc -l src/agents/con_son_agent.py` — confirm ≤ 150 lines.
+- [x] Git commit: `feat: implement ConSonAgent with position enforcement and retry`.
 
 ### 2.6 FatherAgent
 
