@@ -3,7 +3,8 @@
 TDD order:
     SkillError (is Exception subclass)
     → SkillResult (dataclass fields)
-    → AgentSkill (cannot instantiate / partial subclass still abstract / full subclass ok)
+    → AgentSkill (cannot instantiate / partial subclass still abstract /
+      full subclass ok)
 """
 
 import pytest

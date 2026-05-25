@@ -66,7 +66,9 @@ def loader(tmp_config_dir: pytest.TempPathFactory) -> ConfigLoader:
 # ---------------------------------------------------------------------------
 
 
-def test_config_loader_init_sets_config_dir(tmp_config_dir: pytest.TempPathFactory) -> None:
+def test_config_loader_init_sets_config_dir(
+    tmp_config_dir: pytest.TempPathFactory,
+) -> None:
     """config_dir attribute matches the directory passed to __init__."""
     from pathlib import Path
 
@@ -113,7 +115,9 @@ def test_load_rate_limits_returns_dict(loader: ConfigLoader) -> None:
     assert "models" in result
 
 
-def test_load_rate_limits_raises_file_not_found(tmp_path: pytest.TempPathFactory) -> None:
+def test_load_rate_limits_raises_file_not_found(
+    tmp_path: pytest.TempPathFactory,
+) -> None:
     """load_rate_limits raises FileNotFoundError when the file is absent."""
     loader = ConfigLoader(str(tmp_path))
     with pytest.raises(FileNotFoundError):
@@ -144,7 +148,9 @@ def test_load_pricing_raises_file_not_found(tmp_path: pytest.TempPathFactory) ->
 # ---------------------------------------------------------------------------
 
 
-def test_validate_schema_version_passes_on_matching_version(loader: ConfigLoader) -> None:
+def test_validate_schema_version_passes_on_matching_version(
+    loader: ConfigLoader,
+) -> None:
     """No exception raised when schema_version matches expected."""
     loader._validate_schema_version({"schema_version": "1.0"}, "1.0")  # must not raise
 
@@ -157,7 +163,9 @@ def test_validate_schema_version_raises_config_version_error_on_mismatch(
         loader._validate_schema_version({"schema_version": "2.0"}, "1.0")
 
 
-def test_validate_schema_version_raises_when_field_is_missing(loader: ConfigLoader) -> None:
+def test_validate_schema_version_raises_when_field_is_missing(
+    loader: ConfigLoader,
+) -> None:
     """ConfigVersionError raised when schema_version key is absent."""
     with pytest.raises(ConfigVersionError):
         loader._validate_schema_version({}, "1.0")

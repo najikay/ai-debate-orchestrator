@@ -3,7 +3,8 @@
 TDD order:
     __init__ (role=father)
     → open_debate (returns DebateMessage / sender=father / recipient=pro_son / uuid)
-    → _validate_message (valid / missing content / invalid sender / empty sources on turn%3)
+    → _validate_message (valid / missing content / invalid sender /
+      empty sources on turn%3)
     → route (pro_son / con_son / invalid)
     → _check_min_turns (False at 19 / True at 20 / True above 20)
     → _score_persuasiveness (dict keys / rubric dimensions / rubric template)
@@ -12,12 +13,12 @@ TDD order:
 
 import json
 import types
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
-from src.agents.father_agent import FatherAgent, NotEnoughTurnsError, Verdict
 from src.agents.base_agent import DebateMessage
+from src.agents.father_agent import FatherAgent, NotEnoughTurnsError
 from src.infrastructure.gatekeeper import APIResponse, Gatekeeper
 
 # ---------------------------------------------------------------------------

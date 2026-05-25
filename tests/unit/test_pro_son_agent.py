@@ -7,13 +7,12 @@ TDD order:
     → generate_argument (happy / sources non-empty / retries / failure)
 """
 
-import json
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
-from src.agents.pro_son_agent import ProSonAgent
 from src.agents.base_agent import AgentFailureError, DebateMessage
+from src.agents.pro_son_agent import ProSonAgent
 from src.infrastructure.gatekeeper import APIResponse, Gatekeeper
 from src.skills.base_skill import AgentSkill, SkillResult
 
@@ -59,7 +58,9 @@ def pro_config() -> dict:
 
 
 @pytest.fixture
-def agent(mock_gatekeeper: MagicMock, mock_skill: MagicMock, pro_config: dict) -> ProSonAgent:
+def agent(
+    mock_gatekeeper: MagicMock, mock_skill: MagicMock, pro_config: dict
+) -> ProSonAgent:
     return ProSonAgent(
         gatekeeper=mock_gatekeeper,
         config=pro_config,
@@ -113,7 +114,8 @@ def test_build_prompt_contains_pro_position_instruction(
 ) -> None:
     """Prompt explicitly instructs the agent to argue FOR the topic."""
     result = agent.build_prompt({"message": father_msg, "topic": "AI ethics"})
-    assert "pro" in result.lower() or "support" in result.lower() or "for" in result.lower()
+    lower = result.lower()
+    assert "pro" in lower or "support" in lower or "for" in lower
 
 
 def test_build_prompt_embeds_topic_from_debate_state(

@@ -12,8 +12,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests
 
-from src.skills.web_search_tool import WebSearchTool
 from src.skills.base_skill import SkillError, SkillResult
+from src.skills.web_search_tool import WebSearchTool
 
 # ---------------------------------------------------------------------------
 # Fixtures

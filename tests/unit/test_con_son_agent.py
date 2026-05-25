@@ -11,8 +11,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from src.agents.con_son_agent import ConSonAgent
 from src.agents.base_agent import AgentFailureError, DebateMessage
+from src.agents.con_son_agent import ConSonAgent
 from src.infrastructure.gatekeeper import APIResponse, Gatekeeper
 from src.skills.base_skill import AgentSkill, SkillResult
 
@@ -36,7 +36,9 @@ _VALID_MSG = {
 def mock_gatekeeper() -> MagicMock:
     gk = MagicMock(spec=Gatekeeper)
     gk.dispatch.return_value = APIResponse(
-        content="AI poses serious risks to society.", prompt_tokens=5, completion_tokens=10
+        content="AI poses serious risks to society.",
+        prompt_tokens=5,
+        completion_tokens=10,
     )
     return gk
 
@@ -58,7 +60,9 @@ def con_config() -> dict:
 
 
 @pytest.fixture
-def agent(mock_gatekeeper: MagicMock, mock_skill: MagicMock, con_config: dict) -> ConSonAgent:
+def agent(
+    mock_gatekeeper: MagicMock, mock_skill: MagicMock, con_config: dict
+) -> ConSonAgent:
     return ConSonAgent(
         gatekeeper=mock_gatekeeper,
         config=con_config,
@@ -112,7 +116,8 @@ def test_build_prompt_contains_con_position_instruction(
 ) -> None:
     """Prompt explicitly instructs the agent to argue AGAINST the topic."""
     result = agent.build_prompt({"message": father_msg, "topic": "AI ethics"})
-    assert "con" in result.lower() or "against" in result.lower() or "oppose" in result.lower()
+    lower = result.lower()
+    assert "con" in lower or "against" in lower or "oppose" in lower
 
 
 def test_build_prompt_embeds_topic_from_debate_state(

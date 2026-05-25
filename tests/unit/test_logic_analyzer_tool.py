@@ -2,18 +2,18 @@
 
 TDD order:
     skill_name attribute
-    → execute (returns SkillResult / non-empty snippets / keyword detection / word count)
+    → execute (returns SkillResult / non-empty snippets / keyword detection /
+      word count)
     → empty query (no exception)
     → no network calls
 """
 
-import socket
 from unittest.mock import patch
 
 import pytest
 
-from src.skills.logic_analyzer_tool import LogicAnalyzerTool
 from src.skills.base_skill import SkillResult
+from src.skills.logic_analyzer_tool import LogicAnalyzerTool
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -96,7 +96,7 @@ def test_execute_detects_conclusion_keywords(tool: LogicAnalyzerTool) -> None:
 
 
 def test_execute_counts_words(tool: LogicAnalyzerTool) -> None:
-    """word_count in raw_response equals the actual number of whitespace-split tokens."""
+    """word_count equals the number of whitespace-split tokens."""
     text = "One two three four five"
     result = tool.execute(text)
     assert result.raw_response["word_count"] == 5

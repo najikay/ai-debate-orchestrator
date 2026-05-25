@@ -6,9 +6,8 @@ TDD order:
     → _kill_and_retry (cancels future / emits warning log)
 """
 
-import time
 import logging
-from unittest.mock import patch
+import time
 
 import pytest
 

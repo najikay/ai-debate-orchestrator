@@ -14,9 +14,9 @@ import time
 
 import pytest
 
-from src.engine.state_manager import DebateState, StateManager
 from src.agents.base_agent import DebateMessage
 from src.agents.father_agent import Verdict
+from src.engine.state_manager import StateManager
 
 # ---------------------------------------------------------------------------
 # Fixtures

@@ -9,15 +9,15 @@ TDD order:
 """
 
 import logging
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import patch
 
 import pytest
 
-from src.engine.debate_engine import DebateEngine
 from src.agents.base_agent import DebateMessage
 from src.agents.father_agent import Verdict
-from src.infrastructure.watchdog import WatchdogError
+from src.engine.debate_engine import DebateEngine
 from src.infrastructure.cost_reporter import CostSummary
+from src.infrastructure.watchdog import WatchdogError
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -76,7 +76,7 @@ def engine(mock_config: dict) -> DebateEngine:
          patch("src.engine.debate_engine.StateManager") as MockSM, \
          patch("src.engine.debate_engine.Watchdog") as MockWD, \
          patch("src.engine.debate_engine.CostReporter") as MockCR, \
-         patch("src.engine.debate_engine.Gatekeeper") as MockGK:
+         patch("src.engine.debate_engine.Gatekeeper"):
 
         eng = DebateEngine(mock_config)
 

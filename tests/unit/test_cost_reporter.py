@@ -9,7 +9,7 @@ TDD order:
 
 import pytest
 
-from src.infrastructure.cost_reporter import AgentUsage, CostReporter, CostSummary
+from src.infrastructure.cost_reporter import CostReporter
 
 # ---------------------------------------------------------------------------
 # Fixtures
