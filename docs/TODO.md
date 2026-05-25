@@ -149,35 +149,35 @@
 
 ### 1.2 LoggerManager
 
-- [ ] Create `src/infrastructure/logger_manager.py`.
-- [ ] Add imports: `import logging`, `from datetime import datetime, timezone`, `from pathlib import Path`, `import os`.
-- [ ] Create `tests/unit/test_logger_manager.py`.
-- [ ] Add imports: `import pytest`, `from pathlib import Path`, `from src.infrastructure.logger_manager import LoggerManager`.
-- [ ] Define `tmp_log_dir` fixture using `tmp_path` pytest built-in.
-- [ ] Define `logger` fixture: `LoggerManager(tmp_log_dir, max_files=5, max_lines=10)`.
-- [ ] Write failing test: `test_logger_manager_init_creates_log_dir` — directory exists after init.
-- [ ] Implement `LoggerManager.__init__(self, log_dir: str, max_files: int, max_lines: int)` with Google-style docstring.
-- [ ] Run `uv run pytest tests/unit/test_logger_manager.py::test_logger_manager_init_creates_log_dir` — confirm pass.
-- [ ] Write failing test: `test_write_creates_log_file` — first `write()` creates a `.log` file.
-- [ ] Implement `LoggerManager.write(self, level: str, component: str, message: str) -> None`.
-- [ ] Write failing test: `test_write_format_matches_spec` — line format is `ISO | LEVEL | COMPONENT | MESSAGE`.
-- [ ] Implement log-line format enforcement in `write`.
-- [ ] Write failing test: `test_write_rejects_unknown_level` — invalid level string raises `ValueError`.
-- [ ] Implement level validation (DEBUG/INFO/WARNING/ERROR) in `write`.
-- [ ] Run `uv run pytest` on all `write` tests — confirm all pass.
-- [ ] Write failing test: `test_get_current_file_returns_existing_path`.
-- [ ] Implement `LoggerManager._get_current_file(self) -> Path`.
-- [ ] Write failing test: `test_get_current_file_opens_new_file_after_line_limit` — 10 lines written (fixture limit), next write goes to new file.
-- [ ] Implement line-count check and new-file creation in `_get_current_file`.
-- [ ] Run `uv run pytest` on all `_get_current_file` tests — confirm all pass.
-- [ ] Write failing test: `test_rotate_deletes_oldest_file_when_max_files_exceeded` — 5-file fixture limit, sixth file triggers eviction.
-- [ ] Implement `LoggerManager._rotate(self) -> None` with FIFO eviction logic.
-- [ ] Write failing test: `test_rotate_does_not_delete_when_below_max_files_limit`.
-- [ ] Implement below-limit guard in `_rotate`.
-- [ ] Run `uv run pytest` on all `_rotate` tests — confirm all pass.
-- [ ] Run `uv run ruff check src/infrastructure/logger_manager.py` — confirm 0 violations.
-- [ ] Run `wc -l src/infrastructure/logger_manager.py` — confirm ≤ 150 lines.
-- [ ] Git commit: `feat: implement LoggerManager with FIFO rotation`.
+- [x] Create `src/infrastructure/logger_manager.py`.
+- [x] Add imports: `import logging`, `from datetime import datetime, timezone`, `from pathlib import Path`, `import os`.
+- [x] Create `tests/unit/test_logger_manager.py`.
+- [x] Add imports: `import pytest`, `from pathlib import Path`, `from src.infrastructure.logger_manager import LoggerManager`.
+- [x] Define `tmp_log_dir` fixture using `tmp_path` pytest built-in.
+- [x] Define `logger` fixture: `LoggerManager(tmp_log_dir, max_files=5, max_lines=10)`.
+- [x] Write failing test: `test_logger_manager_init_creates_log_dir` — directory exists after init.
+- [x] Implement `LoggerManager.__init__(self, log_dir: str, max_files: int, max_lines: int)` with Google-style docstring.
+- [x] Run `uv run pytest tests/unit/test_logger_manager.py::test_logger_manager_init_creates_log_dir` — confirm pass.
+- [x] Write failing test: `test_write_creates_log_file` — first `write()` creates a `.log` file.
+- [x] Implement `LoggerManager.write(self, level: str, component: str, message: str) -> None`.
+- [x] Write failing test: `test_write_format_matches_spec` — line format is `ISO | LEVEL | COMPONENT | MESSAGE`.
+- [x] Implement log-line format enforcement in `write`.
+- [x] Write failing test: `test_write_rejects_unknown_level` — invalid level string raises `ValueError`.
+- [x] Implement level validation (DEBUG/INFO/WARNING/ERROR) in `write`.
+- [x] Run `uv run pytest` on all `write` tests — confirm all pass.
+- [x] Write failing test: `test_get_current_file_returns_existing_path`.
+- [x] Implement `LoggerManager._get_current_file(self) -> Path`.
+- [x] Write failing test: `test_get_current_file_opens_new_file_after_line_limit` — 10 lines written (fixture limit), next write goes to new file.
+- [x] Implement line-count check and new-file creation in `_get_current_file`.
+- [x] Run `uv run pytest` on all `_get_current_file` tests — confirm all pass.
+- [x] Write failing test: `test_rotate_deletes_oldest_file_when_max_files_exceeded` — 5-file fixture limit, sixth file triggers eviction.
+- [x] Implement `LoggerManager._rotate(self) -> None` with FIFO eviction logic.
+- [x] Write failing test: `test_rotate_does_not_delete_when_below_max_files_limit`.
+- [x] Implement below-limit guard in `_rotate`.
+- [x] Run `uv run pytest` on all `_rotate` tests — confirm all pass.
+- [x] Run `uv run ruff check src/infrastructure/logger_manager.py` — confirm 0 violations.
+- [x] Run `wc -l src/infrastructure/logger_manager.py` — confirm ≤ 150 lines.
+- [x] Git commit: `feat: implement LoggerManager with FIFO rotation`.
 
 ### 1.3 Gatekeeper
 
