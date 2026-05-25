@@ -388,47 +388,47 @@
 
 ### 2.3 BaseAgent ABC
 
-- [ ] Create `src/agents/base_agent.py`.
-- [ ] Add imports: `import json`, `from abc import ABC, abstractmethod`, `import jsonschema`, `from pathlib import Path`.
-- [ ] Add `from src.infrastructure.gatekeeper import Gatekeeper, APIRequest`.
-- [ ] Define `MessageParseError(Exception)` in `base_agent.py`.
-- [ ] Define `AgentFailureError(Exception)` in `base_agent.py`.
-- [ ] Define `DebateMessage` dataclass in `base_agent.py` with all 8 fields from schema.
-- [ ] Create `tests/unit/test_base_agent.py`.
-- [ ] Add imports: `import pytest`, `from unittest.mock import MagicMock, patch`.
-- [ ] Add `from src.agents.base_agent import BaseAgent, MessageParseError, AgentFailureError, DebateMessage`.
-- [ ] Define `mock_gatekeeper` fixture as `MagicMock(spec=Gatekeeper)`.
-- [ ] Define `mock_config` fixture with minimal agent config dict.
-- [ ] Define `ConcreteAgent` helper subclass (implements all abstract methods) inside test file.
-- [ ] Define `concrete_agent` fixture instantiating `ConcreteAgent`.
-- [ ] Write failing test: `test_base_agent_cannot_be_instantiated_directly` — raises `TypeError`.
-- [ ] Write failing test: `test_base_agent_init_sets_agent_id`.
-- [ ] Write failing test: `test_base_agent_init_sets_role`.
-- [ ] Write failing test: `test_base_agent_init_stores_gatekeeper_reference`.
-- [ ] Implement `BaseAgent.__init__(self, agent_id: str, role: str, gatekeeper: Gatekeeper, config: dict)` with Google-style docstring.
-- [ ] Run `uv run pytest` on all `__init__` tests — confirm all pass.
-- [ ] Write failing test: `test_parse_response_returns_debate_message_on_valid_json`.
-- [ ] Implement `BaseAgent.parse_response(self, raw: str) -> DebateMessage`.
-- [ ] Write failing test: `test_parse_response_raises_message_parse_error_on_invalid_json`.
-- [ ] Implement `json.JSONDecodeError` handling in `parse_response`.
-- [ ] Write failing test: `test_parse_response_raises_message_parse_error_on_schema_violation`.
-- [ ] Implement `jsonschema.ValidationError` handling in `parse_response`.
-- [ ] Run `uv run pytest` on all `parse_response` tests — confirm all pass.
-- [ ] Write failing test: `test_validate_schema_returns_true_on_valid_message_dict`.
-- [ ] Implement `BaseAgent._validate_schema(self, msg: dict) -> bool`.
-- [ ] Write failing test: `test_validate_schema_returns_false_on_missing_required_field`.
-- [ ] Write failing test: `test_validate_schema_returns_false_on_wrong_sender_enum_value`.
-- [ ] Run `uv run pytest` on all `_validate_schema` tests — confirm all pass.
-- [ ] Write failing test: `test_call_api_dispatches_through_gatekeeper`.
-- [ ] Implement `BaseAgent.call_api(self, prompt: str) -> str`.
-- [ ] Write failing test: `test_call_api_uses_model_from_config_dict`.
-- [ ] Implement model lookup from `self.config` in `call_api`.
-- [ ] Write failing test: `test_call_api_includes_agent_id_in_request`.
-- [ ] Verify `agent_id` is included in the `APIRequest` object.
-- [ ] Run `uv run pytest` on all `call_api` tests — confirm all pass.
-- [ ] Run `uv run ruff check src/agents/base_agent.py` — confirm 0 violations.
-- [ ] Run `wc -l src/agents/base_agent.py` — confirm ≤ 150 lines.
-- [ ] Git commit: `feat: implement BaseAgent ABC with JSON schema validation`.
+- [x] Create `src/agents/base_agent.py`.
+- [x] Add imports: `import json`, `from abc import ABC, abstractmethod`, `import jsonschema`, `from pathlib import Path`.
+- [x] Add `from src.infrastructure.gatekeeper import Gatekeeper, APIRequest`.
+- [x] Define `MessageParseError(Exception)` in `base_agent.py`.
+- [x] Define `AgentFailureError(Exception)` in `base_agent.py`.
+- [x] Define `DebateMessage` dataclass in `base_agent.py` with all 8 fields from schema.
+- [x] Create `tests/unit/test_base_agent.py`.
+- [x] Add imports: `import pytest`, `from unittest.mock import MagicMock, patch`.
+- [x] Add `from src.agents.base_agent import BaseAgent, MessageParseError, AgentFailureError, DebateMessage`.
+- [x] Define `mock_gatekeeper` fixture as `MagicMock(spec=Gatekeeper)`.
+- [x] Define `mock_config` fixture with minimal agent config dict.
+- [x] Define `ConcreteAgent` helper subclass (implements all abstract methods) inside test file.
+- [x] Define `concrete_agent` fixture instantiating `ConcreteAgent`.
+- [x] Write failing test: `test_base_agent_cannot_be_instantiated_directly` — raises `TypeError`.
+- [x] Write failing test: `test_base_agent_init_sets_agent_id`.
+- [x] Write failing test: `test_base_agent_init_sets_role`.
+- [x] Write failing test: `test_base_agent_init_stores_gatekeeper_reference`.
+- [x] Implement `BaseAgent.__init__(self, agent_id: str, role: str, gatekeeper: Gatekeeper, config: dict)` with Google-style docstring.
+- [x] Run `uv run pytest` on all `__init__` tests — confirm all pass.
+- [x] Write failing test: `test_parse_response_returns_debate_message_on_valid_json`.
+- [x] Implement `BaseAgent.parse_response(self, raw: str) -> DebateMessage`.
+- [x] Write failing test: `test_parse_response_raises_message_parse_error_on_invalid_json`.
+- [x] Implement `json.JSONDecodeError` handling in `parse_response`.
+- [x] Write failing test: `test_parse_response_raises_message_parse_error_on_schema_violation`.
+- [x] Implement `jsonschema.ValidationError` handling in `parse_response`.
+- [x] Run `uv run pytest` on all `parse_response` tests — confirm all pass.
+- [x] Write failing test: `test_validate_schema_returns_true_on_valid_message_dict`.
+- [x] Implement `BaseAgent._validate_schema(self, msg: dict) -> bool`.
+- [x] Write failing test: `test_validate_schema_returns_false_on_missing_required_field`.
+- [x] Write failing test: `test_validate_schema_returns_false_on_wrong_sender_enum_value`.
+- [x] Run `uv run pytest` on all `_validate_schema` tests — confirm all pass.
+- [x] Write failing test: `test_call_api_dispatches_through_gatekeeper`.
+- [x] Implement `BaseAgent.call_api(self, prompt: str) -> str`.
+- [x] Write failing test: `test_call_api_uses_model_from_config_dict`.
+- [x] Implement model lookup from `self.config` in `call_api`.
+- [x] Write failing test: `test_call_api_includes_agent_id_in_request`.
+- [x] Verify `agent_id` is included in the `APIRequest` object.
+- [x] Run `uv run pytest` on all `call_api` tests — confirm all pass.
+- [x] Run `uv run ruff check src/agents/base_agent.py` — confirm 0 violations.
+- [x] Run `wc -l src/agents/base_agent.py` — confirm ≤ 150 lines.
+- [x] Git commit: `feat: implement BaseAgent ABC with JSON schema validation`.
 
 ### 2.4 ProSonAgent
 
