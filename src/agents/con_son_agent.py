@@ -1,14 +1,15 @@
-"""ConSonAgent — negative debater that argues AGAINST the debate topic.
+"""ConSonAgent — negative debater that argues AGAINST the debate topic."""
 
-Must maintain the con position at all times. Responses that express
-support are rejected and retried up to twice before raising
-:class:`~src.agents.base_agent.AgentFailureError`.
-"""
-
+import json
 import uuid
 from datetime import datetime, timezone
 
-from src.agents.base_agent import AgentFailureError, BaseAgent, DebateMessage
+from src.agents.base_agent import (
+    AgentFailureError,
+    BaseAgent,
+    DebateMessage,
+    _extract_json,
+)
 from src.skills.base_skill import AgentSkill
 
 _MAX_RETRIES: int = 2
@@ -20,6 +21,11 @@ _PRO_SIGNALS: tuple[str, ...] = (
     "i agree",
     "wonderful",
     "greatly benefits",
+)
+_COT_SCHEMA: str = (
+    '{"opponent_analysis":"core claim of opponent",'
+    '"debate_strategy":"how you will refute it with logic and facts",'
+    '"argument":"your rebuttal — max 3 paragraphs, sharp and factual"}'
 )
 
 
@@ -58,37 +64,23 @@ class ConSonAgent(BaseAgent):
         self.position: str = "con"
         self.skills: list[AgentSkill] = skills
 
-    # ------------------------------------------------------------------
-    # BaseAgent abstract interface
-    # ------------------------------------------------------------------
-
     def build_prompt(self, context: dict) -> str:
-        """Build a con-position prompt embedding the debate topic.
-
-        Args:
-            context: Dict with ``topic`` (str) and ``message`` (DebateMessage).
-
-        Returns:
-            Prompt string instructing the agent to oppose the topic.
-        """
+        """Return a CoT prompt with No-Surrender clause and JSON output schema."""
         topic = context.get("topic", "")
         msg = context.get("message")
         prior = msg.content if msg else ""
         return (
             f"You are the CON debater. You must argue strongly AGAINST: '{topic}'.\n"
-            f"You MUST oppose and argue against this position.\n"
-            f"Previous message: {prior}\n"
-            f"Respond with a compelling argument that opposes the topic."
+            "NO SURRENDER: Never concede, agree with the opponent, or be neutral. "
+            "Directly counter their points using sound logic and verified facts.\n"
+            f"Opponent's last argument:\n{prior}\n\n"
+            "Respond ONLY with valid JSON (no markdown fences):\n" + _COT_SCHEMA
         )
 
     def act(self, context: dict) -> DebateMessage:
         """Produce the next con-side argument."""
         msg = context.get("message")
         return self.generate_argument(msg)
-
-    # ------------------------------------------------------------------
-    # Public domain method
-    # ------------------------------------------------------------------
 
     def generate_argument(
         self, prompt: DebateMessage, topic: str = ""
@@ -109,7 +101,8 @@ class ConSonAgent(BaseAgent):
         prompt_str = self.build_prompt({"topic": topic, "message": prompt})
 
         for attempt in range(_MAX_RETRIES + 1):
-            content = self.call_api(prompt_str)
+            raw = self.call_api(prompt_str)
+            content = self._extract_argument(raw)
             try:
                 content = self._enforce_position(content)
                 break
@@ -131,16 +124,20 @@ class ConSonAgent(BaseAgent):
             timestamp=datetime.now(tz=timezone.utc).isoformat(),
         )
 
-    # ------------------------------------------------------------------
-    # Private helpers
-    # ------------------------------------------------------------------
-
     def _enforce_position(self, content: str) -> str:
         """Verify *content* expresses a con stance; raise if it does not."""
         lower = content.lower()
         if any(signal in lower for signal in _PRO_SIGNALS):
             raise _PositionError("Content expresses a pro stance.")
         return content
+
+    def _extract_argument(self, raw: str) -> str:
+        """Extract ``argument`` field from CoT JSON; fall back to raw text."""
+        try:
+            data = json.loads(_extract_json(raw))
+            return data.get("argument", raw) if isinstance(data, dict) else raw
+        except json.JSONDecodeError:
+            return raw
 
     def _gather_sources(self, topic: str) -> list[str]:
         """Run the first available skill and collect its snippets as sources."""
