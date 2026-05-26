@@ -998,6 +998,48 @@
 
 ---
 
+## Phase 5.3 — End-to-End Cost Tracking Wire-Up
+
+> Three root causes identified and resolved together. All golden rules satisfied.
+> See `docs/PRD.md §15.7–15.8` and `docs/PLAN.md §9.7` for full root-cause analysis.
+
+### 5.3.1 `app.py` Configuration Merge Fix
+
+- [x] Identify root cause: `create_app()` route passed only `load_setup()` to `DebateEngine`; `pricing.json` missing from config dict.
+- [x] Fix: `cfg = {**_loader.load_setup(), "pricing": _loader.load_pricing()}` before `DebateEngine(cfg)`.
+- [x] Verify cost card shows non-zero USD values in web UI after fix.
+- [x] Confirm `src/ui/app.py` remains ≤ 150 lines.
+- [x] Run `uv run ruff check src/ui/app.py` — confirm 0 violations.
+
+### 5.3.2 `DebateEngine._sync_costs()` Orchestration Loop Fix
+
+- [x] Identify root cause: `Gatekeeper.UsageStats` and `CostReporter._records` were disconnected; `compute()` always returned $0.
+- [x] Implement `DebateEngine._sync_costs()`: clears `_records`, then calls `cost_reporter.record_usage()` for each agent from `gatekeeper.get_usage()`.
+- [x] Wire `_sync_costs()` into `start()` (called once before final `compute()`) and `_check_budget()` (called each turn).
+- [x] Confirm per-agent token counts appear in cost report after a live run.
+- [x] Run `uv run pytest` — confirm 0 regressions.
+- [x] Confirm `src/engine/debate_engine.py` remains ≤ 150 lines.
+
+### 5.3.3 `CostReporter` Fuzzy Model-ID Matching
+
+- [x] Identify root cause: Anthropic date-suffix model IDs (e.g. `claude-haiku-4-5-20251001`) fail strict `pricing.json` key lookup → silent $0.
+- [x] Add `_find_rates(model: str) -> dict` to `CostReporter`: longest-common-prefix scan; 60% match-ratio threshold.
+- [x] Emit `[WARN]` log when fuzzy path is taken; emit `"UNKNOWN PRICE"` warn when threshold not met.
+- [x] Route all `compute()` rate lookups through `_find_rates()`.
+- [x] Confirm `src/infrastructure/cost_reporter.py` remains ≤ 150 lines.
+- [x] Run `uv run ruff check src/infrastructure/cost_reporter.py` — confirm 0 violations.
+- [x] Run `uv run pytest` — confirm 0 regressions.
+
+### 5.3.4 Documentation Sync
+
+- [x] Update `docs/PRD.md`: add §15.7 (`app.py` config merge) and §15.8 (`_sync_costs()` orchestration fix).
+- [x] Update `docs/PLAN.md`: add §9.7 Phase 5.3 end-to-end cost tracking data-flow table.
+- [x] Update `docs/TODO.md`: add this Phase 5.3 checklist with all tasks checked off.
+- [x] Update `README.md`: professional overhaul — introduction, quick start, all run options, screenshot placeholders.
+- [x] Git commit: `docs: complete professional README overhaul and synchronize final cost-tracking hotfixes across documentation`.
+
+---
+
 ### 5.6 Final Release
 
 - [x] Run full test suite: `uv run pytest --cov=src --cov-fail-under=85` — confirm green.

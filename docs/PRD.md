@@ -806,6 +806,59 @@ silently treated as `$0`, understating session spend.
 This makes the cost tracker resilient to minor version-suffix changes without
 requiring a `pricing.json` update on every Anthropic model release.
 
+### 15.7 `app.py` Configuration Merge Fix
+
+**Root cause:** The Flask application factory in `src/ui/app.py` passed only
+`_loader.load_setup()` to `DebateEngine`. `DebateEngine.__init__` initialises
+`CostReporter` via `config.get("pricing", {"models": {}})`, which resolved to an
+empty dict — so every model-rate lookup returned `$0` and the cost card always
+showed zero spend.
+
+**Fix:** The `/api/debate` route handler now merges `pricing.json` into the config
+dict before instantiating the engine:
+
+```python
+cfg = {**_loader.load_setup(), "pricing": _loader.load_pricing()}
+engine = DebateEngine(cfg)
+```
+
+`pricing.json` is loaded once per request and forwarded as a top-level `"pricing"`
+key so `DebateEngine` can pass it directly to `CostReporter.__init__`.
+
+### 15.8 `DebateEngine._sync_costs()` Orchestration Loop Fix
+
+**Root cause:** `Gatekeeper` accumulated per-agent token-usage statistics inside its
+internal `UsageStats` dict as each `call_api()` completed. However, `CostReporter._records`
+was never updated from those totals — the two tracking structures were completely
+disconnected. `CostReporter.compute()` therefore always operated on an empty record
+set, returning `$0` regardless of actual spend.
+
+**Fix:** A `_sync_costs()` private method was added to `DebateEngine`:
+
+```python
+def _sync_costs(self) -> None:
+    cr = self.cost_reporter
+    cr._records.clear()
+    for aid in ("father", "pro_son", "con_son"):
+        s = self.gatekeeper.get_usage(aid)
+        if s.total_tokens:
+            m = getattr(self, aid).model
+            cr.record_usage(aid, m, s.prompt_tokens, s.completion_tokens)
+```
+
+`_sync_costs()` is called at two points:
+
+1. **End of `start()`** — once, immediately before `compute()` produces the final
+   cost summary returned to the caller.
+2. **Inside `_check_budget()`** — at every turn boundary so the 90%/100% budget
+   enforcement thresholds always reflect live Gatekeeper totals rather than stale
+   (empty) reporter state.
+
+Together, fixes §15.6, §15.7, and §15.8 form the complete end-to-end cost tracking
+pipeline: `Gatekeeper` records raw token counts → `_sync_costs()` wires them into
+`CostReporter` → `_find_rates()` resolves the correct USD rate even for
+date-suffixed model IDs → `compute()` returns accurate spend.
+
 ---
 
 ## 14. Out of Scope (v1.0)
