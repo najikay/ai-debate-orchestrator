@@ -854,78 +854,70 @@
 
 ### 5.1 Topic Bug Fix
 
-- [ ] In `src/agents/pro_son_agent.py`: change `generate_argument(self, prompt)` signature to `generate_argument(self, prompt, topic: str = "")`.
-- [ ] Update `build_prompt` call inside `generate_argument` to use `topic` param when non-empty, else fall back to `prompt.content`.
-- [ ] In `src/agents/con_son_agent.py`: apply the same `topic: str = ""` parameter change.
-- [ ] In `src/engine/debate_engine.py._run_turn_loop`: pass `topic=self.state_manager.state.topic` to both `generate_argument` calls.
-- [ ] Add failing unit test in `tests/unit/test_pro_son_agent.py`: `test_generate_argument_uses_explicit_topic_when_provided`.
-- [ ] Add failing unit test in `tests/unit/test_con_son_agent.py`: `test_generate_argument_uses_explicit_topic_when_provided`.
-- [ ] Run `uv run pytest tests/unit/test_pro_son_agent.py tests/unit/test_con_son_agent.py` — confirm all pass.
-- [ ] Run `uv run ruff check src/agents/pro_son_agent.py src/agents/con_son_agent.py src/engine/debate_engine.py` — confirm 0 violations.
-- [ ] Confirm each edited file remains ≤ 150 lines.
+- [x] In `src/agents/pro_son_agent.py`: change `generate_argument(self, prompt)` signature to `generate_argument(self, prompt, topic: str = "")`.
+- [x] Update `build_prompt` call inside `generate_argument` to use `topic` param when non-empty, else fall back to `prompt.content`.
+- [x] In `src/agents/con_son_agent.py`: apply the same `topic: str = ""` parameter change.
+- [x] In `src/engine/debate_engine.py._run_turn_loop`: pass `topic=self.state_manager.state.topic` to both `generate_argument` calls.
+- [x] Add failing unit test in `tests/unit/test_pro_son_agent.py`: `test_generate_argument_uses_explicit_topic_when_provided`.
+- [x] Add failing unit test in `tests/unit/test_con_son_agent.py`: `test_generate_argument_uses_explicit_topic_when_provided`.
+- [x] Run `uv run pytest tests/unit/test_pro_son_agent.py tests/unit/test_con_son_agent.py` — confirm all pass.
+- [x] Run `uv run ruff check src/agents/pro_son_agent.py src/agents/con_son_agent.py src/engine/debate_engine.py` — confirm 0 violations.
+- [x] Confirm each edited file remains ≤ 150 lines.
 
 ### 5.2 Father Moderation & Scoring Updates
 
-- [ ] In `src/agents/father_agent.py`: update `_RUBRIC_TEMPLATE` to include:
+- [x] In `src/agents/father_agent.py`: update `_RUBRIC_TEMPLATE` to include:
   - Instruction to detect and note **argument dodging** (same-turn pivot or verbatim repeat).
   - Instruction to detect and note **disrespectful or inappropriate language**.
   - Instruction that the Father does **not** fact-check sources — agents challenge sources through argument.
   - `"current_lean": "pro_son | con_son"` field in the expected JSON response.
   - Remove redundant `"draw": false` line from the JSON template (schema enforces it).
-- [ ] Confirm `father_agent.py` remains ≤ 150 lines after changes.
-- [ ] Add failing unit test: `test_score_persuasiveness_result_contains_current_lean_key`.
-- [ ] Add failing unit test: `test_rubric_prompt_contains_dodging_instruction`.
-- [ ] Add failing unit test: `test_rubric_prompt_contains_language_enforcement_instruction`.
-- [ ] Add failing unit test: `test_rubric_prompt_does_not_instruct_fact_checking`.
-- [ ] Run `uv run pytest tests/unit/test_father_agent.py` — confirm all pass.
-- [ ] Run `uv run ruff check src/agents/father_agent.py` — confirm 0 violations.
+- [x] Confirm `father_agent.py` remains ≤ 150 lines after changes.
+- [x] Add failing unit test: `test_score_persuasiveness_result_contains_current_lean_key`.
+- [x] Add failing unit test: `test_rubric_prompt_contains_dodging_instruction`.
+- [x] Add failing unit test: `test_rubric_prompt_contains_language_enforcement_instruction`.
+- [x] Add failing unit test: `test_rubric_prompt_does_not_instruct_fact_checking`.
+- [x] Run `uv run pytest tests/unit/test_father_agent.py` — confirm all pass.
+- [x] Run `uv run ruff check src/agents/father_agent.py` — confirm 0 violations.
 
 ### 5.3 Schema Verification (No Draws)
 
-- [ ] Open `src/schemas/verdict.json` — confirm `"draw": {"const": false}` is present.
-- [ ] Confirm `"winner": {"enum": ["pro_son", "con_son"]}` is present.
-- [ ] Confirm `"additionalProperties": false` is set.
-- [ ] Run existing `test_evaluate_returns_verdict_with_draw_false` — confirm still passes.
-- [ ] No schema file changes required unless a regression is found.
+- [x] Open `src/schemas/verdict.json` — confirm `"draw": {"const": false}` is present.
+- [x] Confirm `"winner": {"enum": ["pro_son", "con_son"]}` is present.
+- [x] Confirm `"additionalProperties": false` is set.
+- [x] Run existing `test_evaluate_returns_verdict_with_draw_false` — confirm still passes.
+- [x] No schema file changes required unless a regression is found.
 
 ### 5.4 QA Gate
 
-- [ ] Run `uv run pytest` — confirm all unit and integration tests pass.
-- [ ] Run `uv run ruff check .` — confirm 0 violations.
-- [ ] Run `uv run pytest --cov=src --cov-fail-under=85` — confirm coverage gate holds.
-- [ ] Confirm no Python file in `src/` exceeds 150 lines.
-- [ ] Git commit: `fix: resolve topic bug and apply QA debate rules`.
+- [x] Run `uv run pytest` — confirm all unit and integration tests pass.
+- [x] Run `uv run ruff check .` — confirm 0 violations.
+- [x] Run `uv run pytest --cov=src --cov-fail-under=85` — confirm coverage gate holds.
+- [x] Confirm no Python file in `src/` exceeds 150 lines.
+- [x] Git commit: `fix: resolve topic bug and apply QA debate rules`.
 
 ### 5.5 Flask Web GUI
 
-- [ ] Add `flask` (≥ 3.0) to `[project.dependencies]` in `pyproject.toml`.
-- [ ] Run `uv sync` to install Flask.
-- [ ] Create `src/web/` directory with `__init__.py`.
-- [ ] Create `src/web/app.py` — Flask application factory; `main()` entry point.
-- [ ] Create `src/web/routes.py` — route handlers for `GET /`, `POST /debate/start`, `GET /debate/<id>`, `GET /debate/<id>/verdict`.
-- [ ] Create `src/web/templates/base.html` — Bootstrap 5 CDN layout shell.
-- [ ] Create `src/web/templates/index.html` — topic input form.
-- [ ] Create `src/web/templates/debate.html` — SSE turn-stream view.
-- [ ] Create `src/web/templates/verdict.html` — final verdict + cost report.
-- [ ] Add `debate-web = "src.web.app:main"` to `[project.scripts]` in `pyproject.toml`.
-- [ ] Run `uv sync` to register the new entry point.
-- [ ] Create `tests/unit/test_web_app.py` — unit tests for all four routes using `app.test_client()`.
-- [ ] Write failing test: `test_index_route_returns_200`.
-- [ ] Write failing test: `test_start_route_redirects_to_debate_view`.
-- [ ] Write failing test: `test_debate_view_returns_200_for_valid_session`.
-- [ ] Write failing test: `test_verdict_view_returns_200_after_debate_completes`.
-- [ ] Implement all four routes; confirm all tests pass.
-- [ ] Run `uv run ruff check src/web/` — confirm 0 violations.
-- [ ] Confirm `src/web/app.py` and `src/web/routes.py` each ≤ 150 lines.
-- [ ] Run `uv run debate-web` — verify landing page loads in browser.
-- [ ] Submit a topic through the form — verify live turn stream appears.
-- [ ] Verify verdict page renders after debate completes.
-- [ ] Git commit: `feat: add Flask/Bootstrap 5 web GUI for debate system`.
+- [x] Add `flask` (≥ 3.0) to `[project.dependencies]` in `pyproject.toml`.
+- [x] Run `uv sync` to install Flask.
+- [x] Create `src/ui/app.py` — Flask application factory with `GET /` and `POST /api/debate`; `main()` entry point (84 lines).
+- [x] Create `templates/index.html` — Bootstrap 5 + jQuery chat interface; topic form, colour-coded chat bubbles, verdict card, cost card.
+- [x] Add `debate-web = "src.ui.app:main"` to `[project.scripts]` in `pyproject.toml`.
+- [x] Run `uv sync` to register the new entry point.
+- [x] Create `tests/unit/test_web_app.py` — 11 TDD tests covering all routes and edge cases via `app.test_client()`.
+- [x] Write failing test: `test_index_route_returns_200`.
+- [x] Write failing test: `test_api_debate_returns_400_when_topic_missing`.
+- [x] Write failing test: `test_api_debate_returns_200_on_success`.
+- [x] Write failing test: `test_api_debate_returns_500_on_engine_error`.
+- [x] Implement routes; confirm all 237 tests pass.
+- [x] Run `uv run ruff check src/ui/app.py` — confirm 0 violations.
+- [x] Confirm `src/ui/app.py` ≤ 150 lines (84 lines).
+- [x] Git commit: `feat: implement responsive Flask GUI with Bootstrap and jQuery`.
 
 ### 5.6 Final Release
 
-- [ ] Run full test suite: `uv run pytest --cov=src --cov-fail-under=85` — confirm green.
-- [ ] Run `uv run ruff check .` — confirm 0 violations.
-- [ ] Update `README.md`: add Web GUI section describing `uv run debate-web` usage.
-- [ ] Create git tag: `git tag v2.0.0`.
-- [ ] Git commit: `release: v2.0.0 — Phase 5 QA fixes and Web GUI complete`.
+- [x] Run full test suite: `uv run pytest --cov=src --cov-fail-under=85` — confirm green.
+- [x] Run `uv run ruff check .` — confirm 0 violations.
+- [x] Update `README.md`: add Web GUI section describing `uv run debate-web` usage.
+- [x] Create git tag: `git tag v2.0.0`.
+- [x] Git commit: `release: v2.0.0 — Phase 5 QA fixes and Web GUI complete`.

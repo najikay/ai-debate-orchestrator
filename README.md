@@ -107,6 +107,25 @@ exits without making any API calls.
 
 ---
 
+## Web GUI
+
+A responsive Flask + Bootstrap 5 interface is available alongside the CLI.
+
+```bash
+uv run debate-web          # starts on http://localhost:5000
+PORT=8080 uv run debate-web  # custom port via env var
+```
+
+1. Open `http://localhost:5000` in your browser.
+2. Type a debate topic and click **Debate**.
+3. Watch colour-coded chat bubbles appear for each agent turn once the debate completes.
+4. The **Verdict** and **Cost** cards render automatically at the end.
+
+The web server uses the same `config/` directory and `ANTHROPIC_API_KEY` as the CLI.
+No database or additional infrastructure is required.
+
+---
+
 ## Debate Output
 
 ```
