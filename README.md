@@ -38,13 +38,13 @@
 
 | Debate Starting | In Progress | Final Verdict |
 |---|---|---|
-| ![Web Start](docs/images/archive/image.PNG) | ![Web Progress](docs/images/archive/web_progress1.PNG) | ![Web Verdict](docs/images/archive/web_verdict.PNG) |
+| ![Web Start](docs/images/archive/web_start.PNG) | ![Web Progress](docs/images/archive/web_progress1.PNG) | ![Web Verdict](docs/images/archive/web_verdict.PNG) |
 
 ### 🖥️ Web GUI — Live Debate Streaming:  "Will AI Replace Human Workers?"
 
 | Debate Starting | In Progress | Final Verdict |
 |---|---|---|
-| ![Web Start](docs/images/archive/image2.png) | ![Web Progress](docs/images/archive/web_progress11.png) | ![Web Progress](docs/images/archive/web_verdict1.png) | 
+| ![Web Start](docs/images/archive/web_start1.png) | ![Web Progress](docs/images/archive/web_progress11.png) | ![Web Progress](docs/images/archive/web_verdict1.png) | 
 
 
 ### 💻 Terminal CLI — Color-Coded Live Output: "Will AI Replace Human Workers?"
