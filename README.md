@@ -218,7 +218,7 @@ the CLI. No database or additional infrastructure is required.
 
 ## Screenshots
 
-## 🖥️ Web UI — Debate 1: "FC Barcelona has a Significant Cultural Impaact on Football more than Real Madrid"
+## 🖥️ Web UI — Debate 1: "FC Barcelona has a Significant Cultural Impact on Football more than Real Madrid"
 
 ### Main Page — Topic Form & Live Debate
 
