@@ -113,21 +113,6 @@ uv run ruff check .
 
 ---
 
-## Visual Walkthrough
-
-### Main Dashboard — Topic Form and Live Debate
-
-![Main Dashboard](docs/images/main_page.png)
-
-### Final Verdict — Numerical Scores and Father's Reasoning
-
-![Final Verdict](docs/images/final_verdict.png)
-
-> Drop `main_page.png` and `final_verdict.png` into `docs/images/` to render
-> these screenshots on GitHub.
-
----
-
 ## Architecture
 
 See `docs/PLAN.md` for the full C4 context diagram, class hierarchy, and layered
@@ -233,7 +218,7 @@ the CLI. No database or additional infrastructure is required.
 
 ## Screenshots
 
-## 🖥️ Web UI — Debate 1: "FC Barcelona has a Significant Cultural Impcat on Football more than Real Madrid"
+## 🖥️ Web UI — Debate 1: "FC Barcelona has a Significant Cultural Impaact on Football more than Real Madrid"
 
 ### Main Page — Topic Form & Live Debate
 
@@ -350,7 +335,7 @@ is dispatched to the Anthropic API.
 
 ![alt text](docs/images/t1.PNG)
 
-### Main Page — Topic Form & Live Debate
+### Full Transcript
 
 ![text](docs/images/t2.PNG) 
 ![text](docs/images/t3.PNG) 
