@@ -570,6 +570,31 @@ for each agent_usage:
             LOG WARN "UNKNOWN PRICE for {model}"
 ```
 
+### 9.7 Phase 5.3 — End-to-End Cost Tracking Wire-Up
+
+Three interdependent root causes prevented live cost tracking from working end-to-end.
+All three were identified and fixed together as a single atomic hotfix.
+
+| # | Root Cause | File | Fix Applied |
+|---|-----------|------|-------------|
+| 1 | `app.py` did not merge `pricing.json` into the config dict passed to `DebateEngine`; `CostReporter` initialised with empty pricing → $0 for every model | `src/ui/app.py` | `cfg = {**load_setup(), "pricing": load_pricing()}` merged before `DebateEngine(cfg)` |
+| 2 | `DebateEngine` never transferred live Gatekeeper token totals into `CostReporter`; the two tracking structures were entirely disconnected | `src/engine/debate_engine.py` | `_sync_costs()` added; called at end of `start()` and inside `_check_budget()` at every turn |
+| 3 | Strict model-ID key lookup in `CostReporter.compute()` failed on Anthropic date-suffix IDs (e.g. `claude-haiku-4-5-20251001`) → silent `$0` | `src/infrastructure/cost_reporter.py` | `_find_rates()` with longest-common-prefix fuzzy fallback (≥ 60% match ratio); `[WARN]` emitted on fuzzy path |
+
+**End-to-end cost tracking data flow (post-fix):**
+
+```
+call_api()  ──token counts──►  Gatekeeper.UsageStats  (per agent)
+                                        │
+                               _sync_costs()  ◄── called each turn + at start() end
+                                        │
+                               CostReporter._records  (accumulated)
+                                        │
+                               _find_rates(model)  ◄── fuzzy prefix fallback
+                                        │
+                               CostReporter.compute()  →  CostSummary  →  UI / CLI
+```
+
 ### 9.4 TDD Plan for Phase 5
 
 | Test File | Scope | Notes |
