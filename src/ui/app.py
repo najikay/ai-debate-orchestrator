@@ -64,6 +64,7 @@ def create_app(config_path: str = "config/") -> Flask:
                         "winner": verdict.winner,
                         "reasoning": verdict.reasoning,
                         "turn_count": verdict.turn_count,
+                        "scores": verdict.scores,
                     },
                     "cost": {
                         "total_usd": round(summary.total_usd, 4),

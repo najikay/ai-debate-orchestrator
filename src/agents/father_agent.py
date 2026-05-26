@@ -2,7 +2,7 @@
 
 import json
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
 from src.agents.base_agent import BaseAgent, DebateMessage, _extract_json
@@ -36,7 +36,7 @@ class NotEnoughTurnsError(Exception):
 
 @dataclass
 class Verdict:
-    """Final debate outcome with winner, reasoning, and turn count."""
+    """Final debate outcome with winner, reasoning, turn count, and scores."""
 
     verdict_id: str
     winner: str
@@ -44,6 +44,7 @@ class Verdict:
     reasoning: str
     turn_count: int
     timestamp: str
+    scores: dict = field(default_factory=dict)
 
 
 class FatherAgent(BaseAgent):
@@ -125,11 +126,8 @@ class FatherAgent(BaseAgent):
         scores = self._score_persuasiveness(state.transcript)
         pro_t = scores["pro_son"]["total"]
         con_t = scores["con_son"]["total"]
-        winner = (
-            self._tiebreak(state.transcript)
-            if pro_t == con_t
-            else ("pro_son" if pro_t > con_t else "con_son")
-        )
+        winner = (self._tiebreak(state.transcript) if pro_t == con_t
+                  else ("pro_son" if pro_t > con_t else "con_son"))
         reasoning = scores.get("reasoning") or f"{winner} won ({pro_t} vs {con_t}/30)."
         return Verdict(
             verdict_id=str(uuid.uuid4()),
@@ -138,6 +136,7 @@ class FatherAgent(BaseAgent):
             reasoning=reasoning,
             turn_count=len(state.transcript),
             timestamp=datetime.now(tz=timezone.utc).isoformat(),
+            scores={k: scores.get(k, {}) for k in ("pro_son", "con_son")},
         )
 
     def _tiebreak(self, transcript: list) -> str:

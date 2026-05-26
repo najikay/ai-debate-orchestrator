@@ -89,6 +89,21 @@ class CostReporter:
         rec.prompt_tokens += prompt_tokens
         rec.completion_tokens += completion_tokens
 
+    def _find_rates(self, model: str) -> dict:
+        """Return rates for *model*; falls back to family-token fuzzy match
+        so live API strings like ``claude-3-haiku-20240307`` resolve correctly."""
+        models = self._pricing["models"]
+        if model in models:
+            return models[model]
+        for key, rates in models.items():
+            tokens = [
+                t for t in key.split("-")
+                if t != "claude" and not t.isdigit() and len(t) > 3
+            ]
+            if any(t in model for t in tokens):
+                return rates
+        raise KeyError(f"No pricing found for model {model!r}")
+
     def compute(self) -> CostSummary:
         """Calculate per-agent and total USD cost.
 
@@ -98,7 +113,7 @@ class CostReporter:
         total = 0.0
         per_agent: dict[str, AgentUsage] = {}
         for agent_id, rec in self._records.items():
-            rates = self._pricing["models"][rec.model]
+            rates = self._find_rates(rec.model)
             cost = (
                 rec.prompt_tokens * rates["input_per_1k"]
                 + rec.completion_tokens * rates["output_per_1k"]

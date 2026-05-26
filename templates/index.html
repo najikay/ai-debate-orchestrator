@@ -92,6 +92,31 @@
     <div class="card-body">
       <p class="mb-1"><strong>Winner:</strong> <span id="v-winner"></span></p>
       <p class="mb-2"><strong>Turns:</strong> <span id="v-turns"></span></p>
+      <!-- Raw scores row -->
+      <div id="v-scores" class="row g-2 mb-2" style="display:none;">
+        <div class="col-6">
+          <div class="card border-primary h-100">
+            <div class="card-header py-1 small fw-bold text-primary">Pro Son</div>
+            <div class="card-body py-1 small">
+              Logic&nbsp;<strong id="v-pro-logic">—</strong> &nbsp;
+              Clarity&nbsp;<strong id="v-pro-clarity">—</strong> &nbsp;
+              Evidence&nbsp;<strong id="v-pro-evidence">—</strong>
+              <div class="mt-1">Total&nbsp;<strong id="v-pro-total">—</strong><span class="text-muted">/30</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="card border-danger h-100">
+            <div class="card-header py-1 small fw-bold text-danger">Con Son</div>
+            <div class="card-body py-1 small">
+              Logic&nbsp;<strong id="v-con-logic">—</strong> &nbsp;
+              Clarity&nbsp;<strong id="v-con-clarity">—</strong> &nbsp;
+              Evidence&nbsp;<strong id="v-con-evidence">—</strong>
+              <div class="mt-1">Total&nbsp;<strong id="v-con-total">—</strong><span class="text-muted">/30</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
       <p class="mb-1"><strong>Father's Reasoning:</strong></p>
       <blockquote class="blockquote mb-0 ps-3 border-start border-3 border-primary">
         <p class="mb-0 fst-italic text-secondary" id="v-reasoning"></p>
@@ -197,6 +222,16 @@ $('#debate-form').on('submit', function(e) {
       $('#v-winner').text(winnerLabel(data.verdict.winner));
       $('#v-turns').text(data.verdict.turn_count);
       $('#v-reasoning').text(data.verdict.reasoning);
+      /* scores */
+      var sc = data.verdict.scores || {};
+      if (sc.pro_son && sc.con_son) {
+        var ps = sc.pro_son, cs = sc.con_son;
+        $('#v-pro-logic').text(ps.logic); $('#v-pro-clarity').text(ps.clarity);
+        $('#v-pro-evidence').text(ps.evidence); $('#v-pro-total').text(ps.total);
+        $('#v-con-logic').text(cs.logic); $('#v-con-clarity').text(cs.clarity);
+        $('#v-con-evidence').text(cs.evidence); $('#v-con-total').text(cs.total);
+        $('#v-scores').show();
+      }
       $('#verdict-card').show();
 
       /* cost */
