@@ -48,6 +48,9 @@ git clone <repo-url>
 cd A2
 
 # 2. Copy the environment template and fill in your API key
+# Windows:
+copy .env-example .env
+# Mac/Linux:
 cp .env-example .env
 # Open .env and set:
 #   ANTHROPIC_API_KEY=sk-ant-...    ← required
@@ -337,7 +340,6 @@ is dispatched to the Anthropic API.
 
 ### Full Transcript
 
-[text](README.md) 
 ![text](docs/images/tt2.PNG) 
 ![text](docs/images/tt3.PNG) 
 ![text](docs/images/tt4.PNG) 
