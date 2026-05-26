@@ -1,12 +1,4 @@
-"""DebateCLI — command-line entry point for the AI Debate System.
-
-Usage::
-
-    uv run debate --topic "AI will replace human workers"
-    uv run debate --topic "..." --config config/ --dry-run
-
-Returns exit code 0 on success, 1 on WatchdogError.
-"""
+"""DebateCLI — command-line entry point for the AI Debate System."""
 
 import argparse
 import sys
@@ -19,28 +11,29 @@ from src.infrastructure.watchdog import WatchdogError
 
 
 def parse_args() -> argparse.Namespace:
-    """Parse command-line arguments.
-
-    Returns:
-        Namespace with ``topic`` (str), ``config`` (str), ``dry_run`` (bool).
-    """
     parser = argparse.ArgumentParser(
         description="AI Debate System — multi-agent debate orchestrator."
     )
     parser.add_argument("--topic", required=True, help="Debate topic string.")
-    parser.add_argument(
-        "--config", default="config/", help="Path to config directory."
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Validate config and exit without calling the LLM API.",
-    )
+    parser.add_argument("--config", default="config/", help="Path to config directory.")
+    parser.add_argument("--dry-run", action="store_true")
     return parser.parse_args()
 
 
+def _print_transcript(engine: DebateEngine) -> None:
+    messages = engine.state_manager.state.transcript
+    bar = "-" * 60
+    print(f"\n{bar}")
+    print("[TRANSCRIPT]")
+    print(bar)
+    for msg in messages:
+        label = msg.sender.upper()
+        print(f"\n[{label}]  (turn {msg.turn})")
+        print(f"  {msg.content}")
+    print(bar)
+
+
 def _print_verdict(verdict: Verdict) -> None:
-    """Print the debate verdict to stdout."""
     bar = "=" * 60
     print(f"\n{bar}")
     print("[VERDICT]")
@@ -51,7 +44,6 @@ def _print_verdict(verdict: Verdict) -> None:
 
 
 def _print_cost_report(summary: CostSummary) -> None:
-    """Print the session cost summary to stdout."""
     print("\n[COST REPORT]")
     print(
         f"  Total : ${summary.total_usd:.4f}"
@@ -59,15 +51,10 @@ def _print_cost_report(summary: CostSummary) -> None:
         f"  ({summary.utilisation_pct:.1f}% of budget)"
     )
     for agent_id, usage in summary.per_agent.items():
-        print(f"  {agent_id:<12}: ${usage:.4f}")
+        print(f"  {agent_id:<12}: ${usage.cost_usd:.4f}")
 
 
 def run() -> int:
-    """Run the debate CLI.
-
-    Returns:
-        ``0`` on success, ``1`` on :class:`~src.infrastructure.watchdog.WatchdogError`.
-    """
     args = parse_args()
     print(f"[INFO]  Loading config from '{args.config}' ...")
     config = ConfigLoader(args.config).load_setup()
@@ -86,6 +73,7 @@ def run() -> int:
         print(f"\n[DEBATE STARTING] Topic: {args.topic}\n")
         verdict = engine.start(args.topic)
         summary = engine.cost_reporter.compute()
+        _print_transcript(engine)
         _print_verdict(verdict)
         _print_cost_report(summary)
         return 0

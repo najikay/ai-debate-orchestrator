@@ -233,72 +233,151 @@ the CLI. No database or additional infrastructure is required.
 
 ## Screenshots
 
+## 🖥️ Web UI — Debate 1: "FC Barcelona has a Significant Cultural Impcat on Football more than Real Madrid"
+
 ### Main Page — Topic Form & Live Debate
 
-![Main page — topic input form and colour-coded debate bubbles]
-
-[text](README.md) 
 ![text](docs/images/1.PNG) 
+
 ![text](docs/images/2.PNG)
+
 ![text](docs/images/3.PNG) 
+
 ![text](docs/images/4.PNG) 
+
 ![text](docs/images/5.PNG) 
+
 ![text](docs/images/6.PNG) 
+
 ![text](docs/images/7.PNG) 
+
 ![text](docs/images/8.PNG) 
+
 ![text](docs/images/9.PNG) 
+
 ![text](docs/images/10.PNG) 
+
 ![text](docs/images/11.PNG) 
+
 ![text](docs/images/12.PNG) 
+
 ![text](docs/images/13.PNG) 
+
 ![text](docs/images/14.PNG) 
+
 ![text](docs/images/15.PNG) 
+
 ![text](docs/images/16.PNG) 
+
 ![text](docs/images/17.PNG) 
+
 ![text](docs/images/18.PNG) 
+
 ![text](docs/images/19.PNG) 
+
 ![text](docs/images/20.PNG) 
+
 ![text](docs/images/21.PNG)
 
 ### Final Verdict — Scores & Reasoning
 
 ![alt text](docs/images/22.PNG)
 
+---
+
+## 🖥️ Web UI — Debate 2: "Will AI Replace Human Workers?"
+
 ### Main Page — Topic Form & Live Debate
 
-![Main page — topic input form and colour-coded debate bubbles]
-
-
 ![alt text](docs/images/23.PNG)
+
 ![text](docs/images/24.PNG) 
+
 ![text](docs/images/25.PNG) 
+
 ![text](docs/images/26.PNG) 
+
 ![text](docs/images/27.PNG) 
+
 ![text](docs/images/28.PNG) 
+
 ![text](docs/images/29.PNG) 
+
 ![text](docs/images/30.PNG) 
+
 ![text](docs/images/31.PNG) 
+
 ![text](docs/images/32.PNG) 
+
 ![text](docs/images/33.PNG) 
+
 ![text](docs/images/34.PNG) 
+
 ![text](docs/images/35.PNG) 
+
 ![text](docs/images/36.PNG) 
+
 ![text](docs/images/37.PNG) 
+
 ![text](docs/images/38.PNG) 
+
 ![text](docs/images/39.PNG) 
+
 ![text](docs/images/40.PNG) 
+
 ![text](docs/images/41.PNG) 
+
 ![text](docs/images/42.PNG) 
+
 ![text](docs/images/43.PNG) 
+
 ![text](docs/images/44.PNG) 
+
 ![text](docs/images/45.PNG)
 
 ### Final Verdict — Scores & Reasoning
 
 ![alt text](docs/images/46.PNG)
 
-> Drop `main_page.png` and `final_verdict.png` into `docs/images/` to make these
-> images visible in GitHub.
+---
+
+### 💻 Terminal — Debate: Will AI Replace Human Workers?
+
+Running `uv run debate --topic "will AI replace human workers"` launches the debate
+directly from the command line. The system loads the config, initialises the three
+Claude agents, and begins the turn loop — printing live status as each agent call
+is dispatched to the Anthropic API.
+
+![alt text](docs/images/t1.PNG)
+
+### Main Page — Topic Form & Live Debate
+
+![text](docs/images/t2.PNG) 
+![text](docs/images/t3.PNG) 
+![text](docs/images/t4.PNG) 
+![text](docs/images/t5.PNG) 
+![text](docs/images/t6.PNG) 
+![text](docs/images/t7.PNG) 
+![text](docs/images/t8.PNG) 
+![text](docs/images/t9.PNG) 
+![text](docs/images/t10.PNG) 
+![text](docs/images/t11.PNG) 
+![text](docs/images/t12.PNG) 
+![text](docs/images/t13.PNG) 
+![text](docs/images/t14.PNG) 
+![text](docs/images/t15.PNG) 
+![text](docs/images/t16.PNG) 
+![text](docs/images/t17.PNG) 
+![text](docs/images/t18.PNG) 
+![text](docs/images/t19.PNG) 
+![text](docs/images/t20.PNG) 
+![text](docs/images/t21.PNG) 
+![text](docs/images/t22.PNG) 
+![text](docs/images/t23.PNG)
+
+### Final Verdict — Scores & Reasoning
+
+![alt text](docs/images/t24.PNG)
 
 ---
 
