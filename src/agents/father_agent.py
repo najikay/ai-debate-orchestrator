@@ -26,7 +26,7 @@ _RUBRIC_TEMPLATE = (
     "  }},\n"
     '  "current_lean": "pro_son | con_son",\n'
     '  "winner": "pro_son | con_son",\n'
-    '  "reasoning": "<min 50 chars>"\n}}'
+    '  "reasoning": "<2-3 sentences: WHY winner won, cite Logic/Dodging/Clarity>"\n}}'
 )
 
 
@@ -109,6 +109,7 @@ class FatherAgent(BaseAgent):
         parsed = json.loads(_extract_json(raw))
         result = dict(parsed["scores"])
         result["current_lean"] = parsed.get("current_lean", "")
+        result["reasoning"] = parsed.get("reasoning", "")
         return result
 
     def evaluate(self, state) -> Verdict:
@@ -129,10 +130,7 @@ class FatherAgent(BaseAgent):
             if pro_t == con_t
             else ("pro_son" if pro_t > con_t else "con_son")
         )
-        reasoning = (
-            f"pro_son scored {pro_t}/30, con_son scored {con_t}/30. "
-            f"Winner: {winner} based on cumulative rubric evaluation."
-        )
+        reasoning = scores.get("reasoning") or f"{winner} won ({pro_t} vs {con_t}/30)."
         return Verdict(
             verdict_id=str(uuid.uuid4()),
             winner=winner,

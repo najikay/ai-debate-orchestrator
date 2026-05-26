@@ -1,5 +1,4 @@
 """Gatekeeper — token-bucket rate limiting and FIFO request queuing.
-
 Enforces per-model RPM limits using a 60-second rolling window.
 Queues requests when the bucket is full (max depth: 50).
 Tracks cumulative token usage per agent, thread-safely.
@@ -141,7 +140,7 @@ class Gatekeeper:
             self._client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
         msg = self._client.messages.create(
             model=request.model,
-            max_tokens=1024,
+            max_tokens=4096,
             messages=[{"role": "user", "content": request.payload["prompt"]}],
         )
         return APIResponse(
