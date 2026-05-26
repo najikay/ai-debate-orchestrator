@@ -95,11 +95,8 @@ class DebateEngine:
             raise
         verdict = self.father.evaluate(self.state_manager.state)
         self.state_manager.record_verdict(verdict)
+        self._sync_costs()
         return verdict
-
-    # ------------------------------------------------------------------
-    # Private orchestration helpers
-    # ------------------------------------------------------------------
 
     def _run_turn_loop(self, min_turns: int) -> None:
         """Execute debate rounds until min_turns per side are complete."""
@@ -120,8 +117,19 @@ class DebateEngine:
             self.state_manager.record_message(con_msg)
             self.father.route(con_msg)
 
+    def _sync_costs(self) -> None:
+        """Replace cost records with current Gatekeeper usage totals."""
+        cr = self.cost_reporter
+        cr._records.clear()
+        for aid in ("father", "pro_son", "con_son"):
+            s = self.gatekeeper.get_usage(aid)
+            if s.total_tokens:
+                m = getattr(self, aid).model
+                cr.record_usage(aid, m, s.prompt_tokens, s.completion_tokens)
+
     def _check_budget(self) -> bool:
         """Return True if session cost has reached or exceeded the cap."""
+        self._sync_costs()
         summary = self.cost_reporter.compute()
         if summary.utilisation_pct >= _WARN_THRESHOLD:
             _logger.warning(

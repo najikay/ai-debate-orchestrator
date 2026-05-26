@@ -44,7 +44,8 @@ def create_app(config_path: str = "config/") -> Flask:
         if not topic:
             return jsonify({"error": "Topic is required."}), 400
         try:
-            cfg = ConfigLoader(app.config["CONFIG_PATH"]).load_setup()
+            _loader = ConfigLoader(app.config["CONFIG_PATH"])
+            cfg = {**_loader.load_setup(), "pricing": _loader.load_pricing()}
             engine = DebateEngine(cfg)
             verdict = engine.start(topic)
             summary = engine.cost_reporter.compute()

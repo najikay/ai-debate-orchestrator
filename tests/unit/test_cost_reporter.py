@@ -5,7 +5,10 @@ TDD order:
     → record_usage (new entry / accumulate)
     → compute (total_usd / per-agent / zero / utilisation_pct)
     → print_report (non-empty / agent names / total line / utilisation)
+    → _find_rates (exact match / fuzzy date-suffix / unknown model)
 """
+
+import logging
 
 import pytest
 
@@ -180,3 +183,79 @@ def test_print_report_output_contains_budget_utilisation_percentage(
     reporter.print_report(reporter.compute())
     out = capsys.readouterr().out
     assert "%" in out
+
+
+# ---------------------------------------------------------------------------
+# _find_rates — fuzzy longest-prefix matching
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def versioned_pricing() -> dict:
+    """Pricing with a real model key to test date-suffix fuzzy matching."""
+    return {
+        "schema_version": "1.0",
+        "models": {
+            "claude-haiku-4-5": {"input_per_1k": 0.0008, "output_per_1k": 0.004},
+        },
+    }
+
+
+def test_find_rates_exact_match_returns_correct_rates(
+    versioned_pricing: dict,
+) -> None:
+    """Exact key match returns the correct rates without logging."""
+    r = CostReporter(versioned_pricing, 2.0)
+    rates = r._find_rates("claude-haiku-4-5")
+    assert rates["input_per_1k"] == 0.0008
+    assert rates["output_per_1k"] == 0.004
+
+
+def test_find_rates_fuzzy_date_suffix_resolves(versioned_pricing: dict) -> None:
+    """A date-suffixed model ID (e.g. claude-haiku-4-5-20251001) resolves to
+    the base key via longest-prefix matching."""
+    r = CostReporter(versioned_pricing, 2.0)
+    rates = r._find_rates("claude-haiku-4-5-20251001")
+    assert rates["input_per_1k"] == 0.0008
+
+
+def test_find_rates_fuzzy_match_emits_warning(
+    versioned_pricing: dict, caplog: pytest.LogCaptureFixture
+) -> None:
+    """The fuzzy fallback path emits a WARNING log containing 'fuzzy'."""
+    r = CostReporter(versioned_pricing, 2.0)
+    with caplog.at_level(logging.WARNING, logger="src.infrastructure.cost_reporter"):
+        r._find_rates("claude-haiku-4-5-20251001")
+    assert "fuzzy" in caplog.text.lower()
+
+
+def test_find_rates_unknown_model_returns_zero_rates(
+    versioned_pricing: dict,
+) -> None:
+    """A model with < 60% prefix overlap returns zero-cost rates instead of raising."""
+    r = CostReporter(versioned_pricing, 2.0)
+    rates = r._find_rates("completely-unknown-xyz-9999")
+    assert rates["input_per_1k"] == 0.0
+    assert rates["output_per_1k"] == 0.0
+
+
+def test_find_rates_unknown_model_emits_warning(
+    versioned_pricing: dict, caplog: pytest.LogCaptureFixture
+) -> None:
+    """An unresolvable model emits a WARNING log containing 'unknown'."""
+    r = CostReporter(versioned_pricing, 2.0)
+    with caplog.at_level(logging.WARNING, logger="src.infrastructure.cost_reporter"):
+        r._find_rates("completely-unknown-xyz-9999")
+    assert "unknown" in caplog.text.lower()
+
+
+def test_compute_with_date_suffixed_model_returns_nonzero_cost(
+    versioned_pricing: dict,
+) -> None:
+    """compute() resolves fuzzy model names and produces a non-zero total_usd."""
+    r = CostReporter(versioned_pricing, 2.0)
+    r.record_usage("agent", "claude-haiku-4-5-20251001", 1000, 500)
+    summary = r.compute()
+    # 1000 * 0.0008/1k + 500 * 0.004/1k = 0.0008 + 0.002 = 0.0028
+    assert abs(summary.total_usd - 0.0028) < 1e-9
+    assert summary.utilisation_pct > 0.0

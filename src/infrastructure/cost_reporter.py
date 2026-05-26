@@ -4,7 +4,11 @@ Reads token rates from ``pricing.json`` and converts accumulated token
 counts into dollar amounts.  Prints a human-readable session summary.
 """
 
+import logging
+import os
 from dataclasses import dataclass, field
+
+_logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -64,10 +68,6 @@ class CostReporter:
         self.budget_cap_usd: float = budget_cap_usd
         self._records: dict[str, AgentUsage] = {}
 
-    # ------------------------------------------------------------------
-    # Public API
-    # ------------------------------------------------------------------
-
     def record_usage(
         self,
         agent_id: str,
@@ -90,19 +90,17 @@ class CostReporter:
         rec.completion_tokens += completion_tokens
 
     def _find_rates(self, model: str) -> dict:
-        """Return rates for *model*; falls back to family-token fuzzy match
-        so live API strings like ``claude-3-haiku-20240307`` resolve correctly."""
-        models = self._pricing["models"]
+        """Return pricing rates; fuzzy longest-prefix fallback for unknown IDs."""
+        models = self._pricing.get("models", {})
         if model in models:
             return models[model]
-        for key, rates in models.items():
-            tokens = [
-                t for t in key.split("-")
-                if t != "claude" and not t.isdigit() and len(t) > 3
-            ]
-            if any(t in model for t in tokens):
-                return rates
-        raise KeyError(f"No pricing found for model {model!r}")
+        if models:
+            best = max(models, key=lambda k: len(os.path.commonprefix([k, model])))
+            if len(os.path.commonprefix([best, model])) / len(best) >= 0.60:
+                _logger.warning("fuzzy price match: %r -> %r", model, best)
+                return models[best]
+        _logger.warning("UNKNOWN PRICE for %r; treating cost as $0", model)
+        return {"input_per_1k": 0.0, "output_per_1k": 0.0}
 
     def compute(self) -> CostSummary:
         """Calculate per-agent and total USD cost.
