@@ -6,6 +6,7 @@ requires-python = ">=3.11"
 authors = [{ name = "NajAmjad" }]
 dependencies = [
     "anthropic>=0.30.0",
+    "flask>=3.0.0",
     "jsonschema>=4.22.0",
     "python-dotenv>=1.0.0",
     "requests>=2.32.0",
@@ -22,7 +23,8 @@ dev = [
 package = true
 
 [project.scripts]
-debate = "src.ui.debate_cli:run"
+debate     = "src.ui.debate_cli:run"
+debate-web = "src.ui.app:main"
 
 [tool.ruff]
 line-length = 88
