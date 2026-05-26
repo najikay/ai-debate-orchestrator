@@ -966,6 +966,38 @@
 
 ---
 
+## Phase 5.2 — Final UI Scoreboard & Cost-Tracking Hotfixes
+
+> Applied after v2.0.0 to restore the numerical rubric scores in the web UI
+> and fix live Anthropic model price tracking via fuzzy-string matching.
+
+### 5.2.1 Restore Numerical Scores in Verdict UI
+
+- [x] Identify root cause: `templates/index.html` rendered only `reasoning` text; `scores` object present in API response but unused.
+- [x] Update verdict card jQuery: extract `data.verdict.scores.pro_son` and `data.verdict.scores.con_son`.
+- [x] Render scoreboard table rows: `Clarity: N/10 | Evidence: N/10 | Logic: N/10 → Total: N/30` for each agent.
+- [x] Verify both scoreboard table and `reasoning` paragraph appear together in verdict card.
+- [x] Manual smoke test: scores and reasoning visible after a live debate run.
+
+### 5.2.2 Fuzzy-String Model Price Matching
+
+- [x] Identify root cause: Anthropic API returns date-suffixed model IDs (e.g. `claude-haiku-4-5-20251001`) that miss `pricing.json` exact-key lookup.
+- [x] Add fuzzy fallback path to `CostReporter.compute()`: longest-common-prefix scan over all pricing keys.
+- [x] Apply 60% match-ratio threshold; flag as `"UNKNOWN PRICE"` and emit `[WARN]` when threshold not met.
+- [x] Emit `[WARN]` log line when fuzzy path is used, showing live model ID and matched key.
+- [x] Verify `uv run pytest` still passes — confirm 0 regressions.
+- [x] Confirm cost card now shows real USD values (not $0.0000) in web UI.
+
+### 5.2.3 Documentation Sync
+
+- [x] Update `docs/PRD.md`: add §15.5 (numerical scores in UI) and §15.6 (fuzzy price lookup).
+- [x] Update `docs/PLAN.md`: add §9.6 Phase 5.2 fix table and fuzzy-lookup algorithm.
+- [x] Update `docs/TODO.md`: add this Phase 5.2 checklist with all tasks checked off.
+- [x] Update `README.md`: polish setup/config instructions, clarify `ANTHROPIC_API_KEY`, add Screenshots section.
+- [x] Git commit: `docs: update PRD, PLAN, TODO, and README for final UI scores, cost tracking, and screenshot placeholders`.
+
+---
+
 ### 5.6 Final Release
 
 - [x] Run full test suite: `uv run pytest --cov=src --cov-fail-under=85` — confirm green.

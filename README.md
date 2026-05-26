@@ -1,6 +1,6 @@
 # AI Debate System
 
-**Group:** NajAmjad | **Course:** AI Orchestration | **Version:** 1.0.0
+**Group:** NajAmjad | **Course:** AI Orchestration | **Version:** 2.0.1
 
 A multi-agent AI orchestration system in which three Claude agents —
 Father (judge), Pro Son (affirmative), and Con Son (negative) — conduct
@@ -39,10 +39,12 @@ layered architecture overview.
 
 ## Prerequisites
 
-- Python 3.11+
-- `uv` package manager (≥ 0.4.0)
-- Anthropic API key (`ANTHROPIC_API_KEY`)
-- Optional: Search API key (`SEARCH_API_KEY`) for live web search
+| Requirement | Notes |
+|---|---|
+| Python 3.11+ | Check with `python --version` |
+| `uv` ≥ 0.4.0 | Install: `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
+| `ANTHROPIC_API_KEY` | **Required.** Get yours at console.anthropic.com |
+| `SEARCH_API_KEY` | Optional — enables live web search for debaters |
 
 ---
 
@@ -51,9 +53,18 @@ layered architecture overview.
 ```bash
 git clone <repo-url>
 cd A2
-cp .env-example .env          # fill in real API keys
-uv sync --extra dev           # installs all dependencies + dev tools
+
+# 1. Copy the env template and fill in your keys
+cp .env-example .env
+#    ANTHROPIC_API_KEY=sk-ant-...   ← required
+#    SEARCH_API_KEY=...             ← optional (Brave / Tavily)
+
+# 2. Install all dependencies (including dev tools)
+uv sync --extra dev
 ```
+
+> **`.env` is git-ignored** — it will never be committed. The `.env-example`
+> file documents every variable; it is safe to commit.
 
 ---
 
@@ -74,19 +85,23 @@ Key `setup.json` fields:
     "father":  { "model": "claude-sonnet-4-6" },
     "pro_son": { "model": "claude-haiku-4-5" },
     "con_son": { "model": "claude-haiku-4-5" }
-  }
+  },
+  "watchdog": { "timeout_seconds": 30, "max_retries": 1 }
 }
 ```
+
+`ANTHROPIC_API_KEY` is the only secret needed to run a full debate. All other
+values live in config files — **no API keys in source**.
 
 ---
 
 ## Usage
 
+### CLI
+
 ```bash
 uv run debate --topic "AI will replace human workers"
 ```
-
-### Options
 
 | Flag | Default | Description |
 |---|---|---|
@@ -94,16 +109,14 @@ uv run debate --topic "AI will replace human workers"
 | `--config PATH` | `config/` | Path to config directory |
 | `--dry-run` | `False` | Validate config only; no LLM calls |
 
----
-
-## Dry Run
+### Dry Run
 
 ```bash
 uv run debate --topic "AI ethics" --dry-run
 ```
 
 Loads and validates `setup.json`, prints agent model assignments, then
-exits without making any API calls.
+exits without making any API calls. Useful for CI config checks.
 
 ---
 
@@ -117,12 +130,29 @@ PORT=8080 uv run debate-web  # custom port via env var
 ```
 
 1. Open `http://localhost:5000` in your browser.
-2. Type a debate topic and click **Debate**.
-3. Watch colour-coded chat bubbles appear for each agent turn once the debate completes.
-4. The **Verdict** and **Cost** cards render automatically at the end.
+2. Enter a debate topic and click **Debate**.
+3. Colour-coded chat bubbles appear for each agent turn once the debate completes.
+4. The **Verdict** card shows the winner, per-dimension numerical scores
+   (Clarity / Evidence / Logic out of 10 each), and the Father's full reasoning.
+5. The **Cost** card shows total spend and budget utilisation.
 
-The web server uses the same `config/` directory and `ANTHROPIC_API_KEY` as the CLI.
-No database or additional infrastructure is required.
+The web server reads the same `config/` directory and `ANTHROPIC_API_KEY` as
+the CLI. No database or additional infrastructure is required.
+
+---
+
+## Screenshots
+
+### Main Page — Topic Form & Live Debate
+
+![Main page — topic input form and colour-coded debate bubbles](docs/images/main_page.png)
+
+### Final Verdict — Scores & Reasoning
+
+![Final verdict card with numerical scores and Father's reasoning](docs/images/final_verdict.png)
+
+> Drop `main_page.png` and `final_verdict.png` into `docs/images/` to make these
+> images visible in GitHub.
 
 ---
 

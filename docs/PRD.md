@@ -764,6 +764,48 @@ and is therefore the only part written to the shared transcript and rendered in 
 UI.  The `"opponent_analysis"` and `"debate_strategy"` fields remain internal to
 the agent turn and are never exposed to the Father or the web client.
 
+### 15.5 Restored Numerical Scores in Web UI
+
+**Problem:** After the CoT schema refactor (§15.4) the verdict card showed only the
+Father's `reasoning` narrative text. The raw per-dimension rubric numbers
+(`clarity`, `evidence`, `logic`, `total` for each debater) were present in the
+backend JSON response but were not rendered in `templates/index.html`.
+
+**Solution:**
+- `POST /api/debate` already returned the full `scores` object inside the verdict
+  payload; no backend changes were required.
+- `templates/index.html` was updated to extract and display the scoreboard table
+  alongside the reasoning block:
+
+```
+Pro Son  — Clarity: 8/10 | Evidence: 9/10 | Logic: 7/10 → 24/30
+Con Son  — Clarity: 6/10 | Evidence: 7/10 | Logic: 8/10 → 21/30
+```
+
+- Both the numerical score table and the `reasoning` paragraph are rendered inside
+  the verdict card; they are displayed together, not in place of each other.
+
+### 15.6 Fuzzy-String Matching for Live Model Price Lookup
+
+**Problem:** The `CostReporter` performed a strict dictionary key lookup against
+`config/pricing.json` using the exact model-ID string returned by the Anthropic
+API. When Anthropic changed model ID strings (e.g. appending a date suffix such as
+`claude-haiku-4-5-20251001`), the lookup raised a `KeyError` and the cost was
+silently treated as `$0`, understating session spend.
+
+**Solution — fuzzy model-name matching in `CostReporter.compute()`:**
+1. On a `KeyError`, `CostReporter` falls back to a fuzzy scan of all keys in
+   `config/pricing.json`.
+2. The fuzzy scan finds the pricing entry whose key is the **longest common
+   prefix** substring match with the live model ID (case-insensitive).
+3. If the longest match covers ≥ 60% of the pricing key's length, that entry is
+   used; otherwise the model is flagged as `"UNKNOWN PRICE"` and cost is `$0`.
+4. A `[WARN]` log line is emitted whenever the fuzzy path is taken, showing both
+   the live model ID and the matched pricing key.
+
+This makes the cost tracker resilient to minor version-suffix changes without
+requiring a `pricing.json` update on every Anthropic model release.
+
 ---
 
 ## 14. Out of Scope (v1.0)

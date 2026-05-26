@@ -546,6 +546,30 @@ build_prompt()
     DebateMessage.content = argument  ← only public field in transcript
 ```
 
+### 9.6 Phase 5.2 — Final UI Scoreboard & Cost-Tracking Hotfixes
+
+| Fix | File(s) Affected | Root Cause | Change |
+|-----|-----------------|-----------|--------|
+| Numerical scores in UI | `templates/index.html` | Score table not rendered after CoT refactor | jQuery now populates per-agent `clarity / evidence / logic / total` cells in verdict card |
+| Fuzzy model price lookup | `src/infrastructure/cost_reporter.py` | Strict key match fails on Anthropic date-suffix model IDs | `compute()` falls back to longest-common-prefix fuzzy scan; warns + flags "UNKNOWN PRICE" if match < 60% |
+
+**Fuzzy lookup algorithm (`CostReporter.compute()`):**
+
+```
+for each agent_usage:
+    try:
+        price = pricing[model]           ← exact match (fast path)
+    except KeyError:
+        best_key = max(pricing.keys(),
+                       key=lambda k: len(os.path.commonprefix([k, model])))
+        if len(commonprefix) / len(best_key) >= 0.60:
+            price = pricing[best_key]
+            LOG WARN "fuzzy match: {model} → {best_key}"
+        else:
+            price = {"input_per_1k": 0, "output_per_1k": 0}
+            LOG WARN "UNKNOWN PRICE for {model}"
+```
+
 ### 9.4 TDD Plan for Phase 5
 
 | Test File | Scope | Notes |
