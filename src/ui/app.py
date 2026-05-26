@@ -1,8 +1,9 @@
 """Flask web application for the AI Debate System.
 
 Provides:
-    GET  /               — main chat interface (Bootstrap 5 + jQuery)
-    POST /api/debate     — run a full debate and return JSON results
+    GET  /                    — main chat interface (Bootstrap 5 + jQuery)
+    POST /api/debate          — run a full debate and return JSON results
+    GET  /api/debate/stream   — SSE stream: yields messages live as they arrive
 
 Usage::
 
@@ -10,26 +11,25 @@ Usage::
     # then open http://localhost:5000
 """
 
+import json
 import os
+import queue
+import threading
 from pathlib import Path
 
-from flask import Flask, jsonify, render_template, request
+from dotenv import load_dotenv
+from flask import Flask, Response, jsonify, render_template, request
 
 from src.engine.debate_engine import DebateEngine
 from src.infrastructure.config_loader import ConfigLoader
+
+load_dotenv()
 
 _TEMPLATE_DIR = Path(__file__).parent.parent.parent / "templates"
 
 
 def create_app(config_path: str = "config/") -> Flask:
-    """Create and configure the Flask application.
-
-    Args:
-        config_path: Path to the ``config/`` directory.
-
-    Returns:
-        Configured :class:`flask.Flask` instance.
-    """
+    """Create and configure the Flask application."""
     app = Flask(__name__, template_folder=str(_TEMPLATE_DIR))
     app.config["CONFIG_PATH"] = config_path
 
@@ -44,8 +44,9 @@ def create_app(config_path: str = "config/") -> Flask:
         if not topic:
             return jsonify({"error": "Topic is required."}), 400
         try:
-            _loader = ConfigLoader(app.config["CONFIG_PATH"])
-            cfg = {**_loader.load_setup(), "pricing": _loader.load_pricing()}
+            loader = ConfigLoader(app.config["CONFIG_PATH"])
+            cfg = loader.load_setup()
+            cfg["pricing"] = loader.load_pricing()
             engine = DebateEngine(cfg)
             verdict = engine.start(topic)
             summary = engine.cost_reporter.compute()
@@ -76,6 +77,66 @@ def create_app(config_path: str = "config/") -> Flask:
         except Exception as exc:  # noqa: BLE001
             return jsonify({"error": str(exc)}), 500
 
+    @app.route("/api/debate/stream")
+    def stream_debate():
+        topic = request.args.get("topic", "").strip()
+        if not topic:
+            return jsonify({"error": "Topic is required."}), 400
+
+        msg_queue: queue.Queue = queue.Queue()
+
+        def run_engine() -> None:
+            try:
+                loader = ConfigLoader(app.config["CONFIG_PATH"])
+                cfg = loader.load_setup()
+                cfg["pricing"] = loader.load_pricing()
+                engine = DebateEngine(cfg)
+
+                def on_msg(msg) -> None:
+                    msg_queue.put(("message", {
+                        "sender": msg.sender,
+                        "content": msg.content,
+                        "turn": msg.turn,
+                        "sources": msg.sources,
+                    }))
+
+                engine.state_manager.on_message = on_msg
+                verdict = engine.start(topic)
+                summary = engine.cost_reporter.compute()
+                msg_queue.put(("verdict", {
+                    "winner": verdict.winner,
+                    "reasoning": verdict.reasoning,
+                    "turn_count": verdict.turn_count,
+                    "scores": verdict.scores,
+                    "cost": {
+                        "total_usd": round(summary.total_usd, 4),
+                        "utilisation_pct": round(summary.utilisation_pct, 1),
+                    },
+                }))
+            except Exception as exc:  # noqa: BLE001
+                msg_queue.put(("error", str(exc)))
+            finally:
+                msg_queue.put(("done", None))
+
+        threading.Thread(target=run_engine, daemon=True).start()
+
+        def generate():
+            while True:
+                kind, payload = msg_queue.get()
+                data = json.dumps({"type": kind, "data": payload})
+                yield f"data: {data}\n\n"
+                if kind in ("done", "error"):
+                    break
+
+        return Response(
+            generate(),
+            mimetype="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "X-Accel-Buffering": "no",
+            },
+        )
+
     return app
 
 
@@ -83,4 +144,4 @@ def main() -> None:
     """Entry point for ``uv run debate-web``."""
     app = create_app()
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    app.run(host="0.0.0.0", port=port, debug=False, threaded=True)

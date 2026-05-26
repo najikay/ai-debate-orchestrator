@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI Debate System</title>
-  <!-- Bootstrap 5 CSS -->
   <link
     rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
@@ -44,8 +43,26 @@
     }
 
     #spinner { display: none; }
-
     .verdict-card { border-left: 5px solid #0d6efd; }
+
+    #live-status {
+      display: none;
+      font-size: .8rem;
+      color: #6c757d;
+    }
+    .live-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: #28a745;
+      border-radius: 50%;
+      animation: pulse 1s infinite;
+      margin-right: 5px;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .3; }
+    }
   </style>
 </head>
 <body>
@@ -80,19 +97,23 @@
   <!-- Spinner -->
   <div id="spinner" class="text-center my-3">
     <div class="spinner-border text-primary" role="status"></div>
-    <div class="mt-2 text-muted small">Running debate — this may take a few minutes…</div>
+    <div class="mt-2 text-muted small">Starting debate…</div>
+  </div>
+
+  <!-- Live status -->
+  <div id="live-status" class="text-center mb-2">
+    <span class="live-dot"></span> Debate in progress — agents are arguing live…
   </div>
 
   <!-- Chat box -->
   <div id="chat-box" class="shadow-sm mb-3"></div>
 
-  <!-- Verdict card (hidden until debate ends) -->
+  <!-- Verdict card -->
   <div id="verdict-card" class="card shadow-sm verdict-card mb-3" style="display:none;">
     <div class="card-header fw-bold">Verdict</div>
     <div class="card-body">
       <p class="mb-1"><strong>Winner:</strong> <span id="v-winner"></span></p>
       <p class="mb-2"><strong>Turns:</strong> <span id="v-turns"></span></p>
-      <!-- Raw scores row -->
       <div id="v-scores" class="row g-2 mb-2" style="display:none;">
         <div class="col-6">
           <div class="card border-primary h-100">
@@ -124,7 +145,7 @@
     </div>
   </div>
 
-  <!-- Cost card (hidden until debate ends) -->
+  <!-- Cost card -->
   <div id="cost-card" class="card shadow-sm mb-3 text-muted small" style="display:none;">
     <div class="card-body">
       Cost: $<span id="c-total"></span>
@@ -132,15 +153,13 @@
     </div>
   </div>
 
-</div><!-- /container -->
+</div>
 
-<!-- Bootstrap JS bundle -->
 <script
   src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
   integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jyor3NBAIsDfwg8r8RXW0ECGXVgQo"
   crossorigin="anonymous"
 ></script>
-<!-- jQuery -->
 <script
   src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"
   integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
@@ -148,108 +167,130 @@
 ></script>
 
 <script>
-/* ------------------------------------------------------------------ */
-/*  Sender helper                                                       */
-/* ------------------------------------------------------------------ */
 function senderClass(sender) {
-  if (sender === 'pro_son')  return 'bubble-pro';
-  if (sender === 'con_son')  return 'bubble-con';
+  if (sender === 'pro_son') return 'bubble-pro';
+  if (sender === 'con_son') return 'bubble-con';
   return 'bubble-father';
 }
 
 function senderLabel(sender) {
-  if (sender === 'pro_son')  return 'PRO';
-  if (sender === 'con_son')  return 'CON';
+  if (sender === 'pro_son') return 'PRO';
+  if (sender === 'con_son') return 'CON';
   return 'FATHER';
 }
 
 function winnerLabel(w) {
-  return w === 'pro_son' ? 'Pro Son' : 'Con Son';
+  return w === 'pro_son' ? '🔵 Pro Son' : '🔴 Con Son';
 }
 
-/* ------------------------------------------------------------------ */
-/*  Append a single chat bubble                                         */
-/* ------------------------------------------------------------------ */
 function appendBubble(msg) {
   var cls   = senderClass(msg.sender);
   var label = senderLabel(msg.sender);
   var src   = (msg.sources && msg.sources.length)
-              ? '<div class="small text-muted mt-1">' +
-                msg.sources.slice(0,2).map(function(s){
-                  return '<a href="' + s + '" target="_blank" rel="noopener">'
-                       + s.substring(0, 50) + '…</a>';
-                }).join(' ') + '</div>'
-              : '';
+    ? '<div class="small text-muted mt-1">' +
+      msg.sources.slice(0,2).map(function(s) {
+        return '<a href="' + s + '" target="_blank" rel="noopener">'
+             + s.substring(0, 50) + '…</a>';
+      }).join(' ') + '</div>'
+    : '';
 
   var html = '<div class="d-flex flex-column '
-           + (msg.sender === 'pro_son' ? 'align-items-end' : 'align-items-start') + '">'
-           + '<div class="label-badge text-muted">' + label + '</div>'
-           + '<div class="bubble ' + cls + '">'
-           + $('<div>').text(msg.content).html()
-           + src
-           + '</div></div>';
+    + (msg.sender === 'pro_son' ? 'align-items-end' : 'align-items-start') + '">'
+    + '<div class="label-badge text-muted">' + label + '</div>'
+    + '<div class="bubble ' + cls + '">'
+    + $('<div>').text(msg.content).html()
+    + src
+    + '</div></div>';
 
   $('#chat-box').append(html);
   var box = document.getElementById('chat-box');
   box.scrollTop = box.scrollHeight;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Form submit                                                         */
-/* ------------------------------------------------------------------ */
+function showVerdict(verdict) {
+  $('#v-winner').text(winnerLabel(verdict.winner));
+  $('#v-turns').text(verdict.turn_count);
+  $('#v-reasoning').text(verdict.reasoning);
+  var sc = verdict.scores || {};
+  if (sc.pro_son && sc.con_son) {
+    var ps = sc.pro_son, cs = sc.con_son;
+    $('#v-pro-logic').text(ps.logic);
+    $('#v-pro-clarity').text(ps.clarity);
+    $('#v-pro-evidence').text(ps.evidence);
+    $('#v-pro-total').text(ps.total);
+    $('#v-con-logic').text(cs.logic);
+    $('#v-con-clarity').text(cs.clarity);
+    $('#v-con-evidence').text(cs.evidence);
+    $('#v-con-total').text(cs.total);
+    $('#v-scores').show();
+  }
+  $('#verdict-card').show();
+  if (verdict.cost) {
+    $('#c-total').text(verdict.cost.total_usd.toFixed(4));
+    $('#c-pct').text(verdict.cost.utilisation_pct.toFixed(1));
+    $('#cost-card').show();
+  }
+}
+
 $('#debate-form').on('submit', function(e) {
   e.preventDefault();
-
   var topic = $('#topic-input').val().trim();
   if (!topic) return;
 
-  /* reset UI */
+  // Reset UI
   $('#chat-box').empty();
-  $('#verdict-card, #cost-card').hide();
+  $('#verdict-card, #cost-card, #live-status').hide();
+  $('#v-scores').hide();
   $('#spinner').show();
   $('button[type=submit]').prop('disabled', true);
 
-  $.ajax({
-    url: '/api/debate',
-    method: 'POST',
-    contentType: 'application/json',
-    data: JSON.stringify({ topic: topic }),
-    success: function(data) {
-      /* render transcript */
-      $.each(data.transcript, function(_, msg) { appendBubble(msg); });
+  // Close any existing stream
+  if (window._debateSource) {
+    window._debateSource.close();
+  }
 
-      /* verdict */
-      $('#v-winner').text(winnerLabel(data.verdict.winner));
-      $('#v-turns').text(data.verdict.turn_count);
-      $('#v-reasoning').text(data.verdict.reasoning);
-      /* scores */
-      var sc = data.verdict.scores || {};
-      if (sc.pro_son && sc.con_son) {
-        var ps = sc.pro_son, cs = sc.con_son;
-        $('#v-pro-logic').text(ps.logic); $('#v-pro-clarity').text(ps.clarity);
-        $('#v-pro-evidence').text(ps.evidence); $('#v-pro-total').text(ps.total);
-        $('#v-con-logic').text(cs.logic); $('#v-con-clarity').text(cs.clarity);
-        $('#v-con-evidence').text(cs.evidence); $('#v-con-total').text(cs.total);
-        $('#v-scores').show();
+  var url = '/api/debate/stream?topic=' + encodeURIComponent(topic);
+  var source = new EventSource(url);
+  window._debateSource = source;
+
+  source.onmessage = function(e) {
+    var event = JSON.parse(e.data);
+
+    if (event.type === 'message') {
+      if ($('#spinner').is(':visible')) {
+        $('#spinner').hide();
+        $('#live-status').show();
       }
-      $('#verdict-card').show();
+      appendBubble(event.data);
 
-      /* cost */
-      $('#c-total').text(data.cost.total_usd.toFixed(4));
-      $('#c-pct').text(data.cost.utilisation_pct.toFixed(1));
-      $('#cost-card').show();
-    },
-    error: function(xhr) {
-      var msg = (xhr.responseJSON && xhr.responseJSON.error) || 'Debate failed.';
-      $('#chat-box').append(
-        '<div class="alert alert-danger">' + $('<div>').text(msg).html() + '</div>'
-      );
-    },
-    complete: function() {
+    } else if (event.type === 'verdict') {
+      $('#live-status').hide();
+      showVerdict(event.data);
+
+    } else if (event.type === 'error') {
+      $('#live-status').hide();
       $('#spinner').hide();
+      $('#chat-box').append(
+        '<div class="alert alert-danger">' +
+        $('<div>').text(event.data).html() +
+        '</div>'
+      );
+
+    } else if (event.type === 'done') {
+      source.close();
       $('button[type=submit]').prop('disabled', false);
     }
-  });
+  };
+
+  source.onerror = function() {
+    $('#spinner').hide();
+    $('#live-status').hide();
+    $('#chat-box').append(
+      '<div class="alert alert-danger">Connection lost. Please try again.</div>'
+    );
+    source.close();
+    $('button[type=submit]').prop('disabled', false);
+  };
 });
 </script>
 </body>
