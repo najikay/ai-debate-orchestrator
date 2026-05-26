@@ -1,31 +1,57 @@
 # AI Debate System
 
-**Group:** NajAmjad | **Course:** AI Orchestration | **Version:** 2.0.1
+![Python](https://img.shields.io/badge/Python-3.11%2B-blue?logo=python)
+![Flask](https://img.shields.io/badge/Flask-3.0-lightgrey?logo=flask)
+![Claude](https://img.shields.io/badge/Powered%20by-Claude%20Haiku%20%26%20Sonnet-orange)
+![Tests](https://img.shields.io/badge/Tests-209%20passing-brightgreen)
+![Version](https://img.shields.io/badge/Version-2.0.1-informational)
 
-> A production-quality multi-agent orchestration system: three Claude-powered agents
-> conduct a fully scored, structured debate on any topic you supply — with live cost
-> tracking, Chain-of-Thought reasoning, and a responsive web UI.
+**Group:** NajAmjad | **Course:** AI Orchestration
+
+> A production-quality multi-agent orchestration system built on the Anthropic SDK.
+> Three Claude-powered agents conduct a fully scored, structured debate on any topic —
+> with Chain-of-Thought reasoning, live cost tracking, real-time web streaming, and a
+> 209-test defensive engineering suite.
 
 ---
 
-## Introduction
+## Key Features
 
-The AI Debate System wires three LLM agents into a structured debate protocol.
-**Father** (Claude Sonnet) moderates and judges; **Pro Son** and **Con Son**
-(Claude Haiku) argue for and against the topic respectively. Every inter-agent
-message is a validated JSON envelope. After a minimum of 20 turns the Father
-scores both debaters on a three-dimension rubric and declares a non-draw winner.
-
-**Key technical strengths:**
-
-| Strength | Implementation |
+| Feature | Detail |
 |---|---|
-| Custom Agent SDK | `BaseAgent` ABC with JSON schema validation, retry logic, and Gatekeeper routing — no LangChain dependency |
-| Chain-of-Thought reasoning | Structured `{opponent_analysis, debate_strategy, argument}` CoT JSON forces explicit reasoning before every argument |
-| Defensive engineering | Per-call `max_tokens=4096` cap, budget enforcement, resilient `_extract_json()` strips markdown fences, `_enforce_position` retry (max 2×) |
-| Live cost tracking | `Gatekeeper` accumulates token totals → `_sync_costs()` wires them to `CostReporter` → fuzzy model-ID matching prevents silent `$0` costs |
-| Watchdog recovery | `concurrent.futures` timeout with one retry; graceful `WatchdogError` shutdown saves partial state to disk |
-| Web + CLI dual interface | Same `DebateEngine` serves both `uv run debate` (CLI) and `uv run debate-web` (Flask + Bootstrap 5) |
+| **Custom Agent SDK** | `BaseAgent` ABC with JSON schema validation, retry logic, and Gatekeeper routing — zero LangChain dependency |
+| **Chain-of-Thought Reasoning** | Structured `{opponent_analysis, debate_strategy, argument}` CoT JSON forces explicit reasoning before every argument |
+| **Live Web Streaming** | Server-Sent Events (SSE) push each agent turn to the browser in real time — no page refresh, no waiting |
+| **Color-Coded CLI** | Terminal output color-coded by agent (Father=yellow, Pro=blue, Con=red) with live turn-by-turn printing |
+| **Transcript Save** | `--save` flag persists full debate JSON to `debate_history/` for post-session review |
+| **Live Cost Tracking** | `Gatekeeper` accumulates token totals per agent → `CostReporter` computes USD spend against a configurable budget cap |
+| **Fuzzy Pricing Lookup** | `_find_rates()` handles Anthropic date-suffix model IDs (e.g. `claude-haiku-4-5-20251001`) without silent `$0` costs |
+| **Watchdog Recovery** | `concurrent.futures` timeout with one retry; graceful `WatchdogError` shutdown preserves partial state |
+| **Defensive JSON Parsing** | `_extract_json()` strips markdown fences and extracts `{…}` blocks; `MessageParseError` on failure |
+| **209-Test Suite** | Full TDD coverage across unit and integration layers, enforced at ≥ 85% by `pytest-cov` |
+
+---
+
+## Visual Showcase
+
+### 🖥️ Web GUI — Live Debate Streaming: "FC Barcelona has a Significant Cultural impact on Football more than Real Madrid"
+
+| Debate Starting | In Progress | Final Verdict |
+|---|---|---|
+| ![Web Start](docs/images/archive/image.PNG) | ![Web Progress](docs/images/archive/web_progress1.PNG) | ![Web Verdict](docs/images/archive/web_verdict.PNG) |
+
+### 🖥️ Web GUI — Live Debate Streaming:  "Will AI Replace Human Workers?"
+
+| Debate Starting | In Progress | Final Verdict |
+|---|---|---|
+| ![Web Start](docs/images/archive/image2.png) | ![Web Progress](docs/images/archive/web_progress11.png) | ![Web Progress](docs/images/archive/web_verdict1.png) | 
+
+
+### 💻 Terminal CLI — Color-Coded Live Output: "Will AI Replace Human Workers?"
+
+| Debate Starting | In Progress | Final Verdict |
+|---|---|---|
+| ![Terminal Start](docs/images/archive/terminal_start.png) | ![Terminal Progress](docs/images/archive/terminal_progress.png) | ![Terminal Verdict](docs/images/archive/terminal_verdict.png) |
 
 ---
 
@@ -37,10 +63,10 @@ scores both debaters on a three-dimension rubric and declares a non-draw winner.
 |---|---|---|
 | Python | 3.11+ | Check: `python --version` |
 | `uv` | ≥ 0.4.0 | Install: `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
-| `ANTHROPIC_API_KEY` | — | **Required.** Get yours at console.anthropic.com |
-| `SEARCH_API_KEY` | — | Optional — enables live web search (Tavily / Brave) |
+| `ANTHROPIC_API_KEY` | — | **Required.** Get yours at [console.anthropic.com](https://console.anthropic.com) |
+| `SEARCH_API_KEY` | — | Optional — enables live web search via Tavily or Brave |
 
-### Setup
+### Installation
 
 ```bash
 # 1. Clone the repository
@@ -52,22 +78,35 @@ cd ai-debate-orchestrator
 copy .env-example .env
 # Mac/Linux:
 cp .env-example .env
+
 # Open .env and set:
 #   ANTHROPIC_API_KEY=sk-ant-...    ← required
 #   SEARCH_API_KEY=...              ← optional
 
-# 3. Install all dependencies (runtime + dev tools in one step)
+# 3. Install all dependencies
 uv sync --extra dev
 ```
 
 > **`.env` is git-ignored** — it will never be staged or committed.
-> The committed `.env-example` documents every variable with comments.
 
 ---
 
-## How to Run
+## Usage
 
-### Interactive CLI
+### Web GUI (Recommended)
+
+```bash
+uv run debate-web                  # starts at http://localhost:5000
+PORT=8080 uv run debate-web        # custom port
+```
+
+1. Open `http://localhost:5000` in your browser
+2. Type a debate topic and click **Debate**
+3. Watch colour-coded agent bubbles stream **live** as the debate unfolds
+4. The **Verdict** card renders the winner, per-dimension scores, and the Father's full reasoning
+5. The **Cost** card shows real USD spend and budget utilisation
+
+### Terminal CLI
 
 ```bash
 uv run debate --topic "AI will replace human workers"
@@ -77,32 +116,25 @@ uv run debate --topic "AI will replace human workers"
 |---|---|---|
 | `--topic TEXT` | *(required)* | The debate topic |
 | `--config PATH` | `config/` | Path to the config directory |
-| `--dry-run` | `False` | Validate config only; makes no LLM calls |
-| `--save` | `False` | Save transcript to `debate_history/` |
+| `--dry-run` | `False` | Validate config only — makes no API calls |
+| `--save` | `False` | Save full transcript to `debate_history/` |
 
-**Dry-run mode** — validate your setup without spending tokens:
+**Dry-run** — validate your setup without spending tokens:
 
 ```bash
 uv run debate --topic "AI ethics" --dry-run
 ```
 
-### Flask Web GUI
+**Save transcript** — persist the full debate to a JSON file:
 
 ```bash
-uv run debate-web                  # starts at http://localhost:5000
-PORT=8080 uv run debate-web        # custom port via env var
+uv run debate --topic "AI will replace human workers" --save
 ```
 
-Open `http://localhost:5000` in your browser, enter a topic, and click **Debate**.
-Colour-coded chat bubbles stream each agent's turn. The **Verdict** card shows the
-winner, per-dimension numerical scores (Clarity / Evidence / Logic out of 10), and
-the Father's full reasoning. The **Cost** card shows live USD spend and budget
-utilisation.
-
-### Test Suite and Linter
+### Test Suite & Linter
 
 ```bash
-# Unit tests only — fast, no API key required
+# Unit tests — fast, no API key required
 uv run pytest -m "not slow"
 
 # Integration tests — stubbed LLM, no API key required
@@ -111,39 +143,106 @@ uv run pytest -m slow
 # Full suite with coverage enforcement (≥ 85%)
 uv run pytest --cov=src --cov-fail-under=85
 
-# Linter — zero-tolerance ruff check across the entire repo
+# Zero-tolerance ruff linter
 uv run ruff check .
 ```
 
 ---
 
-## Architecture
+## Architecture & Defensive Engineering
 
-See `docs/PLAN.md` for the full C4 context diagram, class hierarchy, and layered
-architecture overview.
+### System Layers
 
-**Layers (bottom → top):**
+```
+┌─────────────────────────────────────────────┐
+│  UI Layer        debate_cli.py  │  app.py   │
+├─────────────────────────────────────────────┤
+│  Engine Layer    DebateEngine  │ StateManager│
+├─────────────────────────────────────────────┤
+│  Agent Layer   FatherAgent │ ProSon │ ConSon │
+├─────────────────────────────────────────────┤
+│  Skills        WebSearchTool │ LogicAnalyzer │
+├─────────────────────────────────────────────┤
+│  Infrastructure  Gatekeeper │ Watchdog       │
+│                  CostReporter │ ConfigLoader  │
+└─────────────────────────────────────────────┘
+```
 
-| Layer | Key classes |
-|---|---|
-| Infrastructure | `ConfigLoader`, `LoggerManager`, `Gatekeeper`, `Watchdog`, `CostReporter` |
-| Skills | `WebSearchTool`, `LogicAnalyzerTool` |
-| Agents | `BaseAgent`, `FatherAgent`, `ProSonAgent`, `ConSonAgent` |
-| Engine | `StateManager`, `DebateEngine` |
-| UI | `DebateCLI` (CLI), `app.py` (Flask) |
-
----
-
-## Agent Roles
+### Agent Roles
 
 | Agent | Model | Role |
 |---|---|---|
-| Father | `claude-sonnet-4-6` | Moderator, message router, and final judge |
-| Pro Son | `claude-haiku-4-5` | Argues FOR the topic; must never concede |
-| Con Son | `claude-haiku-4-5` | Argues AGAINST the topic; must never concede |
+| **Father** | `claude-sonnet-4-6` | Moderator, message router, and final judge |
+| **Pro Son** | `claude-haiku-4-5` | Argues **FOR** the topic — must never concede |
+| **Con Son** | `claude-haiku-4-5` | Argues **AGAINST** the topic — must never concede |
 
-All messages route exclusively through the Father. Direct agent-to-agent
-communication is prohibited by design and enforced in the routing layer.
+All messages route exclusively through the Father. Direct agent-to-agent communication
+is prohibited by design and enforced in the routing layer.
+
+### Chain-of-Thought Reasoning
+
+Every Pro Son and Con Son argument is structured as a three-field CoT JSON object
+before the argument text is extracted:
+
+```json
+{
+  "opponent_analysis": "What the opponent just argued and where it is weak…",
+  "debate_strategy":   "How I will counter and what angle I will take…",
+  "argument":          "The actual argument delivered to the Father."
+}
+```
+
+This forces the agent to reason explicitly before speaking, producing more coherent
+and strategically consistent arguments across all 20+ turns.
+
+### Persuasiveness Rubric
+
+The Father scores each debater on three dimensions (1–10 each, max 30 total):
+
+| Dimension | Criterion |
+|---|---|
+| **Clarity** | How clearly and concisely were arguments expressed? |
+| **Evidence Quality** | How well were claims supported by cited sources? |
+| **Logical Consistency** | Were arguments internally consistent across all turns? |
+
+Equal totals trigger a last-4-turn momentum tiebreaker. Draws are prohibited —
+`"draw": false` is enforced by the `verdict.json` schema.
+
+### Defensive Engineering
+
+| Scenario | Behaviour |
+|---|---|
+| Agent hangs > 30 s | `Watchdog` retries once; raises `WatchdogError` on second timeout |
+| Budget cap reached | Turn loop exits early; `evaluate()` still runs on partial transcript |
+| Position drift | Son agent retries up to 2×; `AgentFailureError` raised after exhaustion |
+| Invalid JSON from LLM | `_extract_json()` strips fences + extracts `{…}`; `MessageParseError` on failure |
+| Schema violation | `jsonschema.ValidationError` caught → `MessageParseError` |
+| Unknown model ID | Fuzzy prefix match (≥ 60%); `[WARN]` logged if below threshold |
+
+### JSON Message Contract
+
+Every inter-agent message is validated against `src/schemas/debate_message.json`:
+
+```json
+{
+  "message_id":  "uuid-v4",
+  "sender":      "pro_son | con_son | father",
+  "recipient":   "father | pro_son | con_son",
+  "turn":        2,
+  "content":     "Argument text…",
+  "sources":     ["https://example.com/article"],
+  "token_count": 342,
+  "timestamp":   "2026-05-25T12:00:00+00:00"
+}
+```
+
+### State Machine
+
+```
+INITIALIZATION → IN_PROGRESS → EVALUATION → TERMINATED
+```
+
+All transitions are one-directional and enforced by `StateManager`.
 
 ---
 
@@ -169,254 +268,6 @@ Key `setup.json` fields:
 }
 ```
 
-`ANTHROPIC_API_KEY` is the only secret needed to run a full debate. All other
-values live in config files — **no API keys in source**.
-
----
-
-
-## Web GUI
-
-A responsive Flask + Bootstrap 5 interface is available alongside the CLI.
-
-```bash
-uv run debate-web          # starts on http://localhost:5000
-PORT=8080 uv run debate-web  # custom port via env var
-```
-
-1. Open `http://localhost:5000` in your browser.
-2. Enter a debate topic and click **Debate**.
-3. Colour-coded chat bubbles appear for each agent turn once the debate completes.
-4. The **Verdict** card shows the winner, per-dimension numerical scores
-   (Clarity / Evidence / Logic out of 10 each), and the Father's full reasoning.
-5. The **Cost** card shows total spend and budget utilisation.
-
-The web server reads the same `config/` directory and `ANTHROPIC_API_KEY` as
-the CLI. No database or additional infrastructure is required.
-
----
-
-## Screenshots
-
-## 🖥️ Web UI — Debate 1: "FC Barcelona has a Significant Cultural Impact on Football more than Real Madrid"
-
-### Main Page — Topic Form & Live Debate
-
-![text](docs/images/1.PNG) 
-
-![text](docs/images/2.PNG)
-
-![text](docs/images/3.PNG) 
-
-![text](docs/images/4.PNG) 
-
-![text](docs/images/5.PNG) 
-
-![text](docs/images/6.PNG) 
-
-![text](docs/images/7.PNG) 
-
-![text](docs/images/8.PNG) 
-
-![text](docs/images/9.PNG) 
-
-![text](docs/images/10.PNG) 
-
-![text](docs/images/11.PNG) 
-
-![text](docs/images/12.PNG) 
-
-![text](docs/images/13.PNG) 
-
-![text](docs/images/14.PNG) 
-
-![text](docs/images/15.PNG) 
-
-![text](docs/images/16.PNG) 
-
-![text](docs/images/17.PNG) 
-
-![text](docs/images/18.PNG) 
-
-![text](docs/images/19.PNG) 
-
-![text](docs/images/20.PNG) 
-
-![text](docs/images/21.PNG)
-
-### Final Verdict — Scores & Reasoning
-
-![alt text](docs/images/22.PNG)
-
----
-
-## 🖥️ Web UI — Debate 2: "Will AI Replace Human Workers?"
-
-### Main Page — Topic Form & Live Debate
-
-![alt text](docs/images/23.PNG)
-
-![text](docs/images/24.PNG) 
-
-![text](docs/images/25.PNG) 
-
-![text](docs/images/26.PNG) 
-
-![text](docs/images/27.PNG) 
-
-![text](docs/images/28.PNG) 
-
-![text](docs/images/29.PNG) 
-
-![text](docs/images/30.PNG) 
-
-![text](docs/images/31.PNG) 
-
-![text](docs/images/32.PNG) 
-
-![text](docs/images/33.PNG) 
-
-![text](docs/images/34.PNG) 
-
-![text](docs/images/35.PNG) 
-
-![text](docs/images/36.PNG) 
-
-![text](docs/images/37.PNG) 
-
-![text](docs/images/38.PNG) 
-
-![text](docs/images/39.PNG) 
-
-![text](docs/images/40.PNG) 
-
-![text](docs/images/41.PNG) 
-
-![text](docs/images/42.PNG) 
-
-![text](docs/images/43.PNG) 
-
-![text](docs/images/44.PNG) 
-
-![text](docs/images/45.PNG)
-
-### Final Verdict — Scores & Reasoning
-
-![alt text](docs/images/46.PNG)
-
----
-
-### 💻 Terminal — Debate: Will AI Replace Human Workers?
-
-Running `uv run debate --topic "will AI replace human workers"` launches the debate
-directly from the command line. The system loads the config, initialises the three
-Claude agents, and begins the turn loop — printing each agent's argument live with colour-coded output (Father=yellow, Pro=blue, Con=red) as the debate unfolds to the Anthropic API.
-
-![alt text](docs/images/tt1.PNG)
-
-### Full Transcript
-
-![text](docs/images/tt2.PNG) 
-![text](docs/images/tt3.PNG) 
-![text](docs/images/tt4.PNG) 
-![text](docs/images/tt5.PNG) 
-![text](docs/images/tt6.PNG) 
-![text](docs/images/tt7.PNG) 
-![text](docs/images/tt8.PNG) 
-![text](docs/images/tt9.PNG) 
-![text](docs/images/tt10.PNG) 
-![text](docs/images/tt11.PNG) 
-![text](docs/images/tt12.PNG) 
-![text](docs/images/tt13.PNG) 
-![text](docs/images/tt14.PNG) 
-![text](docs/images/tt15-16.PNG) 
-![text](docs/images/tt17.PNG) 
-![text](docs/images/tt18.PNG) 
-![text](docs/images/tt19-20.PNG) 
-![text](docs/images/tt21.PNG)
-
-### Final Verdict — Scores & Reasoning
-
-![alt text](docs/images/tt22.PNG)
-
----
-
-## Debate Output
-
-```
-[INFO]  Loading config from 'config/' ...
-[INFO]  Config loaded. Schema version: 1.0
-[INFO]  Agents: father=claude-sonnet-4-6 | pro_son=claude-haiku-4-5 | con_son=claude-haiku-4-5
-
-[DEBATE STARTING]
-  Topic    : AI will replace human workers
-  Min turns: 10 per side (20 total)
-
-  ... (colour-coded turn output) ...
-
-╔══════════════════════════════════════╗
-║              VERDICT                 ║
-║  Winner  : pro_son                   ║
-║  Turns   : 21                        ║
-║  Scores  : Pro 24/30  Con 21/30      ║
-╚══════════════════════════════════════╝
-
-[COST REPORT]  Total: $0.4821 / $2.00  (24.1% of budget)
-```
-
----
-
-## Cost Reporting
-
-`CostReporter` accumulates prompt and completion tokens per agent via
-`DebateEngine._sync_costs()`, which pulls live totals from `Gatekeeper` at every
-turn boundary. Per-model USD rates are read from `config/pricing.json`. A `[WARN]`
-is logged when utilisation reaches 90% of the budget cap; the turn loop exits early
-at 100%.
-
-Fuzzy model-ID matching (`_find_rates`) handles Anthropic date-suffix IDs
-(e.g. `claude-haiku-4-5-20251001`) that would otherwise miss an exact key lookup.
-
----
-
-## Error Handling
-
-| Scenario | Behaviour |
-|---|---|
-| Agent hangs > 30 s | `Watchdog` retries once; raises `WatchdogError` on second timeout |
-| Budget cap reached | Turn loop exits early; `evaluate()` still runs on partial transcript |
-| Position drift | Son agent retries up to 2×; `AgentFailureError` raised after exhaustion |
-| Invalid JSON from LLM | `_extract_json()` strips fences + extracts `{…}`; `MessageParseError` on failure |
-| Schema violation | `jsonschema.ValidationError` caught → `MessageParseError` |
-| Unknown model ID in pricing | Fuzzy prefix match (≥ 60%); flagged `"UNKNOWN PRICE"` + `[WARN]` if below threshold |
-
----
-
-## Persuasiveness Rubric
-
-The Father scores each debater on three dimensions (1–10 each, max 30):
-
-| Dimension | Criterion |
-|---|---|
-| Clarity | How clearly and concisely were arguments expressed? |
-| Evidence Quality | How well were claims supported by cited sources? |
-| Logical Consistency | Were arguments internally consistent across all turns? |
-
-Equal totals trigger a momentum tiebreaker (final 4 turns). Draws are
-prohibited — `"draw": false` is enforced by the `verdict.json` schema.
-
----
-
-## Golden Rules
-
-Every source file in `src/` must satisfy all five simultaneously:
-
-1. **≤ 150 lines** — split into sub-modules if exceeded
-2. **0 ruff violations** — `line-length = 88`, rules E/W/F/I enforced
-3. **> 85% test coverage** — enforced by `--cov-fail-under=85`
-4. **TDD** — failing tests written before each implementation
-5. **No hardcoded values; no direct agent-to-agent messages**
-
 ---
 
 ## Project Structure
@@ -424,77 +275,33 @@ Every source file in `src/` must satisfy all five simultaneously:
 ```
 ai-debate-orchestrator/
 ├── config/
-│   ├── pricing.json         USD/1K token rates per model
-│   ├── rate_limits.json     Per-model RPM / TPM caps
-│   └── setup.json           Agent models, turn limits, budget cap
+│   ├── pricing.json               USD/1K token rates per model
+│   ├── rate_limits.json           Per-model RPM / TPM caps
+│   └── setup.json                 Agent models, turn limits, budget cap
 ├── docs/
-│   ├── PLAN.md              C4 diagrams, class hierarchy, roadmap
-│   ├── PRD.md               Product requirements and hotfix log
-│   └── TODO.md              Phased execution checklist
+│   ├── images/
+│   │   ├── archive/               Non-primary screenshots (moved here manually)
+│   │   ├── web_run_main.png       Primary web UI showcase image
+│   │   └── terminal_run_main.png  Primary CLI showcase image
+│   ├── PLAN.md                    C4 diagrams, class hierarchy, roadmap
+│   ├── PRD.md                     Product requirements and hotfix log
+│   └── TODO.md                    Phased execution checklist
 ├── src/
-│   ├── agents/              FatherAgent, ProSonAgent, ConSonAgent, BaseAgent
-│   ├── engine/              DebateEngine, StateManager
-│   ├── infrastructure/      Gatekeeper, Watchdog, CostReporter, ConfigLoader, LoggerManager
-│   ├── schemas/             debate_message.json, verdict.json
-│   ├── skills/              WebSearchTool, LogicAnalyzerTool
-│   └── ui/                  debate_cli.py (CLI), app.py (Flask)
-├── templates/               Bootstrap 5 + jQuery web UI templates
+│   ├── agents/                    FatherAgent, ProSonAgent, ConSonAgent, BaseAgent
+│   ├── engine/                    DebateEngine, StateManager
+│   ├── infrastructure/            Gatekeeper, Watchdog, CostReporter, ConfigLoader, LoggerManager
+│   ├── schemas/                   debate_message.json, verdict.json
+│   ├── skills/                    WebSearchTool, LogicAnalyzerTool
+│   └── ui/                        debate_cli.py (CLI), app.py (Flask + SSE)
+├── templates/                     Bootstrap 5 + jQuery web UI
 ├── tests/
-│   ├── unit/                Per-module TDD test suite
-│   └── integration/         Full-debate integration tests
-├── .env-example             Environment variable template (safe to commit)
-├── debate_history/          Saved debate transcripts (created by --save)
-├── pyproject.toml           uv / ruff / pytest configuration
+│   ├── unit/                      Per-module TDD test suite
+│   └── integration/               Full-debate integration tests
+├── debate_history/                Saved debate transcripts (created by --save)
+├── .env-example                   Environment variable template (safe to commit)
+├── pyproject.toml                 uv / ruff / pytest configuration
 └── README.md
 ```
-
----
-
-## JSON Message Contract
-
-Every agent message is validated against `src/schemas/debate_message.json`:
-
-```json
-{
-  "message_id": "uuid-v4",
-  "sender":     "pro_son | con_son | father",
-  "recipient":  "father | pro_son | con_son",
-  "turn":       2,
-  "content":    "Argument text...",
-  "sources":    ["https://example.com/article"],
-  "token_count": 342,
-  "timestamp":  "2026-05-25T12:00:00+00:00"
-}
-```
-
----
-
-## Verdict Format
-
-```json
-{
-  "verdict_id": "uuid-v4",
-  "winner":     "pro_son",
-  "draw":       false,
-  "reasoning":  "pro_son scored 24/30 vs con_son 21/30...",
-  "turn_count": 21,
-  "timestamp":  "2026-05-25T13:00:00+00:00"
-}
-```
-
-`draw` is always `false`. Equal totals resolve via the last-4-turn momentum
-tiebreaker embedded in `FatherAgent.evaluate()`.
-
----
-
-## State Machine
-
-```
-INITIALIZATION → IN_PROGRESS → EVALUATION → TERMINATED
-```
-
-`StateManager` transitions the state automatically as messages and the
-verdict are recorded. All transitions are one-directional.
 
 ---
 
@@ -511,8 +318,8 @@ class MyTool(AgentSkill):
 ```
 
 Place the module in `src/skills/` and declare it in `config/setup.json` under
-`enabled_skills`. The `LogicAnalyzerTool` (offline, zero network calls) is
-included as a built-in fallback when `SEARCH_API_KEY` is unavailable.
+`enabled_skills`. The `LogicAnalyzerTool` (offline, zero network calls) is included
+as a built-in fallback when `SEARCH_API_KEY` is unavailable.
 
 ---
 
