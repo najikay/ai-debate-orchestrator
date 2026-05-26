@@ -44,14 +44,14 @@
 
 | Debate Starting | In Progress | Final Verdict |
 |---|---|---|
-| ![Web Start](docs/images/archive/web_start1.png) | ![Web Progress](docs/images/archive/web_progress11.png) | ![Web Progress](docs/images/archive/web_verdict1.png) | 
+| ![Web Start](docs/images/archive/web_start1.PNG) | ![Web Progress](docs/images/archive/web_progress11.PNG) | ![Web Progress](docs/images/archive/web_verdict1.PNG) | 
 
 
 ### 💻 Terminal CLI — Color-Coded Live Output: "Will AI Replace Human Workers?"
 
 | Debate Starting | In Progress | Final Verdict |
 |---|---|---|
-| ![Terminal Start](docs/images/archive/terminal_start.png) | ![Terminal Progress](docs/images/archive/terminal_progress.png) | ![Terminal Verdict](docs/images/archive/terminal_verdict.png) |
+| ![Terminal Start](docs/images/archive/terminal_start.PNG) | ![Terminal Progress](docs/images/archive/terminal_progress.PNG) | ![Terminal Verdict](docs/images/archive/terminal_verdict.PNG) |
 
 ---
 
