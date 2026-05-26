@@ -453,3 +453,74 @@ A2/
 | Hung API call | Low | High | Watchdog with 30s timeout |
 | JSON parse failure | Medium | Medium | Schema validation + retry |
 | Log disk overflow | Low | Low | FIFO rotation: 20 files × 500 lines |
+
+---
+
+## 9. Phase 5 Roadmap — QA Fixes & Web GUI
+
+### 9.1 Backend QA Fixes
+
+| Item | File(s) Affected | Description |
+|------|-----------------|-------------|
+| Topic bug fix | `pro_son_agent.py`, `con_son_agent.py`, `debate_engine.py` | `generate_argument` used `prompt.content` (full opening message) as the topic. Fix: add `topic: str = ""` parameter; `DebateEngine._run_turn_loop` passes `self.state_manager.state.topic`. |
+| Father moderation rules | `father_agent.py` | Update `_RUBRIC_TEMPLATE` to add dodging-detection, language-enforcement, and `current_lean` instructions. Remove `"draw": false` from prompt JSON since the schema already enforces it. |
+| `current_lean` field | `father_agent.py` | Add `"current_lean": "pro_son \| con_son"` to the intermediate scoring JSON schema embedded in the evaluation prompt. Log it but do not use it to determine the winner. |
+| No-draw enforcement | `src/schemas/verdict.json` | Schema already has `"draw": {"const": false}`. Verify no regressions; keep the field to maintain backward-compatibility with existing tests. |
+
+### 9.2 Web GUI Architecture
+
+```
+src/web/
+├── __init__.py
+├── app.py            ← Flask application factory (≤150 lines)
+├── routes.py         ← Route handlers: /, /debate/start, /debate/<id>, /debate/<id>/verdict
+└── templates/
+    ├── base.html     ← Bootstrap 5 layout shell
+    ├── index.html    ← Topic input form
+    ├── debate.html   ← Live SSE turn stream view
+    └── verdict.html  ← Final verdict + cost report
+```
+
+New entry point added to `pyproject.toml`:
+```toml
+[project.scripts]
+debate     = "src.ui.debate_cli:run"
+debate-web = "src.web.app:main"
+```
+
+### 9.3 Phase 5 Layered Architecture (updated)
+
+```
+┌─────────────────────────────────────────────────────┐
+│           CLI / UI Layer (Phase 4)                  │
+│  debate_cli.py  |  report_printer.py                │
+├─────────────────────────────────────────────────────┤
+│           Web Layer (Phase 5 — new)                 │
+│  app.py  |  routes.py  |  templates/                │
+│  (Flask + Bootstrap 5; SSE for live turn output)    │
+├─────────────────────────────────────────────────────┤
+│              Orchestration Layer                    │
+│  debate_engine.py  |  state_manager.py              │
+├─────────────────────────────────────────────────────┤
+│               Agent Layer                           │
+│  father_agent.py  |  pro_son_agent.py               │
+│  con_son_agent.py  |  base_agent.py                 │
+├─────────────────────────────────────────────────────┤
+│               Tools Layer                           │
+│  web_search_tool.py  |  logic_analyzer_tool.py      │
+├─────────────────────────────────────────────────────┤
+│             Infrastructure Layer                   │
+│  gatekeeper.py  |  watchdog.py  |  cost_reporter.py │
+│  logger_manager.py  |  config_loader.py             │
+└─────────────────────────────────────────────────────┘
+```
+
+### 9.4 TDD Plan for Phase 5
+
+| Test File | Scope | Notes |
+|-----------|-------|-------|
+| `tests/unit/test_pro_son_agent.py` | Add topic-parameter tests | Verify topic passed explicitly beats `prompt.content` fallback |
+| `tests/unit/test_con_son_agent.py` | Add topic-parameter tests | Same as above for ConSon |
+| `tests/unit/test_father_agent.py` | Add `current_lean` key test | Assert key present in `_score_persuasiveness` return dict |
+| `tests/unit/test_web_app.py` | Flask routes | Unit-test all four routes with `app.test_client()` |
+| `tests/integration/test_web_integration.py` | Full browser-less flow | POST topic → GET verdict via test client |

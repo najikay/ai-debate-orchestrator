@@ -82,6 +82,62 @@ extend outcomes.
 - The `setup.json` key `enabled_skills` controls which tools are injected at runtime
   (e.g. `["web_search", "logic_analyzer"]`); the engine reads this at startup.
 
+### 2.6 Father Behavioral Rules (Phase 5)
+
+The Father agent enforces the following moderation rules in addition to message
+routing and scoring.
+
+#### 2.6.1 No Draws — Ever
+
+- The `draw` field in every `Verdict` object is **always `false`**.
+- If the three rubric dimensions produce arithmetically equal totals, the Father
+  applies the turn-by-turn momentum tiebreaker (final 4 turns).
+- The Father's evaluation prompt explicitly prohibits issuing a draw; the
+  `verdict.json` schema enforces this with `"const": false`.
+
+#### 2.6.2 Active Moderation Against Dodging
+
+- If a Son agent's response fails to address the current debate point (i.e. it
+  pivots to an unrelated topic or repeats a prior argument verbatim), the Father
+  flags it as **dodging**.
+- A dodging flag incurs a 2-point deduction from the offending agent's
+  **Logical Consistency** dimension score at evaluation time.
+- The Father's evaluation prompt instructs it to note dodging incidents explicitly
+  in its `reasoning` field.
+
+#### 2.6.3 Language & Respect Enforcement
+
+- The Father monitors each Son's response for disrespectful or inappropriate
+  language directed at the opposing agent or the topic itself.
+- A language violation incurs a 1-point deduction from the offending agent's
+  **Clarity** dimension score.
+- Repeated violations (≥ 2 in one debate) escalate to a 3-point deduction from
+  the **total** score.
+- The Father never fact-checks sources. Agents are expected to challenge each
+  other's sources through argumentation; the Father only evaluates persuasiveness.
+
+#### 2.6.4 Dynamic Opinion Tracking (`current_lean`)
+
+- After each scoring pass the Father records a `current_lean` field indicating
+  which agent is currently winning (`"pro_son"` or `"con_son"`).
+- This field appears in the intermediate scoring JSON returned by the LLM.
+- `current_lean` is logged at each evaluation step but does **not** affect the
+  final verdict directly — it provides real-time transparency.
+- Schema for the intermediate scoring JSON:
+
+```json
+{
+  "scores": {
+    "pro_son": {"clarity": N, "evidence": N, "logic": N, "total": N},
+    "con_son":  {"clarity": N, "evidence": N, "logic": N, "total": N}
+  },
+  "current_lean": "pro_son | con_son",
+  "winner": "pro_son | con_son",
+  "draw": false,
+  "reasoning": "<min 50 chars>"
+}
+```
+
 ---
 
 ## 3. Functional Requirements
@@ -592,6 +648,44 @@ All config schemas carry a `schema_version` field validated at startup.
 | AC-04 | Timeout recovery (Watchdog) | Stuck call killed and retried within 35 s |
 | AC-05 | Debate completes without manual intervention | 100 % of runs |
 | AC-06 | Verdict is non-draw | Always; `draw: false` enforced by schema |
+
+---
+
+## 14. Web GUI (Phase 5)
+
+### 14.1 Overview
+
+A lightweight Flask + Bootstrap 5 web interface wraps the existing CLI-layer
+`DebateEngine`. The GUI provides a browser-based alternative to the terminal;
+it does not replace the CLI — both remain functional.
+
+### 14.2 Technology Choices
+
+| Concern | Choice | Rationale |
+|---------|--------|-----------|
+| Backend framework | Flask (≥ 3.0) | Minimal, no ORM required; quick to scaffold |
+| Frontend styling | Bootstrap 5 CDN | Zero build step; responsive grid |
+| Async streaming | Flask `Response(stream_with_context)` | Server-Sent Events for live turn output |
+| Entry point | `uv run debate-web` | Separate script from `debate` CLI |
+
+### 14.3 UI Pages
+
+| Route | Description |
+|-------|-------------|
+| `GET /` | Landing page — topic input form |
+| `POST /debate/start` | Validates topic, starts `DebateEngine`, redirects to `/debate/<id>` |
+| `GET /debate/<id>` | Live debate view — streams turn output via SSE |
+| `GET /debate/<id>/verdict` | Final verdict + cost report page |
+
+### 14.4 Constraints
+
+- All Golden Rules apply: each new Python file in `src/web/` ≤ 150 lines,
+  0 ruff violations, TDD, no hardcoded values.
+- No JavaScript framework; plain Bootstrap + minimal vanilla JS for SSE
+  consumption only.
+- Session state is held in-process (single-user prototype); no database required.
+- The `DebateEngine` is invoked identically to the CLI path — no business logic
+  is duplicated in the web layer.
 | AC-07 | Ruff violations on final commit | 0 |
 | AC-08 | Test coverage | > 85 % |
 | AC-09 | No hardcoded secrets or values | 0 occurrences (CI grep check) |
