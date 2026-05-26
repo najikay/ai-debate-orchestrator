@@ -1,8 +1,8 @@
 # Product Requirements Document
 ## AI Debate System — Assignment 2
 **Project:** AI Orchestration Course — Group NajAmjad
-**Version:** 2.0.0
-**Date:** 2026-05-25
+**Version:** 2.0.1
+**Date:** 2026-05-26
 **Status:** Draft — Pending Approval
 
 ---
@@ -690,6 +690,79 @@ it does not replace the CLI — both remain functional.
 | AC-08 | Test coverage | > 85 % |
 | AC-09 | No hardcoded secrets or values | 0 occurrences (CI grep check) |
 | AC-10 | Cost report generated at debate end | Present in every run output |
+
+---
+
+## 15. Post-v2.0.0 Hotfixes (v2.0.1)
+
+The following reliability and quality improvements were applied after the v2.0.0 release
+without changing any external interfaces or schemas.
+
+### 15.1 Increased `max_tokens` to 4096
+
+- All API calls dispatched through `Gatekeeper._make_api_call()` now pass
+  `max_tokens=4096` (raised from the prior implicit 1024 default).
+- **Motivation:** Debater agents were producing truncated arguments mid-sentence,
+  degrading debate quality and causing spurious position-check failures.
+- The value is set in `Gatekeeper._make_api_call()` and is intentionally not
+  exposed in `setup.json` (it is a protocol constant, not a tunable parameter).
+
+### 15.2 Resilient JSON Extraction (`_extract_json`)
+
+- `BaseAgent._extract_json(raw: str) -> str` was added to `base_agent.py`.
+- It strips markdown code fences (`` ```json `` … `` ``` ``) and extracts the
+  first `{` … last `}` substring from any LLM response before attempting
+  `json.loads()`.
+- **Motivation:** Claude models frequently wrap JSON in markdown fences even when
+  explicitly instructed not to.  The prior code passed raw text directly to
+  `json.loads()`, causing `MessageParseError` on every fenced response.
+- All `parse_response()` calls in `BaseAgent` now route through `_extract_json`.
+
+### 15.3 Father's `reasoning` Field Displayed in Web UI
+
+- The Flask route `POST /api/debate` always included `verdict.reasoning` in the
+  JSON response payload under `"verdict": {"reasoning": "..."}`.
+- The Bootstrap 5 + jQuery template (`templates/index.html`) was updated to render
+  this `reasoning` string inside the verdict card below the winner announcement.
+- **Motivation:** Users had no visibility into *why* a winner was declared; the
+  field existed in the backend but was silently discarded in the frontend.
+
+### 15.4 Chain-of-Thought Output Schema and "No Surrender" Rule
+
+**Problem:** With `max_tokens=4096` the debater agents had enough token headroom
+to produce long, meandering replies.  The extra freedom caused `ConSonAgent` (and
+occasionally `ProSonAgent`) to include concessive phrasing that triggered the
+`_enforce_position` signal, exhausting retries and raising `AgentFailureError`.
+
+**Solution — Chain-of-Thought (CoT) JSON schema:**
+
+Both `ProSonAgent.build_prompt()` and `ConSonAgent.build_prompt()` now instruct
+the LLM to respond **exclusively** in the following JSON format:
+
+```json
+{
+  "opponent_analysis": "core claim of opponent",
+  "debate_strategy": "how you will refute it with logic and facts",
+  "argument": "your rebuttal — max 3 paragraphs, sharp and factual"
+}
+```
+
+The new `_extract_argument(raw: str) -> str` private method parses this JSON and
+extracts only the `"argument"` field before position enforcement and before the
+value is placed into `DebateMessage.content`.  If parsing fails the raw text is
+used as a safe fallback.
+
+**Solution — "No Surrender" behavioural rule (embedded in system prompt):**
+
+```
+NO SURRENDER: Never concede, agree with the opponent, or be neutral.
+Directly counter their points using sound logic and verified facts.
+```
+
+**Transcript hygiene:** Only the `"argument"` string enters `DebateMessage.content`
+and is therefore the only part written to the shared transcript and rendered in the
+UI.  The `"opponent_analysis"` and `"debate_strategy"` fields remain internal to
+the agent turn and are never exposed to the Father or the web client.
 
 ---
 

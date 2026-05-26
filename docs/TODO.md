@@ -914,6 +914,58 @@
 - [x] Confirm `src/ui/app.py` ≤ 150 lines (84 lines).
 - [x] Git commit: `feat: implement responsive Flask GUI with Bootstrap and jQuery`.
 
+---
+
+## Phase 5.1 — Post-v2.0.0 Hotfixes
+
+> Applied after v2.0.0 to fix position-check failures observed in live debate runs.
+> All five golden rules remain satisfied: ≤150 lines · 0 ruff · >85% coverage · no hardcoded values.
+
+### 5.1.1 JSON Markdown Fix
+
+- [x] Identify root cause: Claude responses wrapped in ` ```json ``` ` fences fail `json.loads()`.
+- [x] Add `_extract_json(raw: str) -> str` to `src/agents/base_agent.py`.
+- [x] Strip ` ```json ``` ` fences and extract `{…}` substring before parsing.
+- [x] Route all `parse_response()` calls through `_extract_json`.
+- [x] Verify `uv run pytest` still passes — confirm 0 regressions.
+
+### 5.1.2 Live Cost Tracking Fix (`max_tokens=4096`)
+
+- [x] Identify root cause: default `max_tokens` caused mid-sentence truncation.
+- [x] Set `max_tokens=4096` in `Gatekeeper._make_api_call()`.
+- [x] Confirm token counts now reflect full completions in `CostReporter`.
+- [x] Verify `uv run pytest` still passes.
+- [x] Git commit: `feat: increase max_tokens and display Father's rubric reasoning in UI`.
+
+### 5.1.3 Father Reasoning UI Addition
+
+- [x] Confirm `POST /api/debate` already returns `verdict.reasoning` in payload.
+- [x] Update `templates/index.html`: render `reasoning` text inside verdict card.
+- [x] Manual smoke test: reasoning paragraph visible below winner announcement.
+- [x] Git commit included in `feat: increase max_tokens` commit above.
+
+### 5.1.4 Chain-of-Thought Schema and "No Surrender" Stance Enforcement
+
+- [x] Update `ProSonAgent.build_prompt()`: embed `{"opponent_analysis", "debate_strategy", "argument"}` JSON schema requirement.
+- [x] Update `ConSonAgent.build_prompt()`: same CoT schema.
+- [x] Add `NO SURRENDER` clause to both prompts: never concede, never neutral, counter directly.
+- [x] Add `_extract_argument(raw: str) -> str` to both agents: parses CoT JSON, returns `"argument"` field; falls back to raw text on parse failure.
+- [x] Update `generate_argument()` in both agents: call `_extract_argument(raw)` before `_enforce_position()`.
+- [x] Confirm transcript/UI only shows `"argument"` field (hidden: `opponent_analysis`, `debate_strategy`).
+- [x] Confirm each modified file ≤ 150 lines (`pro_son_agent.py`: 147, `con_son_agent.py`: 147).
+- [x] Run `uv run ruff check .` — confirm 0 violations.
+- [x] Run `uv run pytest` — confirm 227 tests pass, 97.73% coverage.
+- [x] Git commit: `fix: implement chain-of-thought schema and strict stance prompts to prevent position failure`.
+
+### 5.1.5 Documentation Sync
+
+- [x] Update `docs/PRD.md`: add §15 Post-v2.0.0 Hotfixes (max_tokens, _extract_json, reasoning UI, CoT schema + No Surrender).
+- [x] Update `docs/PLAN.md`: add §9.5 Phase 5.1 hotfix table and CoT flow diagram.
+- [x] Update `docs/TODO.md`: add this Phase 5.1 checklist with all tasks checked off.
+- [x] Git commit: `docs: synchronize PRD, PLAN, and TODO with post-v2.0.0 UX and reliability hotfixes`.
+
+---
+
 ### 5.6 Final Release
 
 - [x] Run full test suite: `uv run pytest --cov=src --cov-fail-under=85` — confirm green.

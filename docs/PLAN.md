@@ -515,6 +515,37 @@ debate-web = "src.web.app:main"
 └─────────────────────────────────────────────────────┘
 ```
 
+### 9.5 Phase 5.1 — Post-v2.0.0 Reliability Hotfixes
+
+These fixes were applied after the v2.0.0 release to stabilise live debate runs.
+No existing interfaces, schemas, or test contracts were changed.
+
+| Fix | File(s) Affected | Root Cause | Change |
+|-----|-----------------|-----------|--------|
+| JSON markdown stripping | `src/agents/base_agent.py` | Claude wraps JSON in fences | `_extract_json()` strips `` ```json `` before `json.loads()` |
+| Increased `max_tokens` | `src/infrastructure/gatekeeper.py` | Arguments truncated mid-sentence | `max_tokens=4096` in `_make_api_call()` |
+| Father reasoning in UI | `templates/index.html` | `reasoning` field rendered as blank | jQuery now populates verdict reasoning card |
+| CoT schema + No Surrender | `src/agents/pro_son_agent.py`, `src/agents/con_son_agent.py` | Position check failures after token headroom increase | `build_prompt()` requests `{"opponent_analysis","debate_strategy","argument"}` JSON; `_extract_argument()` extracts public field; "NO SURRENDER" instruction added |
+
+**Agent CoT prompt flow (Phase 5.1):**
+
+```
+build_prompt()
+    └─ "NO SURRENDER" instruction
+    └─ Required JSON schema: {opponent_analysis, debate_strategy, argument}
+         │
+    call_api() → raw LLM response
+         │
+    _extract_argument(raw)
+         │  ├─ _extract_json() strips markdown fences
+         │  ├─ json.loads() parses CoT JSON
+         │  └─ returns "argument" field (or raw fallback)
+         │
+    _enforce_position(argument)  ← position check on public argument only
+         │
+    DebateMessage.content = argument  ← only public field in transcript
+```
+
 ### 9.4 TDD Plan for Phase 5
 
 | Test File | Scope | Notes |
