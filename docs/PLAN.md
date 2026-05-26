@@ -1,9 +1,9 @@
 # Architectural Blueprint
 ## AI Debate System — Assignment 2
 **Project:** AI Orchestration Course — Group NajAmjad
-**Version:** 1.0.0
-**Date:** 2026-05-25
-**Status:** Draft — Pending Approval
+**Version:** 2.0.1
+**Date:** 2026-05-26
+**Status:** Final — v2.0.1
 
 ---
 
@@ -384,10 +384,14 @@ A2/
 │   ├── rate_limits.json
 │   └── setup.json
 ├── docs/
+│   ├── images/          # Screenshots for README
 │   ├── PLAN.md
 │   ├── PRD.md
 │   └── TODO.md
-├── logs/                    # git-ignored, created at runtime
+├── examples/            # Sample debate transcript and output
+├── logs/                # git-ignored, created at runtime
+├── templates/
+│   └── index.html       # Bootstrap 5 + jQuery SSE chat interface
 ├── src/
 │   ├── agents/
 │   │   ├── __init__.py
@@ -416,6 +420,7 @@ A2/
 │   │   └── web_search_tool.py
 │   └── ui/
 │       ├── __init__.py
+│       ├── app.py       # Flask application factory + SSE streaming route (148 lines)
 │       └── debate_cli.py
 ├── tests/
 │   ├── unit/
@@ -469,50 +474,62 @@ A2/
 
 ### 9.2 Web GUI Architecture
 
+The web layer is implemented as a single file (`src/ui/app.py`, 148 lines) using
+Flask's application factory pattern. Templates are served from the project-root
+`templates/` directory.
+
 ```
-src/web/
+src/ui/
 ├── __init__.py
-├── app.py            ← Flask application factory (≤150 lines)
-├── routes.py         ← Route handlers: /, /debate/start, /debate/<id>, /debate/<id>/verdict
-└── templates/
-    ├── base.html     ← Bootstrap 5 layout shell
-    ├── index.html    ← Topic input form
-    ├── debate.html   ← Live SSE turn stream view
-    └── verdict.html  ← Final verdict + cost report
+├── app.py          ← Flask application factory; create_app() + main() entry point
+└── debate_cli.py   ← CLI entry point (unchanged)
+
+templates/
+└── index.html      ← Bootstrap 5 + jQuery; SSE-driven chat interface (single page)
 ```
 
-New entry point added to `pyproject.toml`:
+Entry points in `pyproject.toml`:
 ```toml
 [project.scripts]
 debate     = "src.ui.debate_cli:run"
-debate-web = "src.web.app:main"
+debate-web = "src.ui.app:main"
 ```
 
-### 9.3 Phase 5 Layered Architecture (updated)
+**Route summary:**
+
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/` | `GET` | Renders `index.html` — chat interface with topic input |
+| `/api/debate` | `POST` | Synchronous full-debate endpoint; returns complete JSON |
+| `/api/debate/stream` | `GET` | **SSE streaming endpoint**; yields turns live via `EventSource` |
+
+### 9.3 Phase 5 Layered Architecture (final — v2.0.1)
 
 ```
-┌─────────────────────────────────────────────────────┐
-│           CLI / UI Layer (Phase 4)                  │
-│  debate_cli.py  |  report_printer.py                │
-├─────────────────────────────────────────────────────┤
-│           Web Layer (Phase 5 — new)                 │
-│  app.py  |  routes.py  |  templates/                │
-│  (Flask + Bootstrap 5; SSE for live turn output)    │
-├─────────────────────────────────────────────────────┤
-│              Orchestration Layer                    │
-│  debate_engine.py  |  state_manager.py              │
-├─────────────────────────────────────────────────────┤
-│               Agent Layer                           │
-│  father_agent.py  |  pro_son_agent.py               │
-│  con_son_agent.py  |  base_agent.py                 │
-├─────────────────────────────────────────────────────┤
-│               Tools Layer                           │
-│  web_search_tool.py  |  logic_analyzer_tool.py      │
-├─────────────────────────────────────────────────────┤
-│             Infrastructure Layer                   │
-│  gatekeeper.py  |  watchdog.py  |  cost_reporter.py │
-│  logger_manager.py  |  config_loader.py             │
-└─────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│                CLI / UI Layer                            │
+│  debate_cli.py  (colour-coded terminal output)           │
+├──────────────────────────────────────────────────────────┤
+│                Web Layer (Phase 5)                       │
+│  app.py  (Flask factory; GET /, POST /api/debate,        │
+│           GET /api/debate/stream — SSE live streaming)   │
+│  templates/index.html  (Bootstrap 5 + jQuery EventSource)│
+├──────────────────────────────────────────────────────────┤
+│              Orchestration Layer                         │
+│  debate_engine.py  |  state_manager.py                   │
+│  (on_message callback wires UI to turn loop)             │
+├──────────────────────────────────────────────────────────┤
+│               Agent Layer                                │
+│  father_agent.py  |  pro_son_agent.py                    │
+│  con_son_agent.py  |  base_agent.py                      │
+├──────────────────────────────────────────────────────────┤
+│               Tools Layer                                │
+│  web_search_tool.py  |  logic_analyzer_tool.py           │
+├──────────────────────────────────────────────────────────┤
+│             Infrastructure Layer                         │
+│  gatekeeper.py  |  watchdog.py  |  cost_reporter.py      │
+│  logger_manager.py  |  config_loader.py                  │
+└──────────────────────────────────────────────────────────┘
 ```
 
 ### 9.5 Phase 5.1 — Post-v2.0.0 Reliability Hotfixes
@@ -593,6 +610,78 @@ call_api()  ──token counts──►  Gatekeeper.UsageStats  (per agent)
                                _find_rates(model)  ◄── fuzzy prefix fallback
                                         │
                                CostReporter.compute()  →  CostSummary  →  UI / CLI
+```
+
+### 9.8 Phase 5.4 — Real-Time SSE Streaming UI
+
+**Problem:** The synchronous `POST /api/debate` endpoint blocked the browser for
+the full debate duration (~3–5 minutes) with no incremental feedback. Users had
+no visibility into which agent was arguing or what had been said until the entire
+debate completed.
+
+**Solution architecture — `GET /api/debate/stream`:**
+
+The streaming endpoint uses Python's standard `threading` and `queue` modules to
+decouple the long-running `DebateEngine` from the SSE generator:
+
+```
+Request arrives at /api/debate/stream?topic=<topic>
+    │
+    ├─ Create msg_queue = queue.Queue()
+    │
+    ├─ Start daemon thread: run_engine()
+    │       ├─ Initialise DebateEngine
+    │       ├─ Wire on_message callback:
+    │       │       engine.state_manager.on_message = lambda msg:
+    │       │           msg_queue.put(("message", {sender, content, turn, sources}))
+    │       ├─ engine.start(topic)   ← turn loop; fires on_message each turn
+    │       ├─ msg_queue.put(("verdict", {winner, reasoning, scores, cost}))
+    │       └─ msg_queue.put(("done", None))
+    │
+    └─ Return Response(generate(), mimetype="text/event-stream")
+            └─ generate():
+                  while True:
+                      kind, payload = msg_queue.get()   ← blocks until next event
+                      yield f"data: {json.dumps({'type': kind, 'data': payload})}\n\n"
+                      if kind in ("done", "error"): break
+```
+
+**`StateManager.on_message` as the universal live-output hook:**
+
+`StateManager.record_message()` calls `self.on_message(msg)` after each turn if
+the attribute is set. This single hook is the canonical integration point for both
+UI modes:
+
+| Caller | Hook value |
+|--------|------------|
+| `debate_cli.py` | `_print_live_message` — colour-codes and word-wraps to terminal |
+| `app.py` SSE route | `lambda msg: msg_queue.put(("message", {...}))` — feeds SSE queue |
+
+No `DebateEngine` code changes are required when adding a new UI; only the hook
+assignment changes.
+
+**Response headers on SSE route:**
+
+```python
+headers = {
+    "Cache-Control": "no-cache",
+    "X-Accel-Buffering": "no",   # prevents nginx/proxy buffering
+}
+```
+
+**Frontend state machine (jQuery + EventSource):**
+
+```
+form.submit
+    │
+    ├─ Reset chat-box, verdict-card, cost-card, live-status
+    ├─ Show spinner
+    └─ Open EventSource('/api/debate/stream?topic=...')
+            │
+            ├─ type == "message"  → hide spinner; show live-dot; appendBubble()
+            ├─ type == "verdict"  → hide live-dot; showVerdict(); showCostCard()
+            ├─ type == "error"    → show alert-danger; close source
+            └─ type == "done"     → close source; re-enable submit button
 ```
 
 ### 9.4 TDD Plan for Phase 5

@@ -1,9 +1,9 @@
 # Execution Checklist
 ## AI Debate System — Assignment 2
 **Project:** AI Orchestration Course — Group NajAmjad
-**Version:** 2.0.0
-**Date:** 2026-05-25
-**Status:** Draft — Pending Approval
+**Version:** 2.0.1
+**Date:** 2026-05-26
+**Status:** Final — v2.0.1
 
 > **Golden Rules** — every task below must satisfy all five:
 > Max 150 lines per source file · 0 ruff violations · >85% test coverage · TDD (test first) · No hardcoded values · No direct agent-to-agent messages
@@ -1039,6 +1039,75 @@
 - [x] Git commit: `docs: complete professional README overhaul and synchronize final cost-tracking hotfixes across documentation`.
 
 ---
+
+---
+
+## Phase 5.4 — Real-Time Streaming UI & Final Documentation Sync
+
+> Delivered in v2.0.1. All five golden rules satisfied: ≤150 lines · 0 ruff · >85% coverage · TDD · no hardcoded values.
+
+### 5.4.1 SSE Streaming Endpoint (`/api/debate/stream`)
+
+- [x] Identify root cause: `POST /api/debate` blocks the browser for the entire debate duration (~3–5 min) with no incremental feedback.
+- [x] Add `GET /api/debate/stream` route to `src/ui/app.py`.
+- [x] Create `msg_queue = queue.Queue()` per request.
+- [x] Launch daemon `threading.Thread` running `run_engine()`:
+  - [x] Instantiate `DebateEngine` with merged config (setup + pricing).
+  - [x] Assign `engine.state_manager.on_message = lambda msg: msg_queue.put(("message", {...}))`.
+  - [x] Call `engine.start(topic)`; each completed turn fires the callback.
+  - [x] Enqueue `("verdict", {...})` after `start()` returns.
+  - [x] Enqueue `("done", None)` in `finally` block.
+  - [x] Enqueue `("error", str(exc))` on exception.
+- [x] Return `flask.Response(generate(), mimetype="text/event-stream")`.
+- [x] `generate()` drains `msg_queue`; yields `data: {json}\n\n`; breaks on `"done"` or `"error"`.
+- [x] Set `Cache-Control: no-cache` and `X-Accel-Buffering: no` response headers.
+- [x] Confirm `src/ui/app.py` remains ≤ 150 lines (148 lines).
+- [x] Run `uv run ruff check src/ui/app.py` — confirm 0 violations.
+
+### 5.4.2 Frontend SSE Integration (`templates/index.html`)
+
+- [x] Replace `$.post('/api/debate')` with `new EventSource('/api/debate/stream?topic=...')`.
+- [x] Add live-status indicator: pulsing green dot with "Debate in progress" label.
+- [x] Show spinner on form submit; replace with live-dot on first `"message"` event.
+- [x] `appendBubble(msg)` called on each `"message"` event — incremental chat bubbles.
+- [x] `showVerdict(data)` called on `"verdict"` event; cost card populated from `verdict.cost`.
+- [x] Hide live-dot and re-enable submit button on `"done"` or `"error"` events.
+- [x] `source.onerror` handler: show `alert-danger` bubble, close source, re-enable submit.
+- [x] Guard against double-open: `window._debateSource.close()` before new `EventSource`.
+- [x] Manual smoke test: debate bubbles appear live; verdict + scores + cost render on completion.
+
+### 5.4.3 CLI Live-Printing Alignment
+
+- [x] Confirm `debate_cli.py` uses `engine.state_manager.on_message = _print_live_message` — same hook as SSE route.
+- [x] Verify CLI still prints colour-coded turns live (no regression from SSE changes).
+- [x] Run `uv run ruff check src/ui/debate_cli.py` — confirm 0 violations.
+- [x] Confirm `debate_cli.py` ≤ 150 lines (171 lines after refactor — `--save` flag addition).
+
+### 5.4.4 Test Coverage
+
+- [x] Add `test_stream_debate_returns_event_stream_mimetype` to `tests/unit/test_web_app.py`.
+- [x] Add `test_stream_debate_returns_400_when_topic_missing` to `tests/unit/test_web_app.py`.
+- [x] Run `uv run pytest` — confirm all tests pass with ≥85% coverage.
+
+### 5.4.5 Final Documentation Sync
+
+- [x] Update `docs/PRD.md`:
+  - [x] Status → "Final — v2.0.1".
+  - [x] Section 14.2 technology table: add SSE + threading row.
+  - [x] Section 14.3 routes: update to actual `/api/debate` and `/api/debate/stream` routes.
+  - [x] Add Section 14.4 Real-Time Streaming Architecture (threading model, SSE event types, `on_message` hook).
+  - [x] Add §15.9 documenting the streaming UI as a post-v2.0.0 feature.
+  - [x] Fix "Out of Scope" section number (14 → 16); remove "real-time streaming" (now in scope).
+- [x] Update `docs/PLAN.md`:
+  - [x] Version → 2.0.1; Status → "Final — v2.0.1".
+  - [x] Directory structure: add `templates/`, `examples/`, `docs/images/`; correct `src/ui/app.py` location.
+  - [x] Section 9.2: replace `src/web/` placeholder with actual `src/ui/app.py` flat structure.
+  - [x] Section 9.3: update layered architecture diagram to include `on_message` callback note.
+  - [x] Add Section 9.8 Phase 5.4 SSE streaming architecture (threading model, frontend state machine).
+- [x] Update `docs/TODO.md`:
+  - [x] Version → 2.0.1; Status → "Final — v2.0.1".
+  - [x] Add this Phase 5.4 checklist with all tasks checked off.
+- [x] Git commit: `docs: final synchronization of PRD, PLAN, and TODO to include real-time streaming UI for project submission`.
 
 ### 5.6 Final Release
 

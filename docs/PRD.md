@@ -3,7 +3,7 @@
 **Project:** AI Orchestration Course — Group NajAmjad
 **Version:** 2.0.1
 **Date:** 2026-05-26
-**Status:** Draft — Pending Approval
+**Status:** Final — v2.0.1
 
 ---
 
@@ -665,27 +665,85 @@ it does not replace the CLI — both remain functional.
 |---------|--------|-----------|
 | Backend framework | Flask (≥ 3.0) | Minimal, no ORM required; quick to scaffold |
 | Frontend styling | Bootstrap 5 CDN | Zero build step; responsive grid |
-| Async streaming | Flask `Response(stream_with_context)` | Server-Sent Events for live turn output |
+| Real-time streaming | Flask `Response(generate())` + `EventSource` (SSE) | Pushes each debate turn to the browser as it occurs; no polling required |
+| Async threading | `threading.Thread` + `queue.Queue` | Engine runs in a daemon thread; SSE generator drains the queue |
 | Entry point | `uv run debate-web` | Separate script from `debate` CLI |
 
-### 14.3 UI Pages
+### 14.3 API Routes
 
-| Route | Description |
-|-------|-------------|
-| `GET /` | Landing page — topic input form |
-| `POST /debate/start` | Validates topic, starts `DebateEngine`, redirects to `/debate/<id>` |
-| `GET /debate/<id>` | Live debate view — streams turn output via SSE |
-| `GET /debate/<id>/verdict` | Final verdict + cost report page |
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/` | `GET` | Landing page — Bootstrap 5 chat interface with topic input form |
+| `/api/debate` | `POST` | Synchronous: runs full debate, returns complete JSON payload (transcript, verdict, cost) |
+| `/api/debate/stream` | `GET` | **Streaming SSE endpoint**: yields `data: {...}\n\n` events live as each agent turn completes |
 
-### 14.4 Constraints
+### 14.4 Real-Time Streaming Architecture
 
-- All Golden Rules apply: each new Python file in `src/web/` ≤ 150 lines,
-  0 ruff violations, TDD, no hardcoded values.
-- No JavaScript framework; plain Bootstrap + minimal vanilla JS for SSE
-  consumption only.
+The `/api/debate/stream` endpoint is the primary UI path for v2.0.1. It delivers
+debate turns to the browser incrementally using the W3C Server-Sent Events (SSE)
+protocol, eliminating the need for polling or WebSockets.
+
+**Server-side threading model:**
+
+```
+GET /api/debate/stream?topic=<topic>
+         │
+         ├─ msg_queue = queue.Queue()
+         │
+         ├─ threading.Thread(target=run_engine, daemon=True).start()
+         │       │
+         │       ├─ DebateEngine initialised
+         │       ├─ engine.state_manager.on_message = lambda msg: msg_queue.put(("message", {...}))
+         │       ├─ engine.start(topic)  ← turn loop runs here; each turn fires on_message
+         │       ├─ msg_queue.put(("verdict", {...}))
+         │       └─ msg_queue.put(("done", None))
+         │
+         └─ Response(generate(), mimetype="text/event-stream")
+                 │
+                 └─ generate():
+                       while True:
+                           kind, payload = msg_queue.get()   ← blocks until turn ready
+                           yield f"data: {json.dumps(...)}\n\n"
+                           if kind in ("done", "error"): break
+```
+
+**SSE event types:**
+
+| `type` field | When emitted | `data` shape |
+|---|---|---|
+| `"message"` | After each completed agent turn | `{sender, content, turn, sources}` |
+| `"verdict"` | After Father's evaluation | `{winner, reasoning, turn_count, scores, cost}` |
+| `"error"` | On unhandled engine exception | Error string |
+| `"done"` | Stream end sentinel | `null` |
+
+**Browser-side (jQuery + EventSource):**
+
+- `new EventSource('/api/debate/stream?topic=...')` opens the SSE connection.
+- `source.onmessage` dispatches on `event.type`: renders chat bubbles for
+  `"message"` events, populates the verdict card on `"verdict"`, and closes the
+  source on `"done"` or `"error"`.
+- A pulsing green live-status indicator is shown during the turn loop and hidden
+  on completion.
+
+**`StateManager.on_message` callback:**
+
+`StateManager` exposes an `on_message: Callable | None` attribute. When set,
+`record_message()` invokes it immediately after appending the turn to the
+transcript. Both the CLI (`debate_cli.py`) and the SSE endpoint (`app.py`) use
+this hook — the CLI passes a colour-printing function; the streaming route passes
+a queue-put lambda. No engine code changes are required to support either UI mode.
+
+### 14.5 Constraints
+
+- All Golden Rules apply: `src/ui/app.py` ≤ 150 lines (148 lines), 0 ruff
+  violations, TDD, no hardcoded values.
+- No JavaScript framework; plain Bootstrap 5 + minimal jQuery for SSE
+  consumption, DOM manipulation, and XSS-safe text insertion.
 - Session state is held in-process (single-user prototype); no database required.
 - The `DebateEngine` is invoked identically to the CLI path — no business logic
   is duplicated in the web layer.
+- `Cache-Control: no-cache` and `X-Accel-Buffering: no` headers are set on the
+  SSE response to prevent proxy/reverse-proxy buffering.
 | AC-07 | Ruff violations on final commit | 0 |
 | AC-08 | Test coverage | > 85 % |
 | AC-09 | No hardcoded secrets or values | 0 occurrences (CI grep check) |
@@ -825,6 +883,43 @@ engine = DebateEngine(cfg)
 `pricing.json` is loaded once per request and forwarded as a top-level `"pricing"`
 key so `DebateEngine` can pass it directly to `CostReporter.__init__`.
 
+### 15.9 Real-Time SSE Streaming UI (v2.0.1)
+
+**Context:** Prior to this update, the web UI relied on `POST /api/debate` — a
+synchronous endpoint that blocked until the entire debate completed (~3–5 minutes)
+before returning any content to the browser. Users saw a spinner with no feedback
+during the debate run.
+
+**Solution — `GET /api/debate/stream` SSE endpoint:**
+
+A new streaming route was added to `src/ui/app.py`:
+
+1. A `queue.Queue` is created per request.
+2. A daemon `threading.Thread` runs `DebateEngine.start()` in the background and
+   wires `engine.state_manager.on_message` to a lambda that puts each completed
+   turn onto the queue as `("message", {...})`.
+3. The main thread returns a `flask.Response` with `mimetype="text/event-stream"`,
+   draining the queue via a generator that yields SSE-formatted `data:` lines.
+4. After the engine finishes, `("verdict", {...})` and `("done", None)` sentinels
+   are enqueued; the generator closes the connection on receipt of `"done"` or
+   `"error"`.
+
+**Frontend (`templates/index.html`) updates:**
+
+- `jQuery` replaced the `fetch()` call with `new EventSource(url)`.
+- A pulsing green live-status indicator (`<span class="live-dot">`) is shown
+  during the turn loop and hidden on verdict receipt.
+- Chat bubbles are appended incrementally via `appendBubble(msg)` on each
+  `"message"` event — no full-page reload.
+- Verdict card and cost card populate on the `"verdict"` event; stream closes on
+  `"done"`.
+
+**`debate_cli.py` live-printing update:**
+
+The CLI already used `state_manager.on_message`; the new implementation makes
+this usage the canonical pattern: `engine.state_manager.on_message = fn` is the
+single hook for both UI modes, with no business logic duplicated.
+
 ### 15.8 `DebateEngine._sync_costs()` Orchestration Loop Fix
 
 **Root cause:** `Gatekeeper` accumulated per-agent token-usage statistics inside its
@@ -861,9 +956,9 @@ date-suffixed model IDs → `compute()` returns accurate spend.
 
 ---
 
-## 14. Out of Scope (v1.0)
+## 16. Out of Scope (v1.0 / v2.0.1)
 
-- Real-time streaming of agent responses to the UI.
 - Multi-topic / bracket-style tournament mode.
 - Fine-tuning or RLHF on debate outcomes.
 - Persistent storage beyond a single session's JSON state file.
+- Multi-user / concurrent session support (single-user prototype only).
