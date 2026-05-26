@@ -333,36 +333,33 @@ directly from the command line. The system loads the config, initialises the thr
 Claude agents, and begins the turn loop — printing live status as each agent call
 is dispatched to the Anthropic API.
 
-![alt text](docs/images/t1.PNG)
+![alt text](docs/images/tt1.PNG)
 
 ### Full Transcript
 
-![text](docs/images/t2.PNG) 
-![text](docs/images/t3.PNG) 
-![text](docs/images/t4.PNG) 
-![text](docs/images/t5.PNG) 
-![text](docs/images/t6.PNG) 
-![text](docs/images/t7.PNG) 
-![text](docs/images/t8.PNG) 
-![text](docs/images/t9.PNG) 
-![text](docs/images/t10.PNG) 
-![text](docs/images/t11.PNG) 
-![text](docs/images/t12.PNG) 
-![text](docs/images/t13.PNG) 
-![text](docs/images/t14.PNG) 
-![text](docs/images/t15.PNG) 
-![text](docs/images/t16.PNG) 
-![text](docs/images/t17.PNG) 
-![text](docs/images/t18.PNG) 
-![text](docs/images/t19.PNG) 
-![text](docs/images/t20.PNG) 
-![text](docs/images/t21.PNG) 
-![text](docs/images/t22.PNG) 
-![text](docs/images/t23.PNG)
+[text](README.md) 
+![text](docs/images/tt2.PNG) 
+![text](docs/images/tt3.PNG) 
+![text](docs/images/tt4.PNG) 
+![text](docs/images/tt5.PNG) 
+![text](docs/images/tt6.PNG) 
+![text](docs/images/tt7.PNG) 
+![text](docs/images/tt8.PNG) 
+![text](docs/images/tt9.PNG) 
+![text](docs/images/tt10.PNG) 
+![text](docs/images/tt11.PNG) 
+![text](docs/images/tt12.PNG) 
+![text](docs/images/tt13.PNG) 
+![text](docs/images/tt14.PNG) 
+![text](docs/images/tt15-16.PNG) 
+![text](docs/images/tt17.PNG) 
+![text](docs/images/tt18.PNG) 
+![text](docs/images/tt19-20.PNG) 
+![text](docs/images/tt21.PNG)
 
 ### Final Verdict — Scores & Reasoning
 
-![alt text](docs/images/t24.PNG)
+![alt text](docs/images/tt22.PNG)
 
 ---
 
