@@ -5,7 +5,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
-from src.agents.base_agent import BaseAgent, DebateMessage
+from src.agents.base_agent import BaseAgent, DebateMessage, _extract_json
 
 _MIN_TURNS: int = 20
 _VALID_SENDERS: frozenset[str] = frozenset({"father", "pro_son", "con_son"})
@@ -106,7 +106,7 @@ class FatherAgent(BaseAgent):
         """Ask the LLM to score both debaters; return scores + current_lean."""
         excerpt = " | ".join(m.content for m in transcript)
         raw = self.call_api(_RUBRIC_TEMPLATE.format(transcript=excerpt))
-        parsed = json.loads(raw)
+        parsed = json.loads(_extract_json(raw))
         result = dict(parsed["scores"])
         result["current_lean"] = parsed.get("current_lean", "")
         return result

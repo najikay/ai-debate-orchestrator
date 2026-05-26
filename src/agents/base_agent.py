@@ -6,6 +6,7 @@ and a ``call_api`` method that routes every LLM call through the
 """
 
 import json
+import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
@@ -25,6 +26,15 @@ def _load_schema() -> dict:
 
 
 _SCHEMA: dict = _load_schema()
+
+
+def _extract_json(raw: str) -> str:
+    """Strip markdown fences; return JSON object between first ``{`` and last ``}``."""
+    text = re.sub(r"```(?:json)?\s*", "", raw).strip()
+    start, end = text.find("{"), text.rfind("}")
+    if start == -1 or end == -1:
+        return raw
+    return text[start : end + 1]
 
 
 class MessageParseError(Exception):
@@ -102,7 +112,7 @@ class BaseAgent(ABC):
             MessageParseError: On JSON decode failure or schema violation.
         """
         try:
-            data = json.loads(raw)
+            data = json.loads(_extract_json(raw))
         except json.JSONDecodeError as exc:
             raise MessageParseError(f"Invalid JSON: {exc}") from exc
         if not self._validate_schema(data):
