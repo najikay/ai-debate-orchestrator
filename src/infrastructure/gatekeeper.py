@@ -5,10 +5,13 @@ Queues requests when the bucket is full (max depth: 50).
 Tracks cumulative token usage per agent, thread-safely.
 """
 
+import os
 import threading
 import time
 from collections import deque
 from dataclasses import dataclass
+
+import anthropic
 
 MAX_QUEUE_DEPTH: int = 50
 _WINDOW: float = 60.0
@@ -61,6 +64,7 @@ class Gatekeeper:
         self._usage: dict[str, dict[str, int]] = {}
         self._times: dict[str, list[float]] = {}
         self._lock: threading.Lock = threading.Lock()
+        self._client: anthropic.Anthropic | None = None
 
     # ------------------------------------------------------------------
     # Public API
@@ -133,4 +137,15 @@ class Gatekeeper:
         return self.queue.popleft()
 
     def _make_api_call(self, request: APIRequest) -> APIResponse:  # pragma: no cover
-        raise NotImplementedError("_make_api_call is injected in Phase 2.")
+        if self._client is None:
+            self._client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+        msg = self._client.messages.create(
+            model=request.model,
+            max_tokens=1024,
+            messages=[{"role": "user", "content": request.payload["prompt"]}],
+        )
+        return APIResponse(
+            content=msg.content[0].text,
+            prompt_tokens=msg.usage.input_tokens,
+            completion_tokens=msg.usage.output_tokens,
+        )
