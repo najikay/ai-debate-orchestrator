@@ -235,11 +235,14 @@ the CLI. No database or additional infrastructure is required.
 
 ### Main Page — Topic Form & Live Debate
 
-![Main page — topic input form and colour-coded debate bubbles](docs/images/main_page.png)
+![Main page — topic input form and colour-coded debate bubbles]
+
+[text](README.md) ![text](docs/images/1.PNG) ![text](docs/images/2.PNG) ![text](docs/images/3.PNG) ![text](docs/images/4.PNG) ![text](docs/images/5.PNG) ![text](docs/images/6.PNG) ![text](docs/images/7.PNG) ![text](docs/images/8.PNG) ![text](docs/images/9.PNG) ![text](docs/images/10.PNG) ![text](docs/images/11.PNG) ![text](docs/images/12.PNG) ![text](docs/images/13.PNG) ![text](docs/images/14.PNG) ![text](docs/images/15.PNG) ![text](docs/images/16.PNG) ![text](docs/images/17.PNG) ![text](docs/images/18.PNG) ![text](docs/images/19.PNG) ![text](docs/images/20.PNG) ![text](docs/images/21.PNG)
 
 ### Final Verdict — Scores & Reasoning
 
-![Final verdict card with numerical scores and Father's reasoning](docs/images/final_verdict.png)
+![Final verdict card with numerical scores and Father's reasoning]
+![alt text](docs/images/22.PNG)
 
 > Drop `main_page.png` and `final_verdict.png` into `docs/images/` to make these
 > images visible in GitHub.
