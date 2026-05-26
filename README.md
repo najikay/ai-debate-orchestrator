@@ -45,7 +45,7 @@ scores both debaters on a three-dimension rubric and declares a non-draw winner.
 ```bash
 # 1. Clone the repository
 git clone <repo-url>
-cd A2
+cd ai-debate-orchestrator
 
 # 2. Copy the environment template and fill in your API key
 # Windows:
@@ -78,6 +78,7 @@ uv run debate --topic "AI will replace human workers"
 | `--topic TEXT` | *(required)* | The debate topic |
 | `--config PATH` | `config/` | Path to the config directory |
 | `--dry-run` | `False` | Validate config only; makes no LLM calls |
+| `--save` | `False` | Save transcript to `debate_history/` |
 
 **Dry-run mode** — validate your setup without spending tokens:
 
@@ -173,30 +174,6 @@ values live in config files — **no API keys in source**.
 
 ---
 
-## Usage
-
-### CLI
-
-```bash
-uv run debate --topic "AI will replace human workers"
-```
-
-| Flag | Default | Description |
-|---|---|---|
-| `--topic TEXT` | *(required)* | The debate topic |
-| `--config PATH` | `config/` | Path to config directory |
-| `--dry-run` | `False` | Validate config only; no LLM calls |
-
-### Dry Run
-
-```bash
-uv run debate --topic "AI ethics" --dry-run
-```
-
-Loads and validates `setup.json`, prints agent model assignments, then
-exits without making any API calls. Useful for CI config checks.
-
----
 
 ## Web GUI
 
@@ -333,8 +310,7 @@ the CLI. No database or additional infrastructure is required.
 
 Running `uv run debate --topic "will AI replace human workers"` launches the debate
 directly from the command line. The system loads the config, initialises the three
-Claude agents, and begins the turn loop — printing live status as each agent call
-is dispatched to the Anthropic API.
+Claude agents, and begins the turn loop — printing each agent's argument live with colour-coded output (Father=yellow, Pro=blue, Con=red) as the debate unfolds to the Anthropic API.
 
 ![alt text](docs/images/tt1.PNG)
 
@@ -446,7 +422,7 @@ Every source file in `src/` must satisfy all five simultaneously:
 ## Project Structure
 
 ```
-A2/
+ai-debate-orchestrator/
 ├── config/
 │   ├── pricing.json         USD/1K token rates per model
 │   ├── rate_limits.json     Per-model RPM / TPM caps
@@ -467,6 +443,7 @@ A2/
 │   ├── unit/                Per-module TDD test suite
 │   └── integration/         Full-debate integration tests
 ├── .env-example             Environment variable template (safe to commit)
+├── debate_history/          Saved debate transcripts (created by --save)
 ├── pyproject.toml           uv / ruff / pytest configuration
 └── README.md
 ```
