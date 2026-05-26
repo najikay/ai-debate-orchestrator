@@ -335,3 +335,59 @@ def test_evaluate_applies_tiebreaker_when_scores_are_equal(
     verdict = agent.evaluate(sample_state)
     assert verdict.winner in ("pro_son", "con_son")
     assert verdict.draw is False
+
+
+# ---------------------------------------------------------------------------
+# Phase 5 — moderation rules in rubric prompt
+# ---------------------------------------------------------------------------
+
+
+def test_score_persuasiveness_result_contains_current_lean_key(
+    agent: FatherAgent, sample_state: types.SimpleNamespace, mock_gatekeeper: MagicMock
+) -> None:
+    """_score_persuasiveness returns a dict that includes 'current_lean'."""
+    lean_json = json.dumps({
+        "scores": {
+            "pro_son": {"clarity": 8, "evidence": 9, "logic": 7, "total": 24},
+            "con_son": {"clarity": 6, "evidence": 7, "logic": 8, "total": 21},
+        },
+        "current_lean": "pro_son",
+        "winner": "pro_son",
+        "draw": False,
+        "reasoning": "Pro Son was clearer and better evidenced throughout.",
+    })
+    mock_gatekeeper.dispatch.return_value = APIResponse(
+        content=lean_json, prompt_tokens=20, completion_tokens=50
+    )
+    result = agent._score_persuasiveness(sample_state.transcript)
+    assert "current_lean" in result
+
+
+def test_rubric_prompt_contains_dodging_instruction(
+    agent: FatherAgent, sample_state: types.SimpleNamespace, mock_gatekeeper: MagicMock
+) -> None:
+    """The rubric prompt mentions dodging detection."""
+    agent._score_persuasiveness(sample_state.transcript)
+    payload = mock_gatekeeper.dispatch.call_args[0][0].payload
+    prompt_text = payload.get("prompt", "").lower()
+    assert "dodg" in prompt_text or "pivot" in prompt_text or "repeat" in prompt_text
+
+
+def test_rubric_prompt_contains_language_enforcement_instruction(
+    agent: FatherAgent, sample_state: types.SimpleNamespace, mock_gatekeeper: MagicMock
+) -> None:
+    """The rubric prompt mentions language or respect enforcement."""
+    agent._score_persuasiveness(sample_state.transcript)
+    payload = mock_gatekeeper.dispatch.call_args[0][0].payload
+    prompt_text = payload.get("prompt", "").lower()
+    assert "language" in prompt_text or "disrespect" in prompt_text
+
+
+def test_rubric_prompt_does_not_instruct_fact_checking(
+    agent: FatherAgent, sample_state: types.SimpleNamespace, mock_gatekeeper: MagicMock
+) -> None:
+    """The rubric prompt explicitly tells the Father NOT to fact-check sources."""
+    agent._score_persuasiveness(sample_state.transcript)
+    payload = mock_gatekeeper.dispatch.call_args[0][0].payload
+    prompt_text = payload.get("prompt", "").lower()
+    assert "fact" in prompt_text

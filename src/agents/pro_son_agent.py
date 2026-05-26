@@ -90,7 +90,9 @@ class ProSonAgent(BaseAgent):
     # Public domain method
     # ------------------------------------------------------------------
 
-    def generate_argument(self, prompt: DebateMessage) -> DebateMessage:
+    def generate_argument(
+        self, prompt: DebateMessage, topic: str = ""
+    ) -> DebateMessage:
         """Generate a pro-position argument, retrying on position drift.
 
         Args:
@@ -102,7 +104,7 @@ class ProSonAgent(BaseAgent):
         Raises:
             AgentFailureError: If position is violated on all attempts.
         """
-        topic = prompt.content
+        topic = topic or prompt.content
         sources = self._gather_sources(topic)
         prompt_str = self.build_prompt({"topic": topic, "message": prompt})
 

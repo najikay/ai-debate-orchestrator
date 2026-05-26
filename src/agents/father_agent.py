@@ -12,19 +12,20 @@ _VALID_SENDERS: frozenset[str] = frozenset({"father", "pro_son", "con_son"})
 _VALID_RECIPIENTS: frozenset[str] = frozenset({"father", "pro_son", "con_son"})
 
 _RUBRIC_TEMPLATE = (
-    "You are the debate judge. Score each debater on:\n"
-    "1. Clarity (1-10): How clearly were arguments expressed?\n"
-    "2. Evidence Quality (1-10): How well were claims supported by cited sources?\n"
-    "3. Logical Consistency (1-10): Were arguments internally consistent"
-    " across all turns?\n"
+    "You are the debate judge. Rules:\n"
+    "- Do NOT fact-check sources — agents challenge each other's evidence.\n"
+    "- Argument dodging (off-topic pivot / verbatim repeat): -2 Logical Consistency.\n"
+    "- Disrespectful language: -1 Clarity (>=2 incidents: -3 total score).\n"
+    "Score: 1. Clarity (1-10)  2. Evidence Quality (1-10)"
+    "  3. Logical Consistency (1-10)\n"
     "\nTranscript:\n{transcript}\n\n"
-    "Return ONLY valid JSON matching this schema:\n"
+    "Return ONLY valid JSON:\n"
     '{{\n  "scores": {{\n'
     '    "pro_son": {{"clarity": N, "evidence": N, "logic": N, "total": N}},\n'
     '    "con_son":  {{"clarity": N, "evidence": N, "logic": N, "total": N}}\n'
     "  }},\n"
-    '  "winner": "pro_son" | "con_son",\n'
-    '  "draw": false,\n'
+    '  "current_lean": "pro_son | con_son",\n'
+    '  "winner": "pro_son | con_son",\n'
     '  "reasoning": "<min 50 chars>"\n}}'
 )
 
@@ -102,10 +103,13 @@ class FatherAgent(BaseAgent):
         return len(state.transcript) >= _MIN_TURNS
 
     def _score_persuasiveness(self, transcript: list) -> dict:
-        """Ask the LLM to score both debaters; return parsed scores dict."""
+        """Ask the LLM to score both debaters; return scores + current_lean."""
         excerpt = " | ".join(m.content for m in transcript)
         raw = self.call_api(_RUBRIC_TEMPLATE.format(transcript=excerpt))
-        return json.loads(raw)["scores"]
+        parsed = json.loads(raw)
+        result = dict(parsed["scores"])
+        result["current_lean"] = parsed.get("current_lean", "")
+        return result
 
     def evaluate(self, state) -> Verdict:
         """Score the debate and declare a winner (never a draw).

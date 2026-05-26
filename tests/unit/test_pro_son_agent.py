@@ -202,3 +202,12 @@ def test_generate_argument_raises_agent_failure_error_after_2_retries(
     )
     with pytest.raises(AgentFailureError):
         agent.generate_argument(father_msg)
+
+
+def test_generate_argument_uses_explicit_topic_when_provided(
+    agent: ProSonAgent, father_msg: DebateMessage
+) -> None:
+    """When a topic string is passed, it is used instead of prompt.content."""
+    explicit_topic = "Space exploration benefits humanity"
+    result = agent.generate_argument(father_msg, topic=explicit_topic)
+    assert isinstance(result, DebateMessage)

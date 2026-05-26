@@ -103,18 +103,19 @@ class DebateEngine:
 
     def _run_turn_loop(self, min_turns: int) -> None:
         """Execute debate rounds until min_turns per side are complete."""
+        topic = self.state_manager.state.topic
         for _ in range(min_turns):
             if self._check_budget():
                 break
             pro_msg = self.pro_son.generate_argument(
-                self.state_manager.state.transcript[-1]
+                self.state_manager.state.transcript[-1], topic=topic
             )
             self.state_manager.record_message(pro_msg)
             self.father.route(pro_msg)
             if self._check_budget():
                 break
             con_msg = self.con_son.generate_argument(
-                self.state_manager.state.transcript[-1]
+                self.state_manager.state.transcript[-1], topic=topic
             )
             self.state_manager.record_message(con_msg)
             self.father.route(con_msg)
