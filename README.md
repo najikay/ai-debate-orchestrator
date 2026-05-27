@@ -3,7 +3,7 @@
 ![Python](https://img.shields.io/badge/Python-3.11%2B-blue?logo=python)
 ![Flask](https://img.shields.io/badge/Flask-3.0-lightgrey?logo=flask)
 ![Claude](https://img.shields.io/badge/Powered%20by-Claude%20%7C%20DeepSeek%20%7C%20Qwen%20%7C%20OpenAI-orange)
-![Tests](https://img.shields.io/badge/Tests-233%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/Tests-255%20passing-brightgreen)
 ![Version](https://img.shields.io/badge/Version-2.1.0-informational)
 
 **Group:** NajAmjad | **Course:** AI Orchestration
@@ -97,6 +97,9 @@ The system will force early evaluation and emit a `[WARN]` if 90% of the cap is 
 | **Live Web Streaming** | Server-Sent Events (SSE) push each agent turn to the browser in real time — no page refresh, no waiting |
 | **Color-Coded CLI** | Terminal output color-coded by agent (Father=yellow, Pro=blue, Con=red) with live turn-by-turn printing |
 | **Transcript Save** | `--save` flag persists full debate JSON to `debate_history/` for post-session review |
+| **Draw Detection** | Father agent declares a draw when scores are within 2 points and no momentum advantage exists in the last 4 turns |
+| **Debate History Viewer** | `debate-history` command lists and replays saved debates with colours and pacing |
+| **CLI Flag Overrides** | `--rounds`, `--pro-model`, `--con-model` flags override config without editing files |
 | **Live Cost Tracking** | `Gatekeeper` accumulates token totals per agent → `CostReporter` computes USD spend against a configurable budget cap |
 | **Fuzzy Pricing Lookup** | `_find_rates()` handles date-suffix model IDs and non-Anthropic providers without silent `$0` costs |
 | **Watchdog Recovery** | `concurrent.futures` timeout with one retry; graceful `WatchdogError` shutdown preserves partial state |
@@ -196,6 +199,9 @@ uv run debate --topic "AI will replace human workers"
 | `--config PATH` | `config/` | Path to the config directory |
 | `--dry-run` | `False` | Validate config only — makes no API calls |
 | `--save` | `False` | Save full transcript to `debate_history/` |
+| `--rounds N` | config default | Number of debate rounds per side |
+| `--pro-model MODEL` | config default | Override Pro agent model |
+| `--con-model MODEL` | config default | Override Con agent model |
 
 **Dry-run** — validate your setup without spending tokens:
 
@@ -207,7 +213,18 @@ uv run debate --topic "AI ethics" --dry-run
 
 ```bash
 uv run debate --topic "AI will replace human workers" --save
-```
+`
+### Debate History Viewer
+
+```bash
+# List all saved debates
+uv run python -m src.ui.debate_history_cli
+
+# Replay the most recent debate
+uv run python -m src.ui.debate_history_cli --last
+
+# Pick a debate to replay interactively
+uv run python -m src.ui.debate_history_cli --replay
 
 ### Test Suite & Linter
 
@@ -289,8 +306,7 @@ The Father scores each debater on three dimensions (1–10 each, max 30 total):
 | **Evidence Quality** | How well were claims supported by cited sources? |
 | **Logical Consistency** | Were arguments internally consistent across all turns? |
 
-Equal totals trigger a last-4-turn momentum tiebreaker. Draws are prohibited —
-`"draw": false` is enforced by the `verdict.json` schema.
+Equal totals trigger a last-4-turn momentum tiebreaker. If momentum is also equal, the verdict is declared a **draw** (`"draw": true`).
 
 ### Defensive Engineering
 
@@ -377,7 +393,7 @@ ai-debate-orchestrator/
 │   │                              Watchdog, CostReporter, ConfigLoader, LoggerManager
 │   ├── schemas/                   debate_message.json, verdict.json
 │   ├── skills/                    WebSearchTool, LogicAnalyzerTool
-│   └── ui/                        debate_cli.py (CLI), app.py (Flask + SSE)
+│   └── ui/                        debate_cli.py, app.py (Flask+SSE), cli_output.py, debate_history_cli.py
 ├── templates/                     Bootstrap 5 + jQuery web UI
 ├── tests/
 │   ├── unit/                      Per-module TDD test suite
