@@ -16,6 +16,7 @@ import os
 import queue
 import threading
 from pathlib import Path
+from typing import Callable, Optional
 
 from dotenv import load_dotenv
 from flask import Flask, Response, jsonify, render_template, request
@@ -29,7 +30,14 @@ _TEMPLATE_DIR = Path(__file__).parent.parent.parent / "templates"
 
 
 def create_app(config_path: str = "config/") -> Flask:
-    """Create and configure the Flask application."""
+    """Create and configure the Flask application.
+
+    Args:
+        config_path: Path to the ``config/`` directory.
+
+    Returns:
+        Configured :class:`flask.Flask` instance.
+    """
     app = Flask(__name__, template_folder=str(_TEMPLATE_DIR))
     app.config["CONFIG_PATH"] = config_path
 
@@ -55,7 +63,7 @@ def create_app(config_path: str = "config/") -> Flask:
                     "sender": m.sender,
                     "content": m.content,
                     "turn": m.turn,
-                    "sources": m.sources,
+                    "sources": m.sources or [],
                 }
                 for m in engine.state_manager.state.transcript
             ]
@@ -97,7 +105,7 @@ def create_app(config_path: str = "config/") -> Flask:
                         "sender": msg.sender,
                         "content": msg.content,
                         "turn": msg.turn,
-                        "sources": msg.sources,
+                        "sources": msg.sources or [],
                     }))
 
                 engine.state_manager.on_message = on_msg
@@ -123,9 +131,13 @@ def create_app(config_path: str = "config/") -> Flask:
         def generate():
             while True:
                 kind, payload = msg_queue.get()
+                if kind == "done":
+                    # Signal the client the stream is finished without sending a data frame
+                    yield "event: close\ndata: {}\n\n"
+                    break
                 data = json.dumps({"type": kind, "data": payload})
                 yield f"data: {data}\n\n"
-                if kind in ("done", "error"):
+                if kind == "error":
                     break
 
         return Response(
