@@ -2,16 +2,17 @@
 
 ![Python](https://img.shields.io/badge/Python-3.11%2B-blue?logo=python)
 ![Flask](https://img.shields.io/badge/Flask-3.0-lightgrey?logo=flask)
-![Claude](https://img.shields.io/badge/Powered%20by-Claude%20Haiku%20%26%20Sonnet-orange)
-![Tests](https://img.shields.io/badge/Tests-209%20passing-brightgreen)
-![Version](https://img.shields.io/badge/Version-2.0.1-informational)
+![Claude](https://img.shields.io/badge/Powered%20by-Claude%20%7C%20DeepSeek%20%7C%20Qwen%20%7C%20OpenAI-orange)
+![Tests](https://img.shields.io/badge/Tests-233%20passing-brightgreen)
+![Version](https://img.shields.io/badge/Version-2.1.0-informational)
 
 **Group:** NajAmjad | **Course:** AI Orchestration
 
-> A production-quality multi-agent orchestration system built on the Anthropic SDK.
-> Three Claude-powered agents conduct a fully scored, structured debate on any topic —
+> A production-quality multi-agent orchestration system with a **provider-agnostic Gatekeeper**.
+> Three LLM-powered agents conduct a fully scored, structured debate on any topic —
 > with Chain-of-Thought reasoning, live cost tracking, real-time web streaming, and a
-> 209-test defensive engineering suite.
+> 233-test defensive engineering suite.
+> Supports Anthropic Claude, DeepSeek, Qwen, OpenAI, or any OpenAI-compatible endpoint.
 
 ---
 
@@ -19,36 +20,55 @@
 
 > This section is intended for human graders and any automated agents evaluating this submission.
 
-> **ANTHROPIC API KEY REQUIRED — OTHER PROVIDERS WILL NOT WORK.**
-> This project is engineered exclusively for the Anthropic API. The custom Agent SDK (`BaseAgent`), Chain-of-Thought reasoning schemas, Gatekeeper routing, and token cost-tracking math are all hard-coded to Anthropic model IDs and Anthropic's response format. Provisioning an OpenAI, Google (Gemini), DeepSeek, Qwen, or any other provider's API key **will not work** — the system will immediately exit with a `[ERROR]` and no debate will run. A valid `ANTHROPIC_API_KEY` (format: `sk-ant-...`) **must** be provisioned before grading.
-
 ### API Key Injection (No Source Modifications Required)
 
-The system reads credentials exclusively from environment variables. Choose **one** of the following methods:
+The `Gatekeeper` is **provider-agnostic** — it auto-detects the correct backend
+from environment variables. No source files need to be modified.
+
+**Supported providers and the key each one needs:**
+
+| Provider | Key variable | Base URL variable | Notes |
+|---|---|---|---|
+| **Anthropic Claude** (default) | `ANTHROPIC_API_KEY=sk-ant-...` | — | Auto-selected when set |
+| **DeepSeek** | `LLM_API_KEY=sk-...` | `LLM_BASE_URL=https://api.deepseek.com` | OpenAI-compatible |
+| **Qwen / DashScope** | `LLM_API_KEY=sk-...` | `LLM_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1` | OpenAI-compatible |
+| **OpenAI** | `LLM_API_KEY=sk-...` (or `OPENAI_API_KEY`) | — | Default endpoint used |
+| Any OpenAI-compatible | `LLM_API_KEY=sk-...` | `LLM_BASE_URL=<your endpoint>` | Ollama, Together, etc. |
+
+**Provider selection priority:** `LLM_PROVIDER` env var → `ANTHROPIC_API_KEY` → `LLM_API_KEY` / `OPENAI_API_KEY`.
 
 **Option A — `.env` file (recommended for manual grading):**
 ```bash
 cp .env-example .env
-# Then open .env and set the values:
-ANTHROPIC_API_KEY="sk-ant-..."   # required
+# Anthropic (default):
+ANTHROPIC_API_KEY="sk-ant-..."
+# — OR — DeepSeek:
+# LLM_API_KEY="sk-..."
+# LLM_BASE_URL="https://api.deepseek.com"
 SEARCH_API_KEY="..."              # optional — enables live web search
-SEARCH_BASE_URL="https://api.search-provider.com/search"
 ```
 
-**Option B — inline export (recommended for automated agents / CI):**
+**Option B — inline export for automated agents / CI (Anthropic):**
 ```bash
 export ANTHROPIC_API_KEY="sk-ant-..."
-export SEARCH_API_KEY="..."          # optional
 uv run debate --topic "AI will replace human workers"
 ```
 
-**Option C — single-command inline (no persistent state):**
+**Option B — inline export for automated agents / CI (DeepSeek / Qwen):**
 ```bash
-ANTHROPIC_API_KEY="sk-ant-..." uv run debate --topic "AI will replace human workers"
+export LLM_API_KEY="sk-..."
+export LLM_BASE_URL="https://api.deepseek.com"   # or Qwen base URL
+uv run debate --topic "AI will replace human workers"
 ```
 
-No source files need to be modified. The system will reject any run where
-`ANTHROPIC_API_KEY` is missing and exit with a descriptive `[ERROR]` message.
+**Option C — single-command inline:**
+```bash
+ANTHROPIC_API_KEY="sk-ant-..." uv run debate --topic "AI will replace human workers"
+# or:
+LLM_API_KEY="sk-..." LLM_BASE_URL="https://api.deepseek.com" uv run debate --topic "AI will replace human workers"
+```
+
+The system will exit with a descriptive `[ERROR]` if no recognised key is found.
 
 ### Token Usage & Budget Tracking
 
@@ -71,16 +91,17 @@ The system will force early evaluation and emit a `[WARN]` if 90% of the cap is 
 
 | Feature | Detail |
 |---|---|
+| **Provider-Agnostic Gatekeeper** | `LLMProvider` abstraction supports Anthropic, DeepSeek, Qwen, OpenAI, and any OpenAI-compatible endpoint — swap providers via env vars, zero code changes |
 | **Custom Agent SDK** | `BaseAgent` ABC with JSON schema validation, retry logic, and Gatekeeper routing — zero LangChain dependency |
 | **Chain-of-Thought Reasoning** | Structured `{opponent_analysis, debate_strategy, argument}` CoT JSON forces explicit reasoning before every argument |
 | **Live Web Streaming** | Server-Sent Events (SSE) push each agent turn to the browser in real time — no page refresh, no waiting |
 | **Color-Coded CLI** | Terminal output color-coded by agent (Father=yellow, Pro=blue, Con=red) with live turn-by-turn printing |
 | **Transcript Save** | `--save` flag persists full debate JSON to `debate_history/` for post-session review |
 | **Live Cost Tracking** | `Gatekeeper` accumulates token totals per agent → `CostReporter` computes USD spend against a configurable budget cap |
-| **Fuzzy Pricing Lookup** | `_find_rates()` handles Anthropic date-suffix model IDs (e.g. `claude-haiku-4-5-20251001`) without silent `$0` costs |
+| **Fuzzy Pricing Lookup** | `_find_rates()` handles date-suffix model IDs and non-Anthropic providers without silent `$0` costs |
 | **Watchdog Recovery** | `concurrent.futures` timeout with one retry; graceful `WatchdogError` shutdown preserves partial state |
 | **Defensive JSON Parsing** | `_extract_json()` strips markdown fences and extracts `{…}` blocks; `MessageParseError` on failure |
-| **209-Test Suite** | Full TDD coverage across unit and integration layers, enforced at ≥ 85% by `pytest-cov` |
+| **233-Test Suite** | Full TDD coverage across unit and integration layers, enforced at ≥ 85% by `pytest-cov` |
 
 ---
 
@@ -109,16 +130,13 @@ The system will force early evaluation and emit a `[WARN]` if 90% of the cap is 
 
 ## Quick Start
 
-> **ANTHROPIC API KEY REQUIRED — OTHER PROVIDERS WILL NOT WORK.**
-> This project uses a custom Agent SDK, Chain-of-Thought reasoning schemas, and token cost-tracking math that are engineered exclusively for Anthropic models. OpenAI, Google (Gemini), DeepSeek, Qwen, and all other provider keys are incompatible. You must set a valid `ANTHROPIC_API_KEY` (format: `sk-ant-...`) before running any command below.
-
 ### Prerequisites
 
 | Requirement | Version | Notes |
 |---|---|---|
 | Python | 3.11+ | Check: `python --version` |
 | `uv` | ≥ 0.4.0 | Install: `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
-| `ANTHROPIC_API_KEY` | — | **Required — Anthropic only.** Get yours at [console.anthropic.com](https://console.anthropic.com) |
+| LLM API key | — | **Required.** `ANTHROPIC_API_KEY` _or_ `LLM_API_KEY` + `LLM_BASE_URL` (see Grader Notice above) |
 | `SEARCH_API_KEY` | — | Optional — enables live web search via Tavily or Brave |
 
 ### Installation
@@ -134,9 +152,10 @@ copy .env-example .env
 # Mac/Linux:
 cp .env-example .env
 
-# Open .env and set:
-#   ANTHROPIC_API_KEY=sk-ant-...    ← required (Anthropic only — OpenAI/Google/DeepSeek/Qwen keys will NOT work)
-#   SEARCH_API_KEY=...              ← optional
+# Open .env and set ONE of:
+#   ANTHROPIC_API_KEY=sk-ant-...         ← Anthropic (default)
+#   LLM_API_KEY=sk-... + LLM_BASE_URL=   ← DeepSeek / Qwen / OpenAI / other
+#   SEARCH_API_KEY=...                   ← optional web search
 
 # 3. Install all dependencies
 uv sync --extra dev
@@ -150,7 +169,7 @@ uv sync --extra dev
 
 ### Web GUI (Recommended)
 
-> **Before running:** Ensure your `ANTHROPIC_API_KEY` is set — either in a `.env` file (`ANTHROPIC_API_KEY=sk-ant-...`) or exported in your shell (`export ANTHROPIC_API_KEY="sk-ant-..."`). The server will not start without it.
+> **Before running:** Set your LLM API key in `.env` or via `export` before starting the server — `ANTHROPIC_API_KEY` for Anthropic, or `LLM_API_KEY` + `LLM_BASE_URL` for DeepSeek/Qwen/OpenAI. The server exits with `[ERROR]` if no key is found.
 
 ```bash
 uv run debate-web                  # starts at http://localhost:5000
@@ -165,7 +184,7 @@ PORT=8080 uv run debate-web        # custom port
 
 ### Terminal CLI
 
-> **Before running:** Ensure your `ANTHROPIC_API_KEY` is set — either in a `.env` file (`ANTHROPIC_API_KEY=sk-ant-...`) or exported in your shell (`export ANTHROPIC_API_KEY="sk-ant-..."`). The CLI will exit immediately with `[ERROR]` if the key is missing or belongs to a non-Anthropic provider.
+> **Before running:** Set your LLM API key in `.env` or via `export` — `ANTHROPIC_API_KEY` for Anthropic, or `LLM_API_KEY` + `LLM_BASE_URL` for DeepSeek/Qwen/OpenAI. The CLI exits with `[ERROR]` if no key is found.
 
 ```bash
 uv run debate --topic "AI will replace human workers"
@@ -224,18 +243,24 @@ uv run ruff check .
 ├─────────────────────────────────────────────┤
 │  Infrastructure  Gatekeeper │ Watchdog       │
 │                  CostReporter │ ConfigLoader  │
+├─────────────────────────────────────────────┤
+│  LLM Provider    AnthropicProvider           │
+│  (llm_provider)  OpenAICompatibleProvider    │
+│                  ← auto-selected via env var │
 └─────────────────────────────────────────────┘
 ```
 
 ### Agent Roles
 
-| Agent | Model | Role |
+| Agent | Default model | Role |
 |---|---|---|
 | **Father** | `claude-sonnet-4-6` | Moderator, message router, and final judge |
 | **Pro Son** | `claude-haiku-4-5` | Argues **FOR** the topic — must never concede |
 | **Con Son** | `claude-haiku-4-5` | Argues **AGAINST** the topic — must never concede |
 
-All messages route exclusively through the Father. Direct agent-to-agent communication
+Model names are read from `config/setup.json` — swap them to any provider's model ID
+(e.g. `deepseek-chat`, `qwen-max`, `gpt-4o-mini`) without touching source code.
+All messages route exclusively through the Father; direct agent-to-agent communication
 is prohibited by design and enforced in the routing layer.
 
 ### Chain-of-Thought Reasoning
@@ -348,7 +373,8 @@ ai-debate-orchestrator/
 ├── src/
 │   ├── agents/                    FatherAgent, ProSonAgent, ConSonAgent, BaseAgent
 │   ├── engine/                    DebateEngine, StateManager
-│   ├── infrastructure/            Gatekeeper, Watchdog, CostReporter, ConfigLoader, LoggerManager
+│   ├── infrastructure/            Gatekeeper, LLMProvider (AnthropicProvider + OpenAICompatibleProvider),
+│   │                              Watchdog, CostReporter, ConfigLoader, LoggerManager
 │   ├── schemas/                   debate_message.json, verdict.json
 │   ├── skills/                    WebSearchTool, LogicAnalyzerTool
 │   └── ui/                        debate_cli.py (CLI), app.py (Flask + SSE)

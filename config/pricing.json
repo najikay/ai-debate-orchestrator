@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "_comment": "Prices are USD per 1,000 tokens. Update these values if Anthropic changes pricing.",
+  "_comment": "Prices are USD per 1,000 tokens. Unknown models fuzzy-matched by CostReporter.",
   "models": {
     "claude-sonnet-4-6": {
       "input_per_1k": 0.003,
@@ -9,6 +9,34 @@
     "claude-haiku-4-5": {
       "input_per_1k": 0.0008,
       "output_per_1k": 0.004
+    },
+    "deepseek-chat": {
+      "input_per_1k": 0.00014,
+      "output_per_1k": 0.00028
+    },
+    "deepseek-reasoner": {
+      "input_per_1k": 0.00055,
+      "output_per_1k": 0.00219
+    },
+    "qwen-turbo": {
+      "input_per_1k": 0.00005,
+      "output_per_1k": 0.00015
+    },
+    "qwen-plus": {
+      "input_per_1k": 0.0004,
+      "output_per_1k": 0.0012
+    },
+    "qwen-max": {
+      "input_per_1k": 0.0016,
+      "output_per_1k": 0.0064
+    },
+    "gpt-4o": {
+      "input_per_1k": 0.0025,
+      "output_per_1k": 0.01
+    },
+    "gpt-4o-mini": {
+      "input_per_1k": 0.00015,
+      "output_per_1k": 0.0006
     }
   }
 }

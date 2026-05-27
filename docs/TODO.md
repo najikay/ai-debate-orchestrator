@@ -1,9 +1,9 @@
 # Execution Checklist
 ## AI Debate System — Assignment 2
 **Project:** AI Orchestration Course — Group NajAmjad
-**Version:** 2.0.1
-**Date:** 2026-05-26
-**Status:** Final — v2.0.1
+**Version:** 2.1.0
+**Date:** 2026-05-27
+**Status:** Final — v2.1.0
 
 > **Golden Rules** — every task below must satisfy all five:
 > Max 150 lines per source file · 0 ruff violations · >85% test coverage · TDD (test first) · No hardcoded values · No direct agent-to-agent messages
@@ -1116,3 +1116,47 @@
 - [x] Update `README.md`: add Web GUI section describing `uv run debate-web` usage.
 - [x] Create git tag: `git tag v2.0.0`.
 - [x] Git commit: `release: v2.0.0 — Phase 5 QA fixes and Web GUI complete`.
+
+---
+
+## Phase 6 — Multi-Provider Support (v2.1.0)
+
+### 6.1 Provider Abstraction
+
+- [x] Create `src/infrastructure/llm_provider.py` with `LLMProvider` ABC, `AnthropicProvider`, `OpenAICompatibleProvider`, and `build_provider()` factory.
+- [x] `AnthropicProvider` wraps `anthropic.Anthropic().messages.create()` — selected when `ANTHROPIC_API_KEY` is set.
+- [x] `OpenAICompatibleProvider` wraps `openai.OpenAI(base_url=...).chat.completions.create()` — selected when `LLM_API_KEY` or `OPENAI_API_KEY` is set.
+- [x] `build_provider()` priority: `LLM_PROVIDER` env var → `ANTHROPIC_API_KEY` → `LLM_API_KEY`/`OPENAI_API_KEY`.
+- [x] Lazy provider instantiation: `Gatekeeper._make_api_call` calls `build_provider()` on first use if no provider was injected.
+
+### 6.2 Gatekeeper Refactor
+
+- [x] Remove `import anthropic` from `gatekeeper.py`.
+- [x] Replace `self._client: anthropic.Anthropic | None` with `self._provider: LLMProvider | None`.
+- [x] Add optional `provider: LLMProvider | None = None` to `Gatekeeper.__init__()`.
+- [x] Add `_rpm(model: str) -> int` helper — falls back to `rate_limits["default"]` or 60 RPM for unknown models.
+- [x] Update `_is_limited` and `_enforce_limits` to use `_rpm()` instead of direct dict access.
+- [x] Update `_make_api_call` to delegate to `self._provider.complete()`.
+
+### 6.3 Config & Dependency Updates
+
+- [x] `config/rate_limits.json` — add `"default": {"rpm": 60, "tpm": 100000}` fallback.
+- [x] `config/rate_limits.json` — add entries for `deepseek-chat`, `deepseek-reasoner`, `qwen-turbo`, `qwen-plus`, `qwen-max`, `gpt-4o`, `gpt-4o-mini`.
+- [x] `config/pricing.json` — add USD/1K rates for DeepSeek, Qwen, and OpenAI models.
+- [x] `.env-example` — document both provider options (Anthropic and OpenAI-compatible) with base URL examples.
+- [x] `pyproject.toml` — add `openai>=1.0.0` to runtime dependencies.
+
+### 6.4 Pre-existing Ruff Fixes
+
+- [x] `src/engine/state_manager.py` — break E501 long line; add W292 trailing newline.
+- [x] `src/ui/debate_cli.py` — add `# noqa: E402` to post-`load_dotenv()` imports; add W292 trailing newline.
+
+### 6.5 Documentation & Final Checks
+
+- [x] Update `README.md`: replace "Anthropic only" warnings with multi-provider instructions; update badges and feature table.
+- [x] Update `docs/PRD.md`: Section 5.1, 6.5, 10.3, add Section 16 (v2.1.0 provider refactor); version → 2.1.0.
+- [x] Update `docs/PLAN.md`: Section 4.1, 5.1, 5.3, 6, 7; version → 2.1.0.
+- [x] Update `docs/TODO.md`: version → 2.1.0; add this Phase 6 checklist.
+- [x] Run `uv run ruff check .` — confirm 0 violations.
+- [x] Run `uv run pytest --cov=src --cov-fail-under=85` — 233 tests pass, 88.55% coverage.
+- [x] Git commit: `feat/docs: implement provider-agnostic Gatekeeper, pass tests, and update documentation for multi-LLM support`.

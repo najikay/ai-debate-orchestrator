@@ -1,9 +1,9 @@
 # Product Requirements Document
 ## AI Debate System — Assignment 2
 **Project:** AI Orchestration Course — Group NajAmjad
-**Version:** 2.0.1
-**Date:** 2026-05-26
-**Status:** Final — v2.0.1
+**Version:** 2.1.0
+**Date:** 2026-05-27
+**Status:** Final — v2.1.0
 
 ---
 
@@ -252,11 +252,11 @@ All state transitions and anomalies are appended to `DebateState.events`:
 
 | File | Committed | Contains |
 |------|-----------|---------|
-| `.env` | No | `ANTHROPIC_API_KEY`, `SEARCH_API_KEY` |
-| `.env-example` | Yes | Placeholder keys, comments |
+| `.env` | No | `ANTHROPIC_API_KEY` or `LLM_API_KEY` + `LLM_BASE_URL`, `SEARCH_API_KEY` |
+| `.env-example` | Yes | Placeholder keys with comments for all supported providers |
 | `config/setup.json` | Yes | Model names, turn limits, log paths |
-| `config/rate_limits.json` | Yes | Per-model RPM/TPM caps |
-| `config/pricing.json` | Yes | USD/1K token rates per model |
+| `config/rate_limits.json` | Yes | Per-model RPM/TPM caps + `"default"` fallback for unknown model IDs |
+| `config/pricing.json` | Yes | USD/1K token rates for Anthropic, DeepSeek, Qwen, and OpenAI models |
 
 Zero hardcoded values are permitted anywhere in application source.
 
@@ -347,7 +347,7 @@ never silently swallows errors.
 |-------------|---------|-----------------|----------|-------------------|
 | Config file missing | `ConfigLoader.load_all()` cannot find file | `FileNotFoundError` raised | No recovery; system exits code 1 | `[ERROR] config/setup.json not found. Run 'make setup'.` |
 | Schema version mismatch | `schema_version` field does not match expected | `ConfigVersionError` raised | No recovery; system exits code 1 | `[ERROR] setup.json schema_version mismatch. Expected 1.0.` |
-| `ANTHROPIC_API_KEY` missing | Not in `.env` at startup | `ValueError` raised | No recovery; system exits code 1 | `[ERROR] ANTHROPIC_API_KEY is not set. Add it to .env.` |
+| No LLM API key | Neither `ANTHROPIC_API_KEY` nor `LLM_API_KEY`/`OPENAI_API_KEY` in `.env` | `EnvironmentError` raised | No recovery; system exits code 1 | `[ERROR] No LLM API key found. Set ANTHROPIC_API_KEY or LLM_API_KEY + LLM_BASE_URL.` |
 | Topic string empty | `--topic ""` passed to CLI | `argparse` error | No recovery; exits code 2 | `error: --topic must be a non-empty string.` |
 
 ---
@@ -599,12 +599,22 @@ Return ONLY valid JSON matching this schema:
 - At 90% of cap: WARNING emitted; debate continues for one more turn.
 - At 100%+ of cap: evaluation forced; cost report generated immediately.
 
-### 10.3 Supported Models (initial)
+### 10.3 Supported Models
 
 | Model Alias | Provider | Rate |
 |-------------|----------|------|
 | `claude-sonnet-4-6` | Anthropic | per `pricing.json` |
 | `claude-haiku-4-5` | Anthropic | per `pricing.json` |
+| `deepseek-chat` | DeepSeek | per `pricing.json` |
+| `deepseek-reasoner` | DeepSeek | per `pricing.json` |
+| `qwen-turbo` | Alibaba / DashScope | per `pricing.json` |
+| `qwen-plus` | Alibaba / DashScope | per `pricing.json` |
+| `qwen-max` | Alibaba / DashScope | per `pricing.json` |
+| `gpt-4o` | OpenAI | per `pricing.json` |
+| `gpt-4o-mini` | OpenAI | per `pricing.json` |
+| *(any OpenAI-compatible ID)* | Any endpoint | fuzzy fallback in `CostReporter` |
+
+Model names are set in `config/setup.json` under `agents.*.model`. Swap them without any source code changes.
 
 ---
 
@@ -956,7 +966,44 @@ date-suffixed model IDs → `compute()` returns accurate spend.
 
 ---
 
-## 16. Out of Scope (v1.0 / v2.0.1)
+## 16. v2.1.0 — Provider-Agnostic Gatekeeper
+
+### 16.1 Motivation
+
+The original `Gatekeeper._make_api_call()` imported and called `anthropic.Anthropic()`
+directly, making the entire system inoperable with any non-Anthropic API key. Automated
+grading agents and cost-sensitive users wishing to use DeepSeek, Qwen, or OpenAI were
+blocked with no clean upgrade path.
+
+### 16.2 Architecture Change
+
+A new `src/infrastructure/llm_provider.py` module introduces a `LLMProvider` abstraction:
+
+| Class | Backend | Selected when |
+|---|---|---|
+| `AnthropicProvider` | `anthropic.Anthropic().messages.create()` | `ANTHROPIC_API_KEY` set (default) |
+| `OpenAICompatibleProvider` | `openai.OpenAI(base_url=...).chat.completions.create()` | `LLM_API_KEY` or `OPENAI_API_KEY` set |
+
+`build_provider()` auto-detects the correct backend from environment variables.
+`Gatekeeper.__init__()` accepts an optional `provider: LLMProvider` argument;
+`build_provider()` is called lazily on the first `_make_api_call` if none is supplied.
+
+### 16.3 Config Changes
+
+- `config/rate_limits.json` — added `"default": {"rpm": 60}` fallback so unknown model IDs don't raise `KeyError`.
+- `config/pricing.json` — added DeepSeek, Qwen, and OpenAI model entries; `CostReporter._find_rates()` fuzzy-matches any suffix variant.
+- `.env-example` — documents both provider options side-by-side.
+- `pyproject.toml` — `openai>=1.0.0` added to runtime dependencies.
+
+### 16.4 Backward Compatibility
+
+No agent, engine, schema, or test code was changed. Existing Anthropic setups
+continue to work without modification — `ANTHROPIC_API_KEY` is still auto-detected
+as the default provider.
+
+---
+
+## 17. Out of Scope (v1.0 / v2.1.0)
 
 - Multi-topic / bracket-style tournament mode.
 - Fine-tuning or RLHF on debate outcomes.

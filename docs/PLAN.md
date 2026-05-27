@@ -1,9 +1,9 @@
 # Architectural Blueprint
 ## AI Debate System — Assignment 2
 **Project:** AI Orchestration Course — Group NajAmjad
-**Version:** 2.0.1
-**Date:** 2026-05-26
-**Status:** Final — v2.0.1
+**Version:** 2.1.0
+**Date:** 2026-05-27
+**Status:** Final — v2.1.0
 
 ---
 
@@ -26,9 +26,11 @@
 │                          ┌──────────────┬─────┘            │
 │                          │              │                   │
 │                   ┌──────▼──────┐ ┌────▼──────┐           │
-│                   │ Anthropic   │ │ Web Search │           │
-│                   │ Claude API  │ │ API        │           │
-│                   └─────────────┘ └───────────┘           │
+│                   │ LLM Provider│ │ Web Search │           │
+│                   │ (Anthropic/ │ │ API        │           │
+│                   │  DeepSeek/  │ └───────────┘           │
+│                   │  Qwen/other)│                          │
+│                   └─────────────┘                          │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -110,9 +112,9 @@ User ──topic──► DebateEngine.start()
 │  (Skill interface implementations)              │
 ├─────────────────────────────────────────────────┤
 │             Infrastructure Layer               │
-│  gatekeeper.py  |  watchdog.py                  │
-│  logger_manager.py  |  cost_reporter.py         │
-│  config_loader.py                               │
+│  gatekeeper.py  |  llm_provider.py              │
+│  watchdog.py    |  cost_reporter.py             │
+│  logger_manager.py  |  config_loader.py         │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -252,13 +254,21 @@ classDiagram
 
 ## 4. Core Mechanisms
 
-### 4.1 API Gatekeeper
+### 4.1 API Gatekeeper & Provider Abstraction
 
-**Purpose:** Single choke-point for all outbound LLM and Web Search API calls.
+**Purpose:** Single choke-point for all outbound LLM API calls; provider-agnostic
+since v2.1.0.
 
-**Behaviour:**
-- Loads `config/rate_limits.json` on startup.
-- Maintains a per-model token bucket (requests per minute, tokens per minute).
+**Provider abstraction (`src/infrastructure/llm_provider.py`):**
+- `LLMProvider` — abstract base class with a single `complete(model, prompt, max_tokens) → LLMResponse` method.
+- `AnthropicProvider` — wraps `anthropic.Anthropic().messages.create()`; selected when `ANTHROPIC_API_KEY` is set.
+- `OpenAICompatibleProvider` — wraps `openai.OpenAI(base_url=..., api_key=...)`; selected when `LLM_API_KEY` or `OPENAI_API_KEY` is set. Compatible with DeepSeek, Qwen (DashScope), OpenAI, Ollama, and any OpenAI-compatible endpoint.
+- `build_provider()` — factory that auto-detects the provider from environment variables (priority: `LLM_PROVIDER` → `ANTHROPIC_API_KEY` → `LLM_API_KEY`/`OPENAI_API_KEY`).
+- The `Gatekeeper` accepts an optional `provider` constructor argument; `build_provider()` is called lazily on the first `_make_api_call` if none is supplied.
+
+**Gatekeeper behaviour:**
+- Loads `config/rate_limits.json` on startup.  Unknown models fall back to the `"default"` key (60 RPM) so any provider model works without a config change.
+- Maintains a per-model token bucket (requests per minute).
 - Excess requests enter a bounded FIFO queue (max 50 items).
 - Exposes `get_usage(agent_id)` returning cumulative token counts for cost reporting.
 - Thread-safe; uses `threading.Lock` internally.
@@ -267,9 +277,13 @@ classDiagram
 ```json
 {
   "schema_version": "1.0",
+  "default": { "rpm": 60, "tpm": 100000 },
   "models": {
     "claude-sonnet-4-6": { "rpm": 50, "tpm": 40000 },
-    "claude-haiku-4-5":  { "rpm": 100, "tpm": 100000 }
+    "claude-haiku-4-5":  { "rpm": 100, "tpm": 100000 },
+    "deepseek-chat":     { "rpm": 60,  "tpm": 100000 },
+    "qwen-turbo":        { "rpm": 60,  "tpm": 100000 },
+    "gpt-4o-mini":       { "rpm": 500, "tpm": 200000 }
   },
   "web_search": { "rpm": 30 }
 }
@@ -329,11 +343,11 @@ Watchdog.run(fn, args)
 
 | File | Committed | Contains |
 |------|-----------|---------|
-| `.env` | No | `ANTHROPIC_API_KEY`, `SEARCH_API_KEY` |
-| `.env-example` | Yes | Placeholder keys, comments |
+| `.env` | No | `ANTHROPIC_API_KEY` or `LLM_API_KEY` + `LLM_BASE_URL`, `SEARCH_API_KEY` |
+| `.env-example` | Yes | Placeholder keys, comments for all providers |
 | `config/setup.json` | Yes | Model names, turn limits, paths, budget cap |
-| `config/rate_limits.json` | Yes | Per-model RPM/TPM caps |
-| `config/pricing.json` | Yes | USD/1K token rates per model |
+| `config/rate_limits.json` | Yes | Per-model RPM/TPM caps + `"default"` fallback for unknown models |
+| `config/pricing.json` | Yes | USD/1K token rates for Anthropic, DeepSeek, Qwen, and OpenAI models |
 
 ### 5.2 `setup.json` Structure
 
@@ -365,8 +379,15 @@ Watchdog.run(fn, args)
 ### 5.3 `.env-example`
 
 ```
-# Anthropic Claude API
+# Option A: Anthropic Claude (default)
 ANTHROPIC_API_KEY=your_key_here
+
+# Option B: Any OpenAI-compatible provider (DeepSeek, Qwen, OpenAI, Ollama…)
+# LLM_API_KEY=your_key_here
+# LLM_BASE_URL=https://api.deepseek.com
+
+# Optional: explicit provider override
+# LLM_PROVIDER=anthropic  # or: openai | deepseek | qwen | openai_compatible
 
 # Web Search API (e.g. Brave Search / Tavily)
 SEARCH_API_KEY=your_key_here
@@ -408,6 +429,7 @@ A2/
 │   │   ├── config_loader.py
 │   │   ├── cost_reporter.py
 │   │   ├── gatekeeper.py
+│   │   ├── llm_provider.py    ← NEW: LLMProvider ABC + AnthropicProvider + OpenAICompatibleProvider
 │   │   ├── logger_manager.py
 │   │   └── watchdog.py
 │   ├── schemas/
@@ -439,7 +461,8 @@ A2/
 |---------|--------|-----------|
 | Runtime | Python 3.11+ | Async support, typing, standard library |
 | Package manager | `uv` | Fast, reproducible, PEP 517 compliant |
-| LLM SDK | `anthropic` (official) | First-class tool-use support |
+| LLM SDK (Anthropic) | `anthropic` (official) | First-class Messages API support |
+| LLM SDK (other providers) | `openai` | Universal OpenAI-compatible client for DeepSeek, Qwen, OpenAI, Ollama |
 | Linting | `ruff` | Zero-config, replaces flake8 + isort |
 | Testing | `pytest` + `pytest-cov` | Mature, widely supported |
 | JSON Schema | `jsonschema` | RFC-compliant validation |

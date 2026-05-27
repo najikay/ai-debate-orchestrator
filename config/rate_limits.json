@@ -1,5 +1,10 @@
 {
   "schema_version": "1.0",
+  "_comment": "Per-model RPM/TPM caps. Unknown models fall back to 'default'.",
+  "default": {
+    "rpm": 60,
+    "tpm": 100000
+  },
   "models": {
     "claude-sonnet-4-6": {
       "rpm": 50,
@@ -8,6 +13,34 @@
     "claude-haiku-4-5": {
       "rpm": 100,
       "tpm": 100000
+    },
+    "deepseek-chat": {
+      "rpm": 60,
+      "tpm": 100000
+    },
+    "deepseek-reasoner": {
+      "rpm": 30,
+      "tpm": 50000
+    },
+    "qwen-turbo": {
+      "rpm": 60,
+      "tpm": 100000
+    },
+    "qwen-plus": {
+      "rpm": 60,
+      "tpm": 100000
+    },
+    "qwen-max": {
+      "rpm": 30,
+      "tpm": 50000
+    },
+    "gpt-4o": {
+      "rpm": 60,
+      "tpm": 100000
+    },
+    "gpt-4o-mini": {
+      "rpm": 500,
+      "tpm": 200000
     }
   },
   "web_search": {

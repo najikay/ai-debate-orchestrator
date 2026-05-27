@@ -2,18 +2,19 @@
 Enforces per-model RPM limits using a 60-second rolling window.
 Queues requests when the bucket is full (max depth: 50).
 Tracks cumulative token usage per agent, thread-safely.
+Unknown models fall back to the ``default`` entry or 60 RPM.
 """
 
-import os
 import threading
 import time
 from collections import deque
 from dataclasses import dataclass
 
-import anthropic
+from .llm_provider import LLMProvider, build_provider
 
 MAX_QUEUE_DEPTH: int = 50
 _WINDOW: float = 60.0
+_DEFAULT_RPM: int = 60
 
 
 class QueueFullError(Exception):
@@ -51,33 +52,31 @@ class Gatekeeper:
     """Rate-limits API calls and tracks per-agent token usage.
 
     Args:
-        rate_limits: Parsed ``rate_limits.json`` dict with ``models.<name>.rpm``.
+        rate_limits: Parsed ``rate_limits.json``.  Unknown models fall back to
+            the ``"default"`` key, or 60 RPM when that key is absent too.
+        provider: Optional :class:`~src.infrastructure.llm_provider.LLMProvider`.
+            Auto-detected from environment variables when *None*.
 
     Attributes:
         queue: FIFO deque of pending :class:`APIRequest` objects.
     """
 
-    def __init__(self, rate_limits: dict) -> None:
+    def __init__(
+        self, rate_limits: dict, provider: LLMProvider | None = None
+    ) -> None:
         self._rl: dict = rate_limits
         self.queue: deque[APIRequest] = deque()
         self._usage: dict[str, dict[str, int]] = {}
         self._times: dict[str, list[float]] = {}
         self._lock: threading.Lock = threading.Lock()
-        self._client: anthropic.Anthropic | None = None
+        self._provider: LLMProvider | None = provider
 
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
 
     def dispatch(self, request: APIRequest) -> APIResponse:
-        """Rate-limit, optionally enqueue, then call the API.
-
-        Args:
-            request: The :class:`APIRequest` to dispatch.
-
-        Returns:
-            The :class:`APIResponse` from :meth:`_make_api_call`.
-        """
+        """Rate-limit, optionally enqueue, then call the API."""
         limited = self._is_limited(request.model)
         if limited:
             self._enqueue(request)
@@ -103,8 +102,13 @@ class Gatekeeper:
     # Private helpers
     # ------------------------------------------------------------------
 
+    def _rpm(self, model: str) -> int:
+        """Look up RPM for *model*; fall back to default entry or 60."""
+        cfg = self._rl["models"].get(model) or self._rl.get("default", {})
+        return cfg.get("rpm", _DEFAULT_RPM)
+
     def _is_limited(self, model: str) -> bool:
-        rpm = self._rl["models"][model]["rpm"]
+        rpm = self._rpm(model)
         with self._lock:
             now = time.monotonic()
             window = [t for t in self._times.get(model, []) if now - t < _WINDOW]
@@ -112,7 +116,7 @@ class Gatekeeper:
 
     def _enforce_limits(self, model: str) -> None:
         """Sleep until the RPM bucket has a free slot, then record the call."""
-        rpm = self._rl["models"][model]["rpm"]
+        rpm = self._rpm(model)
         with self._lock:
             now = time.monotonic()
             window = [t for t in self._times.get(model, []) if now - t < _WINDOW]
@@ -136,15 +140,14 @@ class Gatekeeper:
         return self.queue.popleft()
 
     def _make_api_call(self, request: APIRequest) -> APIResponse:  # pragma: no cover
-        if self._client is None:
-            self._client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-        msg = self._client.messages.create(
+        if self._provider is None:
+            self._provider = build_provider()
+        resp = self._provider.complete(
             model=request.model,
-            max_tokens=4096,
-            messages=[{"role": "user", "content": request.payload["prompt"]}],
+            prompt=request.payload["prompt"],
         )
         return APIResponse(
-            content=msg.content[0].text,
-            prompt_tokens=msg.usage.input_tokens,
-            completion_tokens=msg.usage.output_tokens,
+            content=resp.content,
+            prompt_tokens=resp.prompt_tokens,
+            completion_tokens=resp.completion_tokens,
         )

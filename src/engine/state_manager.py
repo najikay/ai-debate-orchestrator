@@ -52,7 +52,8 @@ class StateManager:
     def to_json(self) -> str:
         def _serialise(obj):
             if hasattr(obj, "__dataclass_fields__"):
-                return {k: _serialise(getattr(obj, k)) for k in obj.__dataclass_fields__}
+                fields = obj.__dataclass_fields__
+                return {k: _serialise(getattr(obj, k)) for k in fields}
             if isinstance(obj, list):
                 return [_serialise(i) for i in obj]
             return obj

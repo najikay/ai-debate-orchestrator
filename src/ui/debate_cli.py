@@ -18,11 +18,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from src.agents.father_agent import Verdict
-from src.engine.debate_engine import DebateEngine
-from src.infrastructure.config_loader import ConfigLoader
-from src.infrastructure.cost_reporter import CostSummary
-from src.infrastructure.watchdog import WatchdogError
+from src.agents.father_agent import Verdict  # noqa: E402
+from src.engine.debate_engine import DebateEngine  # noqa: E402
+from src.infrastructure.config_loader import ConfigLoader  # noqa: E402
+from src.infrastructure.cost_reporter import CostSummary  # noqa: E402
+from src.infrastructure.watchdog import WatchdogError  # noqa: E402
 
 _RESET  = "\033[0m"
 _BOLD   = "\033[1m"
