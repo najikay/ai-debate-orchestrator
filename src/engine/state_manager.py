@@ -1,7 +1,6 @@
 """StateManager — in-memory debate state with JSON serialisation round-trip.
 
-Tracks transcript, turn count, verdict, and status through the four
-lifecycle phases: INITIALIZATION → IN_PROGRESS → EVALUATION → TERMINATED.
+Lifecycle phases: INITIALIZATION → IN_PROGRESS → EVALUATION → TERMINATED.
 """
 
 import json
@@ -45,36 +44,20 @@ class DebateState:
 
 
 class StateManager:
-    """Manages a :class:`DebateState` object through a debate session.
+    """Manages a :class:`DebateState` through a debate session.
 
     Attributes:
         state: The live :class:`DebateState` instance.
-        on_message: Optional callback invoked with each new :class:`DebateMessage`
-            as it is recorded. Useful for live printing (CLI) or SSE streaming (web).
-
-    Example::
-
-        sm = StateManager()
-        sm.state.topic = "AI ethics"
-        sm.on_message = lambda msg: print(msg.content)
-        sm.record_message(msg)
-        snapshot = sm.to_json()
+        on_message: Optional callback fired on each new message.
+            Useful for live printing (CLI) or SSE streaming (web).
     """
 
     def __init__(self) -> None:
         self.state: DebateState = DebateState()
-        self.on_message: Optional[Callable] = None  # live-message callback
-
-    # ------------------------------------------------------------------
-    # Mutation methods
-    # ------------------------------------------------------------------
+        self.on_message: Optional[Callable] = None
 
     def record_message(self, msg) -> None:
-        """Append *msg* to the transcript and increment the turn counter.
-
-        Args:
-            msg: A DebateMessage (or compatible object) to record.
-        """
+        """Append *msg* to the transcript and increment the turn counter."""
         self.state.transcript.append(msg)
         self.state.turn_count += 1
         self.state.updated_at = _now()
@@ -84,10 +67,7 @@ class StateManager:
             self.on_message(msg)
 
     def record_verdict(self, v) -> None:
-        """Store the debate Verdict and mark the session TERMINATED.
-
-        Args:
-            v: A :class:`~src.agents.father_agent.Verdict` object.
+        """Store the Verdict and mark the session TERMINATED.
 
         Raises:
             ValueError: If a verdict has already been recorded.
@@ -98,44 +78,22 @@ class StateManager:
         self.state.status = "TERMINATED"
         self.state.updated_at = _now()
 
-    # ------------------------------------------------------------------
-    # Query methods
-    # ------------------------------------------------------------------
-
     def get_turn_count(self) -> int:
         """Return the current turn count."""
         return self.state.turn_count
 
-    # ------------------------------------------------------------------
-    # Serialisation
-    # ------------------------------------------------------------------
-
     def to_json(self) -> str:
-        """Serialise the current state to a JSON string.
-
-        Returns:
-            A JSON string representation of :attr:`state`.
-        """
+        """Serialise the current state to a JSON string."""
         def _serialise(obj):
             if hasattr(obj, "__dataclass_fields__"):
-                return {
-                    k: _serialise(getattr(obj, k))
-                    for k in obj.__dataclass_fields__
-                }
+                return {k: _serialise(getattr(obj, k)) for k in obj.__dataclass_fields__}
             if isinstance(obj, list):
                 return [_serialise(i) for i in obj]
             return obj
-
         return json.dumps(_serialise(self.state))
 
     def from_json(self, data: str) -> DebateState:
         """Restore a :class:`DebateState` from a JSON string.
-
-        Args:
-            data: JSON string previously produced by :meth:`to_json`.
-
-        Returns:
-            A :class:`DebateState` populated with the deserialised fields.
 
         Raises:
             ValueError: If *data* is not valid JSON.

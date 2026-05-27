@@ -16,7 +16,6 @@ import os
 import queue
 import threading
 from pathlib import Path
-from typing import Callable, Optional
 
 from dotenv import load_dotenv
 from flask import Flask, Response, jsonify, render_template, request
@@ -27,6 +26,14 @@ from src.infrastructure.config_loader import ConfigLoader
 load_dotenv()
 
 _TEMPLATE_DIR = Path(__file__).parent.parent.parent / "templates"
+
+
+def _load_engine(app) -> DebateEngine:
+    """Load config and return a fresh DebateEngine."""
+    loader = ConfigLoader(app.config["CONFIG_PATH"])
+    cfg = loader.load_setup()
+    cfg["pricing"] = loader.load_pricing()
+    return DebateEngine(cfg)
 
 
 def create_app(config_path: str = "config/") -> Flask:
@@ -52,36 +59,27 @@ def create_app(config_path: str = "config/") -> Flask:
         if not topic:
             return jsonify({"error": "Topic is required."}), 400
         try:
-            loader = ConfigLoader(app.config["CONFIG_PATH"])
-            cfg = loader.load_setup()
-            cfg["pricing"] = loader.load_pricing()
-            engine = DebateEngine(cfg)
+            engine = _load_engine(app)
             verdict = engine.start(topic)
             summary = engine.cost_reporter.compute()
             transcript = [
-                {
-                    "sender": m.sender,
-                    "content": m.content,
-                    "turn": m.turn,
-                    "sources": m.sources or [],
-                }
+                {"sender": m.sender, "content": m.content,
+                 "turn": m.turn, "sources": m.sources or []}
                 for m in engine.state_manager.state.transcript
             ]
-            return jsonify(
-                {
-                    "transcript": transcript,
-                    "verdict": {
-                        "winner": verdict.winner,
-                        "reasoning": verdict.reasoning,
-                        "turn_count": verdict.turn_count,
-                        "scores": verdict.scores,
-                    },
-                    "cost": {
-                        "total_usd": round(summary.total_usd, 4),
-                        "utilisation_pct": round(summary.utilisation_pct, 1),
-                    },
-                }
-            )
+            return jsonify({
+                "transcript": transcript,
+                "verdict": {
+                    "winner": verdict.winner,
+                    "reasoning": verdict.reasoning,
+                    "turn_count": verdict.turn_count,
+                    "scores": verdict.scores,
+                },
+                "cost": {
+                    "total_usd": round(summary.total_usd, 4),
+                    "utilisation_pct": round(summary.utilisation_pct, 1),
+                },
+            })
         except Exception as exc:  # noqa: BLE001
             return jsonify({"error": str(exc)}), 500
 
@@ -95,31 +93,18 @@ def create_app(config_path: str = "config/") -> Flask:
 
         def run_engine() -> None:
             try:
-                loader = ConfigLoader(app.config["CONFIG_PATH"])
-                cfg = loader.load_setup()
-                cfg["pricing"] = loader.load_pricing()
-                engine = DebateEngine(cfg)
-
-                def on_msg(msg) -> None:
-                    msg_queue.put(("message", {
-                        "sender": msg.sender,
-                        "content": msg.content,
-                        "turn": msg.turn,
-                        "sources": msg.sources or [],
-                    }))
-
-                engine.state_manager.on_message = on_msg
+                engine = _load_engine(app)
+                engine.state_manager.on_message = lambda msg: msg_queue.put(("message", {
+                    "sender": msg.sender, "content": msg.content,
+                    "turn": msg.turn, "sources": msg.sources or [],
+                }))
                 verdict = engine.start(topic)
                 summary = engine.cost_reporter.compute()
                 msg_queue.put(("verdict", {
-                    "winner": verdict.winner,
-                    "reasoning": verdict.reasoning,
-                    "turn_count": verdict.turn_count,
-                    "scores": verdict.scores,
-                    "cost": {
-                        "total_usd": round(summary.total_usd, 4),
-                        "utilisation_pct": round(summary.utilisation_pct, 1),
-                    },
+                    "winner": verdict.winner, "reasoning": verdict.reasoning,
+                    "turn_count": verdict.turn_count, "scores": verdict.scores,
+                    "cost": {"total_usd": round(summary.total_usd, 4),
+                             "utilisation_pct": round(summary.utilisation_pct, 1)},
                 }))
             except Exception as exc:  # noqa: BLE001
                 msg_queue.put(("error", str(exc)))
@@ -132,22 +117,14 @@ def create_app(config_path: str = "config/") -> Flask:
             while True:
                 kind, payload = msg_queue.get()
                 if kind == "done":
-                    # Signal the client the stream is finished without sending a data frame
                     yield "event: close\ndata: {}\n\n"
                     break
-                data = json.dumps({"type": kind, "data": payload})
-                yield f"data: {data}\n\n"
+                yield f"data: {json.dumps({'type': kind, 'data': payload})}\n\n"
                 if kind == "error":
                     break
 
-        return Response(
-            generate(),
-            mimetype="text/event-stream",
-            headers={
-                "Cache-Control": "no-cache",
-                "X-Accel-Buffering": "no",
-            },
-        )
+        return Response(generate(), mimetype="text/event-stream",
+                        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
     return app
 

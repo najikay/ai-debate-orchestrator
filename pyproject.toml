@@ -25,8 +25,9 @@ dev = [
 package = true
 
 [project.scripts]
-debate     = "src.ui.debate_cli:run"
-debate-web = "src.ui.app:main"
+debate         = "src.ui.debate_cli:run"
+debate-web     = "src.ui.app:main"
+debate-history = "src.ui.debate_history_cli:run"
 
 [tool.ruff]
 line-length = 88
