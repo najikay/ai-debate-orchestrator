@@ -104,7 +104,7 @@ The system will force early evaluation and emit a `[WARN]` if 90% of the cap is 
 | **Fuzzy Pricing Lookup** | `_find_rates()` handles date-suffix model IDs and non-Anthropic providers without silent `$0` costs |
 | **Watchdog Recovery** | `concurrent.futures` timeout with one retry; graceful `WatchdogError` shutdown preserves partial state |
 | **Defensive JSON Parsing** | `_extract_json()` strips markdown fences and extracts `{…}` blocks; `MessageParseError` on failure |
-| **233-Test Suite** | Full TDD coverage across unit and integration layers, enforced at ≥ 85% by `pytest-cov` |
+| **255-Test Suite** | Full TDD coverage across unit and integration layers, enforced at ≥ 85% by `pytest-cov` |
 
 ---
 
@@ -127,7 +127,13 @@ The system will force early evaluation and emit a `[WARN]` if 90% of the cap is 
 
 | Debate Starting | In Progress | Final Verdict |
 |---|---|---|
-| ![Terminal Start](docs/images/archive/terminal_start.PNG) | ![Terminal Progress](docs/images/archive/terminal_progress.PNG) | ![Terminal Verdict](docs/images/archive/terminal_verdict.PNG) |
+| ![Terminal Start](docs/images/archive/terminal_start.PNG) | ![Terminal Progress](docs/images/archive/terminal_progress.PNG) | ![Terminal Verdict](docs/images/archive/terminal_verdict_scores.PNG) |
+
+### 💻 Terminal CLI — Features
+
+| History Viewer | Debate Replay |
+|---|---|
+| ![History](docs/images/archive/terminal_history_list.PNG) | ![History](docs/images/archive/terminal_history_replay.PNG) |
 
 ---
 
@@ -213,7 +219,8 @@ uv run debate --topic "AI ethics" --dry-run
 
 ```bash
 uv run debate --topic "AI will replace human workers" --save
-`
+```
+
 ### Debate History Viewer
 
 ```bash
