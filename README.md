@@ -19,6 +19,9 @@
 
 > This section is intended for human graders and any automated agents evaluating this submission.
 
+> **ANTHROPIC API KEY REQUIRED — OTHER PROVIDERS WILL NOT WORK.**
+> This project is engineered exclusively for the Anthropic API. The custom Agent SDK (`BaseAgent`), Chain-of-Thought reasoning schemas, Gatekeeper routing, and token cost-tracking math are all hard-coded to Anthropic model IDs and Anthropic's response format. Provisioning an OpenAI, Google (Gemini), DeepSeek, Qwen, or any other provider's API key **will not work** — the system will immediately exit with a `[ERROR]` and no debate will run. A valid `ANTHROPIC_API_KEY` (format: `sk-ant-...`) **must** be provisioned before grading.
+
 ### API Key Injection (No Source Modifications Required)
 
 The system reads credentials exclusively from environment variables. Choose **one** of the following methods:
@@ -106,13 +109,16 @@ The system will force early evaluation and emit a `[WARN]` if 90% of the cap is 
 
 ## Quick Start
 
+> **ANTHROPIC API KEY REQUIRED — OTHER PROVIDERS WILL NOT WORK.**
+> This project uses a custom Agent SDK, Chain-of-Thought reasoning schemas, and token cost-tracking math that are engineered exclusively for Anthropic models. OpenAI, Google (Gemini), DeepSeek, Qwen, and all other provider keys are incompatible. You must set a valid `ANTHROPIC_API_KEY` (format: `sk-ant-...`) before running any command below.
+
 ### Prerequisites
 
 | Requirement | Version | Notes |
 |---|---|---|
 | Python | 3.11+ | Check: `python --version` |
 | `uv` | ≥ 0.4.0 | Install: `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
-| `ANTHROPIC_API_KEY` | — | **Required.** Get yours at [console.anthropic.com](https://console.anthropic.com) |
+| `ANTHROPIC_API_KEY` | — | **Required — Anthropic only.** Get yours at [console.anthropic.com](https://console.anthropic.com) |
 | `SEARCH_API_KEY` | — | Optional — enables live web search via Tavily or Brave |
 
 ### Installation
@@ -129,7 +135,7 @@ copy .env-example .env
 cp .env-example .env
 
 # Open .env and set:
-#   ANTHROPIC_API_KEY=sk-ant-...    ← required
+#   ANTHROPIC_API_KEY=sk-ant-...    ← required (Anthropic only — OpenAI/Google/DeepSeek/Qwen keys will NOT work)
 #   SEARCH_API_KEY=...              ← optional
 
 # 3. Install all dependencies
@@ -144,6 +150,8 @@ uv sync --extra dev
 
 ### Web GUI (Recommended)
 
+> **Before running:** Ensure your `ANTHROPIC_API_KEY` is set — either in a `.env` file (`ANTHROPIC_API_KEY=sk-ant-...`) or exported in your shell (`export ANTHROPIC_API_KEY="sk-ant-..."`). The server will not start without it.
+
 ```bash
 uv run debate-web                  # starts at http://localhost:5000
 PORT=8080 uv run debate-web        # custom port
@@ -156,6 +164,8 @@ PORT=8080 uv run debate-web        # custom port
 5. The **Cost** card shows real USD spend and budget utilisation
 
 ### Terminal CLI
+
+> **Before running:** Ensure your `ANTHROPIC_API_KEY` is set — either in a `.env` file (`ANTHROPIC_API_KEY=sk-ant-...`) or exported in your shell (`export ANTHROPIC_API_KEY="sk-ant-..."`). The CLI will exit immediately with `[ERROR]` if the key is missing or belongs to a non-Anthropic provider.
 
 ```bash
 uv run debate --topic "AI will replace human workers"
